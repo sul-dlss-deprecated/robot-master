@@ -25,6 +25,13 @@ Algorithm
 	  end
 	end
 
+Configuration
+-------------
+
+Your _config/environments/env.rb_ should have:
+
+    WORKFLOW_URL = 'https://example.com/workflow/'
+	
 Workflow objects
 ----------------
 
