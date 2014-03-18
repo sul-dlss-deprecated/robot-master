@@ -29,3 +29,10 @@ namespace :doc do
   end
 
 end
+
+desc "Build Yard documentation"
+task :yard do
+  YARD::Rake::YardocTask.new do |t|
+    t.files = ['lib/**/*.rb', 'bin/**/*.rb']
+  end
+end
