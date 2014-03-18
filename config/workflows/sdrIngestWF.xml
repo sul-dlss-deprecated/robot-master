@@ -1,0 +1,37 @@
+<?xml version="1.0"?>
+<workflow-def id="sdrIngestWF" repository="sdr">
+	<process name="start-ingest" sequence="1" status="completed">
+		<label>Initiate deposit</label>
+	</process>
+	<process name="register-sdr" sequence="2">
+		<label>Resgister object in Sedora</label>
+		<prereq>start-ingest</prereq>
+	</process>
+	<process name="transfer-object" sequence="3">
+		<label>Transfer contents from DOR</label>
+		<prereq>register-sdr</prereq>
+	</process>
+	<process name="validate-bag" sequence="4">
+		<label>Verify the bagit bag structure</label>
+		<prereq>transfer-object</prereq>
+	</process>
+	<process name="populate-metadata" sequence="5">
+		<label>Pull selected metadata files into Sedora</label>
+		<prereq>validate-bag</prereq>
+	</process>
+	<process name="verify-agreement" sequence="6">
+		<label>
+Verify there is an ingested agreement object for object
+</label>
+		<prereq>validate-bag</prereq>
+	</process>
+	<process name="complete-deposit" sequence="7">
+		<label>Done; transfer control to full ingest process</label>
+		<prereq>populate-metadata</prereq>
+		<prereq>verify-agreement</prereq>
+	</process>
+	<process name="ingest-cleanup" sequence="8">
+		<label>Clean up workspace</label>
+		<prereq>complete-deposit</prereq>
+	</process>
+</workflow-def>
