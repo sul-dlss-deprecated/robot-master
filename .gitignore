@@ -2,3 +2,5 @@ doc
 .rvmrc
 .yardoc
 rdoc
+log
+config/environments
