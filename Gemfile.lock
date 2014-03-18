@@ -4,6 +4,7 @@ PATH
     robot-master (0.0.1)
       dor-workflow-service (~> 1.5.1)
       druid-tools (~> 0.3.0)
+      nokogiri (~> 1.6.1)
       resque (~> 1.25.2)
 
 GEM

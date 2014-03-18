@@ -22,6 +22,7 @@ Gem::Specification.new do |s|
   
   s.add_dependency 'dor-workflow-service', '~> 1.5.1'
   s.add_dependency 'druid-tools', '~> 0.3.0'
+  s.add_dependency 'nokogiri', '~> 1.6.1'
   s.add_dependency 'resque', '~> 1.25.2'
   
   s.add_development_dependency 'equivalent-xml'
