@@ -1,0 +1,29 @@
+#!/usr/bin/env ruby
+#
+# Usage: robot-master
+#
+require File.expand_path(File.dirname(__FILE__) + '/../config/boot')
+require 'optparse'
+
+class RobotMaster
+  def run(args)
+    flags = {
+      :encoding => 'UTF-8',
+      :verbose => false,
+      :debug => false
+    }
+    args = %w{--help} if args.nil? or args.empty?
+  
+    OptionParser.new do |opts|
+      opts.banner = "Usage: #{File.basename(__FILE__)} [-v]"
+      opts.on('-v', '--verbose', 'Run verbosely, use multiple times for debug level output') do
+        flags[:debug] = true if flags[:verbose]  # -vv
+        flags[:verbose] = true
+      end
+    end.parse!(args)
+  end
+end
+
+# __MAIN__
+RobotMaster.new.run(ARGV)
+
