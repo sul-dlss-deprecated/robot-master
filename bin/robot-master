@@ -4,6 +4,7 @@
 #
 require File.expand_path(File.dirname(__FILE__) + '/../config/boot')
 require 'optparse'
+require 'awesome_print'
 
 class RobotMasterCLI
   def run(args)
@@ -12,7 +13,7 @@ class RobotMasterCLI
       :verbose => false,
       :debug => false
     }
-    args = %w{--help} if args.nil? or args.empty?
+    # args = %w{--help} if args.nil? or args.empty?
   
     OptionParser.new do |opts|
       opts.banner = "Usage: #{File.basename(__FILE__)} [-v]"
@@ -27,3 +28,6 @@ end
 # __MAIN__
 RobotMasterCLI.new.run(ARGV)
 
+# completed, waiting, repository=nil, workflow=nil, with_priority
+results = Dor::WorkflowService.get_objects_for_workstep(['start-assembly'], 'checksum-compute', 'dor', 'assemblyWF', true)
+ap({:results => results})

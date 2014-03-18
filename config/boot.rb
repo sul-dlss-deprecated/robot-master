@@ -13,10 +13,13 @@ env_file = File.expand_path(File.dirname(__FILE__) + "/./environments/#{environm
 # puts "Loading config from #{env_file}"
 require env_file
 
-require 'resque'
 require 'dor-workflow-service'
+Dor::WorkflowService.configure(WORKFLOW_URL)
+
+require 'resque'
 require 'druid-tools'
 require 'robot-master'
+
 
 
 

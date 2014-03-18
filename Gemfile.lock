@@ -2,10 +2,19 @@ PATH
   remote: .
   specs:
     robot-master (0.0.1)
-      dor-workflow-service (~> 1.5.1)
+      dor-workflow-service (~> 1.6.0)
       druid-tools (~> 0.3.0)
       nokogiri (~> 1.6.1)
       resque (~> 1.25.2)
+
+PATH
+  remote: ../dor-workflow-service
+  specs:
+    dor-workflow-service (1.6.0)
+      activesupport
+      confstruct
+      nokogiri
+      rest-client
 
 GEM
   remote: https://rubygems.org/
@@ -17,14 +26,10 @@ GEM
       thread_safe (~> 0.1)
       tzinfo (~> 0.3.37)
     atomic (1.1.16)
+    awesome_print (1.2.0)
     coderay (1.1.0)
     confstruct (0.2.7)
     diff-lcs (1.2.5)
-    dor-workflow-service (1.5.1)
-      activesupport
-      confstruct
-      nokogiri
-      rest-client
     druid-tools (0.3.0)
     equivalent-xml (0.4.2)
       nokogiri (>= 1.4.3)
@@ -86,6 +91,8 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
+  awesome_print
+  dor-workflow-service!
   equivalent-xml
   pry
   rake
