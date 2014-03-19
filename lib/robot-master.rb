@@ -95,7 +95,7 @@ module RobotMaster
     #
     # XXX: doesn't handle low-priority cases -- will never fill the low queue unless high and default full
     def priority_queue_empty?(step, priority = :high, threshold = 100)
-      queue = "prod_#{@workflow}_#{step}_#{priority}" # XXX: needs to come from environment
+      queue = queue_name(step, priority)
       n = Resque.size(queue)
       ROBOT_LOG.debug { "queue size=#{n} #{queue}"}
       (n < threshold)
@@ -167,6 +167,18 @@ module RobotMaster
     #   given priorities fall
     def priority_classes(priorities)
       priorities.uniq.collect {|priority| priority_class(priority) }.uniq
+    end
+    
+    # @param [String] step
+    # @param [Symbol | Integer] priority
+    # @return [String] the Resque queue name
+    def queue_name(step, priority)
+      ['prod',  # XXX: prefix needs to come from environment
+        @repository, 
+        @workflow, 
+        step, 
+        priority.is_a?(Integer) ? priority_class(priority) : priority
+      ].join('_')
     end
   end
 end
