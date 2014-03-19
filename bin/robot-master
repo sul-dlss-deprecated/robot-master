@@ -15,8 +15,7 @@ require 'awesome_print'
 class RobotMasterCLI
   def perform(workflow, flags = {})
     ap({:workflow => workflow, :flags => flags}) if flags[:verbose]
-    robot = RobotMaster::Workflow.new(flags[:repository], workflow)
-    robot.perform
+    RobotMaster::Workflow.perform(flags[:repository], workflow)
   end
   
   def run(args)
