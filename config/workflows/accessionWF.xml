@@ -20,9 +20,7 @@
 		<prereq>content-metadata</prereq>
 	</process>
 	<process batch-limit="100" error-limit="5" name="remediate-object" sequence="6">
-		<label>
-Ensure object conforms to latest DOR standards and schemas
-</label>
+		<label>Ensure object conforms to latest DOR standards and schemas</label>
 		<prereq>content-metadata</prereq>
 		<prereq>descriptive-metadata</prereq>
 		<prereq>technical-metadata</prereq>
@@ -45,13 +43,11 @@ Ensure object conforms to latest DOR standards and schemas
 		<label>Initiate Ingest into Preservation</label>
 		<prereq>provenance-metadata</prereq>
 	</process>
-	<process batch-limit="1" error-limit="5" lifecycle="deposited" name="sdr-ingest-received" sequence="11">
+	<process batch-limit="1" error-limit="5" lifecycle="deposited" name="sdr-ingest-received" sequence="11" no-robot="true">
 		<label>Signal from SDR that object has been received</label>
 	</process>
 	<process batch-limit="1" error-limit="5" lifecycle="accessioned" name="end-accession" sequence="12">
-		<label>
-Clean up any diff caches and set disseminationWF:cleanup to waiting
-</label>
+		<label>Clean up any diff caches and set disseminationWF:cleanup to waiting</label>
 		<prereq>sdr-ingest-received</prereq>
 		<prereq>publish</prereq>
 	</process>
