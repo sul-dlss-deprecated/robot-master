@@ -16,9 +16,12 @@ require 'dor-workflow-service'
 Dor::WorkflowService.configure(WORKFLOW_URL)
 
 require 'resque'
+# REDIS_URL is of the form: redis://user:password@host:port/db
+# @see http://rubydoc.info/gems/redis/3.0.7/file/README.md
+Resque.redis = REDIS_URL
+
 require 'druid-tools'
 require 'robot-master'
-
 
 
 
