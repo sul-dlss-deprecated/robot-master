@@ -32,6 +32,11 @@ Your _config/environments/env.rb_ should have:
 
     WORKFLOW_URL = 'https://example.com/workflow/'
 	
+Added 
+    <process name="foobar" no-robot="true"/>
+
+Use RESTCLIENT_LOG=stdout to view HTTP traffic.
+
 Workflow objects
 ----------------
 
