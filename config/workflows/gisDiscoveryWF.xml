@@ -1,10 +1,10 @@
 <?xml version="1.0"?>
 <workflow-def id="gisDiscoveryWF" repository="dor">
-	<process name="start-gis-discovery-pipeline" sequence="1" status="completed">
+	<process name="initiate" sequence="1" status="completed">
 		<label>Initiate GIS discovery pipeline for the object</label>
 	</process>
 	<process name="generate-ogp" sequence="2">
-		<prereq>start-gis-discovery-pipeline</prereq>
+		<prereq>initiate</prereq>
 		<label>Generate Solr document for OpenGeoPortal</label>
 	</process>
 	<process name="load-ogp" sequence="3">
@@ -12,9 +12,7 @@
 		<label>Load Solr document into OpenGeoPortal</label>
 	</process>
 	<process name="generate-geosearch" sequence="4">
-		<prereq>start-gis-discovery-pipeline</prereq>
-		<prereq>load-ogp</prereq>
-		<!-- XXX: force linear -->
+		<prereq>initiate</prereq>
 		<label>Generate Solr document for GeoSearch</label>
 	</process>
 	<process name="load-geosearch" sequence="5">

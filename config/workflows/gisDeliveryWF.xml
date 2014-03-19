@@ -1,16 +1,14 @@
 <?xml version="1.0"?>
 <workflow-def id="gisDeliveryWF" repository="dor">
-	<process name="start-gis-delivery-pipeline" sequence="1" status="completed">
+	<process name="initiate" sequence="1" status="completed">
 		<label>Initiate delivery pipeline for the object</label>
 	</process>
 	<process name="load-vector" sequence="2">
-		<prereq>start-gis-delivery-pipeline</prereq>
+		<prereq>initiate</prereq>
 		<label>Load vector data into PostGIS database</label>
 	</process>
 	<process name="load-raster" sequence="3">
-		<prereq>start-delivery-pipeline</prereq>
-		<prereq>load-vector</prereq>
-		<!-- XXX: force linear -->
+		<prereq>initiate</prereq>
 		<label>Load raster into GeoTIFF data store</label>
 	</process>
 	<process name="load-geoserver" sequence="4">

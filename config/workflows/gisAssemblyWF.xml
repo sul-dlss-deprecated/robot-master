@@ -1,10 +1,10 @@
 <?xml version="1.0"?>
 <workflow-def id="gisAssemblyWF" repository="dor">
-	<process name="start-gis-assembly-pipeline" sequence="1" status="completed">
+	<process name="initiate" sequence="1" status="completed">
 		<label>Initiate assembly pipeline for the object</label>
 	</process>
 	<process name="register-druid" sequence="2">
-		<prereq>start-gis-assembly-pipeline</prereq>
+		<prereq>initiate</prereq>
 		<label>Ensure proper registration of druid, source ID, and label</label>
 	</process>
 	<process name="author-metadata" sequence="3">
@@ -17,8 +17,6 @@
 	</process>
 	<process name="wrangle-data" sequence="5">
 		<prereq>register-druid</prereq>
-		<prereq>approve-metadata</prereq>
-		<!-- XXX: force linear -->
 		<label>Wrangle the data into the digital work</label>
 	</process>
 	<process name="approve-data" sequence="6">
@@ -39,16 +37,11 @@
 	</process>
 	<process name="extract-thumbnail" sequence="10">
 		<prereq>approve-metadata</prereq>
-		<prereq>finish-data</prereq>
-		<!-- XXX: force linear -->
 		<label>Extract thumbnail preview</label>
 	</process>
 	<process name="extract-iso19139" sequence="11">
 		<prereq>approve-metadata</prereq>
-		<prereq>finish-data</prereq>
-		<!-- requires shapefile -->
-		<prereq>extract-thumbnail</prereq>
-		<!-- XXX: force linear -->
+		<prereq>finish-data</prereq> <!-- requires shapefile -->
 		<label>Extract ISO 19139 metadata from ArcCatalog</label>
 	</process>
 	<process name="generate-geo-metadata" sequence="12">
@@ -83,8 +76,6 @@
 	</process>
 	<process name="start-delivery-workflow" sequence="19">
 		<prereq>finish-gis-assembly-pipeline</prereq>
-		<prereq>start-assembly-workflow</prereq>
-		<!-- XXX: force linear -->
 		<label>Kickstart the GIS delivery workflow at gisDeliveryWF</label>
 	</process>
 </workflow-def>
