@@ -1,8 +1,9 @@
 module RobotMaster
   VERSION = File.read(File.join(File.dirname(__FILE__), '..', 'VERSION')).strip
   
+  # Manages a workflow to enqueue jobs into a priority queue
   class Workflow
-    # main entry point
+    # Perform workflow queueing on the given workflow
     #
     # @param [String] repository
     # @param [String] workflow
@@ -33,7 +34,7 @@ module RobotMaster
         
         # parse out the name and prereqs for this node
         step = parse_process_node(node)
-        # step[:limit] = 100
+        # step[:limit] = 100 # XXX: enable for limiting the batches
         
         # doit
         perform_step(step) unless step[:prereq].empty?
@@ -56,34 +57,70 @@ module RobotMaster
       ap({:results => results})
       ROBOT_LOG.debug { "Found #{results.size} druids" }
       
-      return unless has_priority_items?(results) or not queue_needs_work?(step)
+      return unless has_priority_items?(results) or priority_queue_empty?(step)
       
-      results.each do |item, priority|
-        enqueue(item, priority)
-        mark_as_queued(item)
+      results.each do |druid, priority|
+        enqueue(step[:name], druid, priority)
+        update_status_to_enqueued(step[:name], druid)
       end
     end
     
-    private
+    protected
     
+    # @return [Boolean] true if the results queue has any high priority items
     def has_priority_items?(results)
       results.each_value.any? {|priority| priority > 0 }
     end
     
-    def queue_needs_work?(step)
-      true # XXX
+    # @return [Boolean] true if the Resque priority queue for the step needs some more jobs
+    def priority_queue_empty?(step)
       # raise NotImplementedError
+      %w{high default low}.each do |priority|
+        queue = "#{ENV['ROBOT_ENVIRONMENT']}_#{@workflow}_#{step[:name]}_#{priority}"
+        # puts queue
+      end
+      true # XXX
     end
     
-    
-    def enqueue(item, priority)
+    # Adds the given item to the priority queue for this step
+    #
+    # @param [String] step name of the step
+    # @param [String] druid
+    # @param [Integer] priority
+    def enqueue(step, druid, priority)
       raise NotImplementedError
     end
     
-    def mark_as_queued(item)
+    # Updates the status from `waiting` (implied) to `queued` in the Workflow Service
+    # 
+    # @param [String] step name of the step
+    # @param [String] druid
+    def update_status_to_enqueued(step, druid)
       raise NotImplementedError
     end
 
+    # Parses the process XML to extract name and prereqs
+    #
+    # @return [Hash] with `:name` and `:prereq` keys
+    # @example
+    #   <process name="remediate-object" sequence="6">
+    #     <label>Ensure object conforms to latest DOR standards and schemas</label>
+    #     <prereq>content-metadata</prereq>
+    #     <prereq>descriptive-metadata</prereq>
+    #     <prereq>technical-metadata</prereq>
+    #     <prereq>rights-metadata</prereq>
+    #   </process>
+    # 
+    #   => {
+    #     :name => 'remediate-object',
+    #     :prereq => [
+    #         'content-metadata',
+    #         'descriptive-metadata',
+    #         'technical-metadata',
+    #         'rights-metadata'
+    #      ]
+    #   }
+    # 
     def parse_process_node(node)
       step = node['name']
       prereqs = []

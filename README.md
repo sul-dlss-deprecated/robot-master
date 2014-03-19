@@ -1,7 +1,7 @@
 robot-master
 ============
 
-Moderator for migrating jobs from the Workflow service to the Resque queues.
+Mediates jobs from the Workflow service to the Resque priority queues.
 
 Algorithm
 ---------
@@ -28,17 +28,44 @@ Algorithm
 Configuration
 -------------
 
-Your _config/environments/env.rb_ should have:
+Your `config/environments/env.rb` should have:
 
     WORKFLOW_URL = 'https://example.com/workflow/'
 	
 Added 
+
     <process name="foobar" no-robot="true"/>
 
-Use RESTCLIENT_LOG=stdout to view HTTP traffic.
+Use `RESTCLIENT_LOG=stdout` to view HTTP traffic.
+
+Operation
+---------
+
+Designed to run from cron, like so in production:
+
+    bin/robot-master --environment=production accessionWF
+
+for testing:
+
+    bin/robot-master --environment=testing accessionWF shelve
+	
+for development:
+
+    RESTCLIENT_LOG=stdout bin/robot-master --environment=development --log-level=debug accessionWF shelve publish
+	
+Usage
+-----
+
+	Usage:	robot-master [flags] [repo:]workflow [step [step2 ...]]
+	        --repository=REPOSITORY      Use the given repository (default: dor)
+	        --environment=ENV            Use the given environment (default: development)
+	        --log-level=LEVEL            Use the given log-level (default: info)
+	    -v, --verbose                    Run verbosely, use multiple times for debug level output
 
 Workflow objects
 ----------------
+
+These are the druids in production for the various workflow objects. `config/workflows` has cached copies of these.
 
     1	bb163sd6279	DOR sdrIngestWF	 	 	 	 	 	 	 
     2	dd778qy4284	DOR dpgImageWF
