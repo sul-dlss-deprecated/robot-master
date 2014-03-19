@@ -1,33 +1,85 @@
 #!/usr/bin/env ruby
 #
-# Usage: robot-master
+# Usage: robot-master [-v] [repository:]workflow [step [step2 ...]]
+#        where repository = 'dor' by default
 #
-require File.expand_path(File.dirname(__FILE__) + '/../config/boot')
+# @example
+#   robot-master accessionWF
+#   robot-master assemblyWF jp2-create
+#   robot-master gisDeliveryWF load-raster load-vector
+#   robot-master --repository=sdr sdrIngestWF
+#
 require 'optparse'
 require 'awesome_print'
 
 class RobotMasterCLI
+  def perform(workflow, flags = {})
+    ap({:workflow => workflow, :flags => flags}) if flags[:verbose]
+    ROBOT_LOG.info("Processing workflow #{workflow}")
+  end
+  
   def run(args)
     flags = {
-      :encoding => 'UTF-8',
       :verbose => false,
-      :debug => false
+      :debug => false,
+      :repository => 'dor',
+      :robot_environment => ENV['ROBOT_ENVIRONMENT'] || 'development',
+      :robot_log_level => ENV['ROBOT_LOG_LEVEL'] || 'info',
+      :log_output => STDOUT
     }
-    # args = %w{--help} if args.nil? or args.empty?
+    
+    args = %w{--help} if args.nil? or args.empty?
   
     OptionParser.new do |opts|
-      opts.banner = "Usage: #{File.basename(__FILE__)} [-v]"
+      opts.banner = "Usage:\t#{File.basename(__FILE__)} [flags] workflow [step [step2 ...]]"
+      opts.on('--repository=REPOSITORY', "Use the given repository (default: #{flags[:repository]})") do |v|
+        flags[:repository] = v
+      end
+      opts.on('--environment=ENV', "Use the given environment (default: #{flags[:robot_environment]})") do |v|
+        flags[:robot_environment] = v
+      end
+      opts.on('--log-level=LEVEL', "Use the given log-level (default: #{flags[:robot_log_level]})") do |v|
+        flags[:robot_log_level] = v
+      end      
       opts.on('-v', '--verbose', 'Run verbosely, use multiple times for debug level output') do
         flags[:debug] = true if flags[:verbose]  # -vv
         flags[:verbose] = true
       end
     end.parse!(args)
+    ap({:args => args}) if flags[:debug]
+    
+    # Initialize the workflow, and set the repository if prepended with :
+    flags[:workflow] = args.shift
+    raise ArgumentError, "Missing required workflow" if flags[:workflow].nil?
+    if flags[:workflow] =~ /:/
+      flags[:repository], flags[:workflow] = flags[:workflow].split(/:/, 2)
+    end
+    
+    # Load the optional steps
+    flags[:steps] = []
+    while args.size > 0
+      flags[:steps] << args.shift
+    end
+    
+    ap({:flags => flags}) if flags[:debug]
+    
+    # boot up
+    ENV['ROBOT_ENVIRONMENT'] = flags[:robot_environment]
+    ENV['ROBOT_LOG_LEVEL'] = flags[:robot_log_level]
+    puts "Loading boot file..." if flags[:verbose]
+    ap({:env => ENV}) if flags[:debug]
+    begin
+      require File.expand_path(File.dirname(__FILE__) + '/../config/boot')
+    rescue Exception => e
+      raise ArgumentError, "Missing boot file: #{e.message}"
+    end
+    
+    perform(flags[:workflow], flags)
   end
 end
 
 # __MAIN__
 RobotMasterCLI.new.run(ARGV)
-
 # completed, waiting, repository=nil, workflow=nil, with_priority
-results = Dor::WorkflowService.get_objects_for_workstep(['start-assembly'], 'checksum-compute', 'dor', 'assemblyWF', true)
-ap({:results => results})
+# results = Dor::WorkflowService.get_objects_for_workstep(['start-assembly'], 'checksum-compute', 'dor', 'assemblyWF', true)
+# ap({:results => results})
