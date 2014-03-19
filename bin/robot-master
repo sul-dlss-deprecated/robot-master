@@ -15,7 +15,8 @@ require 'awesome_print'
 class RobotMasterCLI
   def perform(workflow, flags = {})
     ap({:workflow => workflow, :flags => flags}) if flags[:verbose]
-    ROBOT_LOG.info("Processing workflow #{workflow}")
+    robot = RobotMaster::Workflow.new(flags[:repository], workflow)
+    robot.perform
   end
   
   def run(args)
@@ -31,7 +32,7 @@ class RobotMasterCLI
     args = %w{--help} if args.nil? or args.empty?
   
     OptionParser.new do |opts|
-      opts.banner = "Usage:\t#{File.basename(__FILE__)} [flags] workflow [step [step2 ...]]"
+      opts.banner = "Usage:\t#{File.basename(__FILE__)} [flags] [repo:]workflow [step [step2 ...]]"
       opts.on('--repository=REPOSITORY', "Use the given repository (default: #{flags[:repository]})") do |v|
         flags[:repository] = v
       end
@@ -66,20 +67,21 @@ class RobotMasterCLI
     # boot up
     ENV['ROBOT_ENVIRONMENT'] = flags[:robot_environment]
     ENV['ROBOT_LOG_LEVEL'] = flags[:robot_log_level]
-    puts "Loading boot file..." if flags[:verbose]
+    ENV['ROBOT_LOG_LEVEL'] = 'debug' if flags[:debug]
     ap({:env => ENV}) if flags[:debug]
     begin
+      puts "Loading boot file..." if flags[:verbose]
       require File.expand_path(File.dirname(__FILE__) + '/../config/boot')
     rescue Exception => e
       raise ArgumentError, "Missing boot file: #{e.message}"
     end
     
+    # Perform actual work finally
+    ROBOT_LOG.info("Starting RobotMaster #{RobotMaster::VERSION}: workflow=#{flags[:workflow]}")
     perform(flags[:workflow], flags)
+    ROBOT_LOG.info("Finish RobotMaster: workflow=#{flags[:workflow]}")
   end
 end
 
 # __MAIN__
 RobotMasterCLI.new.run(ARGV)
-# completed, waiting, repository=nil, workflow=nil, with_priority
-# results = Dor::WorkflowService.get_objects_for_workstep(['start-assembly'], 'checksum-compute', 'dor', 'assemblyWF', true)
-# ap({:results => results})
