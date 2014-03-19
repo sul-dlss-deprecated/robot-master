@@ -5,9 +5,7 @@
 	</process>
 	<process name="submit-version" sequence="2">
 		<prereq>start-version</prereq>
-		<label>
-Assemply complete, submit for review or accessioning
-</label>
+		<label>Assemply complete, submit for review or accessioning</label>
 	</process>
 	<process name="start-accession" sequence="3">
 		<prereq>review-version</prereq>

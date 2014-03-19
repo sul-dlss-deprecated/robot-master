@@ -20,9 +20,7 @@
 		<prereq>validate-bag</prereq>
 	</process>
 	<process name="verify-agreement" sequence="6">
-		<label>
-Verify there is an ingested agreement object for object
-</label>
+		<label>Verify there is an ingested agreement object for object</label>
 		<prereq>validate-bag</prereq>
 	</process>
 	<process name="complete-deposit" sequence="7">
