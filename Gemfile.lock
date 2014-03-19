@@ -11,10 +11,10 @@ PATH
   remote: ../dor-workflow-service
   specs:
     dor-workflow-service (1.6.0)
-      activesupport
-      confstruct
-      nokogiri
-      rest-client
+      activesupport (~> 4.0.4)
+      confstruct (~> 0.2.7)
+      nokogiri (~> 1.6.0)
+      rest-client (~> 1.6.7)
 
 GEM
   remote: https://rubygems.org/
