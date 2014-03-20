@@ -34,9 +34,9 @@ Your `config/environments/env.rb` should have:
 
     WORKFLOW_URL = 'https://example.com/workflow/'
 	
-Added 
+For processes that do not need Resque queues, use the `skip-queue` attribute flag.
 
-    <process name="foobar" no-robot="true"/>
+    <process name="foobar" skip-queue="true"/>
 
 Use `RESTCLIENT_LOG=stdout` to view HTTP traffic.
 
