@@ -1,5 +1,5 @@
 GIT
-  remote: git://github.com/sul-dlss/dor-workflow-service.git
+  remote: https://github.com/sul-dlss/dor-workflow-service
   revision: f74b4453b68c23f13bf0c824bc8030b46679979e
   branch: develop
   specs:
