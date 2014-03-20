@@ -46,6 +46,7 @@ module RobotMaster
     # @param step [Hash]
     # @option step [String] :name
     # @option step [Array<String>] :prereq
+    # @option step [Integer] :limit
     # @example
     #   perform_step({:name => 'checksum-compute', :prereq => ['start-assembly']})
     #   => Dor::WorkflowService.get_objects_for_workstep(['start-assembly'], 'checksum-compute', @repository, @workflow, true)
@@ -81,6 +82,27 @@ module RobotMaster
       end
     end
     
+    # Converts the given priority number into a priority class
+    # 
+    # - priority > 100 is `:critical`
+    # - priority > 0 is `:high`
+    # - priority == 0 is `:default`
+    # - priority < 0 is `:low`
+    #
+    # @param [Integer] priority
+    # @return [Symbol] the priority class the given priority falls
+    def priority_class(priority)
+      if priority > 100
+        :critical
+      elsif priority > 0 and priority <= 100
+        :high
+      elsif priority < 0
+        :low
+      else
+        :default
+      end
+    end
+    
     protected
     
     # @return [Boolean] true if the results queue has any high priority items
@@ -103,12 +125,23 @@ module RobotMaster
     
     # Adds the given item to the priority queue for this step
     #
+    # Job names for the given step are converted like so:
+    #
+    # - `assemblyWF:jp2-create` into `Robots::Assembly::Jp2Create`
+    # - `etdSubmitWF:binder-transfer` into `Robots:EtdSubmit::BinderTransfer`
+    #
     # @param [String] step name of the step
     # @param [String] druid
     # @param [Symbol] priority `:high`, `:default`, or `:low`
+    # @return [Hash] returns the `:queue` name and `klass` name enqueued
     def enqueue(step, druid, priority)
       ROBOT_LOG.debug { "enqueue #{step} #{druid} #{priority}" }
       # raise NotImplementedError # XXX
+      queue = queue_name(step, priority)
+      klass = "Robots::#{@workflow.sub('WF', '').camelcase}::#{step.sub('-', '_').camelcase}"
+      ROBOT_LOG.debug { "enqueue_to: #{queue} #{klass} #{druid}" }
+      Resque.enqueue_to(queue.to_sym, klass, druid)
+      { :queue => queue, :klass => klass }
     end
     
     # Updates the status from `waiting` (implied) to `queued` in the Workflow Service
@@ -150,30 +183,26 @@ module RobotMaster
       end
       { :name => step, :prereq => prereqs }
     end
-    
-    # @param [Integer] priority where 0 is default, positive is high, and negative is low
-    # @return [Symbol] one of `:high`, `:default`, `:low` keys for into which class the given priority falls
-    def priority_class(priority)
-      if priority > 0
-        :high
-      elsif priority < 0
-        :low
-      else
-        :default
-      end
-    end
-    
-    # @return [Array<Symbol>] contains `:high`, `:default`, `:low` keys for into which classes the 
-    #   given priorities fall
+        
+    # Converts all priority numbers into the possible priority classes.
+    #
+    # @param [Array<Integer>] priorities
+    # @return [Array<Symbol>] a unique array of priority classes into which the given priorities fall,
+    #   in order of highest priority first.
+    # @example
+    #     priority_classes([1000, 101, 100, -100, -1, 99, 150])
+    #     => [:critical, :high, :low]
     def priority_classes(priorities)
-      priorities.uniq.collect {|priority| priority_class(priority) }.uniq
+      priorities.uniq.sort.collect {|priority| priority_class(priority) }.uniq
     end
     
+    # Constructs the Resque priority queue name
+    # 
     # @param [String] step
     # @param [Symbol | Integer] priority
-    # @return [String] the Resque queue name
+    # @return [String] the Resque queue name of the form: `repo_myWF_my-step_priority`
     def queue_name(step, priority)
-      [ 'q',
+      [ 
         @repository, 
         @workflow, 
         step, 
