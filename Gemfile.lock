@@ -1,3 +1,14 @@
+GIT
+  remote: git://github.com/sul-dlss/dor-workflow-service.git
+  revision: f74b4453b68c23f13bf0c824bc8030b46679979e
+  branch: develop
+  specs:
+    dor-workflow-service (1.6.0)
+      activesupport (~> 4.0.4)
+      confstruct (~> 0.2.7)
+      nokogiri (~> 1.6.0)
+      rest-client (~> 1.6.7)
+
 PATH
   remote: .
   specs:
@@ -6,15 +17,6 @@ PATH
       druid-tools (~> 0.3.0)
       nokogiri (~> 1.6.1)
       resque (~> 1.25.2)
-
-PATH
-  remote: ../dor-workflow-service
-  specs:
-    dor-workflow-service (1.6.0)
-      activesupport (~> 4.0.4)
-      confstruct (~> 0.2.7)
-      nokogiri (~> 1.6.0)
-      rest-client (~> 1.6.7)
 
 GEM
   remote: https://rubygems.org/
@@ -40,7 +42,7 @@ GEM
     mini_portile (0.5.2)
     minitest (4.7.5)
     mono_logger (1.1.0)
-    multi_json (1.9.0)
+    multi_json (1.9.2)
     nokogiri (1.6.1)
       mini_portile (~> 0.5.0)
     pry (0.9.12.6)
