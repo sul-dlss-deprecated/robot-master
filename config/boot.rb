@@ -28,6 +28,7 @@ require 'resque'
 #   Hash - a redis connection hash (e.g. {:host => 'localhost', :port => 6379, :db => 0})
 Resque.redis = REDIS_URL
 
+require 'active_support/core_ext' # camelcase
 require 'druid-tools'
 require 'robot-master'
 
