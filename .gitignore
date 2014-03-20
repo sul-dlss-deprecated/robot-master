@@ -4,3 +4,4 @@ doc
 rdoc
 log
 config/environments
+Gemfile.lock
