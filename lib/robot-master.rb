@@ -77,8 +77,13 @@ module RobotMaster
       
       # perform the mediation
       results.each do |druid, priority|
-        enqueue(step[:name], druid, priority_class(priority))
-        update_status_to_enqueued(step[:name], druid)
+        begin # preferably within atomic transaction
+          enqueue(step[:name], druid, priority_class(priority))
+          update_status_to_enqueued(step[:name], druid)
+        rescue Exception => e
+          ROBOT_LOG.error("Cannot enqueue job: #{@repository}:#{@workflow}:#{step[:name]} #{druid} priority=#{priority}: #{e}")
+          raise e
+        end
       end
     end
     
@@ -136,7 +141,6 @@ module RobotMaster
     # @return [Hash] returns the `:queue` name and `klass` name enqueued
     def enqueue(step, druid, priority)
       ROBOT_LOG.debug { "enqueue #{step} #{druid} #{priority}" }
-      # raise NotImplementedError # XXX
       queue = queue_name(step, priority)
       klass = "Robots::#{@workflow.sub('WF', '').camelcase}::#{step.sub('-', '_').camelcase}"
       ROBOT_LOG.debug { "enqueue_to: #{queue} #{klass} #{druid}" }
@@ -151,6 +155,7 @@ module RobotMaster
     def update_status_to_enqueued(step, druid)
       ROBOT_LOG.debug { "update_status_to_enqueued #{step} #{druid}" }
       # raise NotImplementedError # XXX
+      # WorkflowService.update_workflow_status(@repository, druid, @workflow, step, 'queued')
     end
 
     # Parses the process XML to extract name and prereqs
