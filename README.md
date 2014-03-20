@@ -9,17 +9,19 @@ Algorithm
     foreach repository do
       foreach workflow do
 	    foreach process-step do
-		  if priority queue needs jobs or priority jobs in workflow
+		  if priority queue needs jobs or priority jobs in workflow service
 			within transaction do
-			  fetch N jobs with 'ready' status by priority
-			  mark N jobs as 'queued'
+			  jobs = fetch N jobs with 'ready' status by priority from workflow service
+			  jobs.each do |job|
+			    mark job as 'queued' in workflow service
+			  end
 			end
-			foreach job
-			  enqueue into priority queue
+			jobs.each do |job|
+			  enqueue job into Resque priority queue
 			end
 		  end
-          foreach failed do
-  	        mark as 'error'
+          foreach failed job do
+  	        mark job status as 'error' in workflow service
   	      end
 		end
 	  end
