@@ -173,7 +173,7 @@ module RobotMaster
     # @param [Symbol | Integer] priority
     # @return [String] the Resque queue name
     def queue_name(step, priority)
-      ['prod',  # XXX: prefix needs to come from environment
+      [ 'q',
         @repository, 
         @workflow, 
         step, 
