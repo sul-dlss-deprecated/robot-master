@@ -194,7 +194,7 @@ module RobotMaster
 
     # Parses the process XML to extract name and prereqs
     #
-    # @return [Hash] with `:name` and `:prereq` keys
+    # @return [Hash] with `:name` and `:prereq` and `:skip` keys
     # @example
     #   parse_process_node '
     #     <workflow-def id="accessionWF" repository="dor">
@@ -214,7 +214,8 @@ module RobotMaster
     #         'dor:accessionWF:descriptive-metadata',
     #         'dor:accessionWF:technical-metadata',
     #         'dor:accessionWF:rights-metadata'
-    #      ]
+    #      ],
+    #      :skip => false
     #   }
     # 
     def parse_process_node(node)
