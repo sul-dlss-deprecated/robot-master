@@ -9,8 +9,10 @@ describe RobotMaster do
   
   it '#queue_name' do
     %w{critical high default low}.each do |priority|
-      @subject.queue_name('foo-bar', priority).should == 'dor_accessionWF_foo-bar_' + priority
+      @subject.queue_name('foo-bar', priority.to_sym).should == 'dor_accessionWF_foo-bar_' + priority
     end
+    @subject.queue_name('foo-bar', 0) == 'dor_accessionWF_foo-bar_default'
+    @subject.queue_name('dor:someWF:foo-bar', -1) == 'dor_someWF_foo-bar_low'
   end
   
   it '#priority_class' do
