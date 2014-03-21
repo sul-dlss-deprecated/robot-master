@@ -1,4 +1,6 @@
+# Single module for all robot master code
 module RobotMaster
+  # e.g., `VERSION => '1.2.3'`
   VERSION = File.read(File.join(File.dirname(__FILE__), '..', 'VERSION')).strip
   
   # Manages a workflow to enqueue jobs into a priority queue
@@ -19,85 +21,93 @@ module RobotMaster
       @workflow = workflow
     end
 
-    # Queries the workflow service for all druids awaiting processing, and queues them into a priority queue
+    # Queries the workflow service for all druids awaiting processing, and 
+    # queues them into a priority queue
     def perform
+      # fetch the workflow object from our configuration cache
       doc = Nokogiri::XML(File.open("config/workflows/#{@workflow}.xml"))
-      # puts doc.to_xml
       
       # select all process steps that can be in a `waiting` state
-      doc.xpath('//process[not(@status) or (@status=\'waiting\')]').each do |node|
-        # skip any non-robot steps
-        if node['skip-queue'].is_a?(String) and node['skip-queue'].downcase == 'true'
-          ROBOT_LOG.debug { "Skipping #{node['name']} as it is marked no-robot" }
+      doc.xpath('//process[not(@status) or (@status=\'waiting\')]').each do |node|        
+        # parse out the name and prereqs for this node
+        process = parse_process_node(node)
+        # process[:limit] = 100 # XXX: enable for limiting the batches
+        
+        # skip any processes that do not require queueing
+        if process[:skip]
+          ROBOT_LOG.debug { "Skipping #{process[:name]}" }
           next
         end
         
-        # parse out the name and prereqs for this node
-        step = parse_process_node(node)
-        unless qualified?(step[:name])
-          step[:name] = qualify(step[:name])
-        end
-        # step[:limit] = 100 # XXX: enable for limiting the batches
-        
         # doit
-        perform_step(step) unless step[:prereq].empty?
+        unless process[:prereq].empty? 
+          # XXX: REST API doesn't return priorities without prereqs
+          enqueue_process(process) 
+        end
       end
+      nil
     end
 
-    def qualify(step)
-      "#{@repository}:#{@workflow}:#{step}"
-    end
-    
-    def qualified?(step)
-      step =~ /:/
-    end
-    
-    # Queries the workflow service for druids, and enqueues them to the appropriate priority queue
+    # Queries the workflow service for druids waiting for given process step, and 
+    # enqueues them to the appropriate priority queue
     #
-    # @param [Hash] step
-    # @option step [String] :name a fully qualified step name
-    # @option step [Array<String>] :prereq
-    # @option step [Integer] :limit
+    # @param [Hash] process
+    # @option process [String] :name a fully qualified step name
+    # @option process [Array<String>] :prereq fully qualified step names
+    # @option process [Integer] :limit maximum number of jobs to enqueued
+    # @return [Integer] the number of jobs enqueued
     # @example
-    #   perform_step({:name => 'dor:assemblyWF:checksum-compute', :prereq => ['dor:assemblyWF:start-assembly']})
-    #   => Dor::WorkflowService.get_objects_for_workstep(['dor:assemblyWF:start-assembly'], 'dor:assemblyWF:checksum-compute', 
-    #        nil, nil, with_priority: true)
-    def perform_step(step)
-      raise ArgumentError, "Step must be fully qualified: #{step[:name]}" unless qualified?(step[:name])
-      ROBOT_LOG.info("Processing #{step[:name]}")
-      ROBOT_LOG.debug { "depends on #{step[:prereq].join(',')}" }
+    #   enqueue_process(
+    #     name: 'dor:assemblyWF:checksum-compute', 
+    #     prereq: ['dor:assemblyWF:start-assembly', 'dor:someOtherWF:other-step']
+    #   )
+    def enqueue_process(process)
+      step = process[:name]
+      raise ArgumentError, "Step must be fully qualified: #{step}" unless qualified?(step)
+      ROBOT_LOG.info("Processing #{step}")
+      ROBOT_LOG.debug { "depends on #{process[:prereq].join(',')}" }
       
       # fetch pending jobs for this step from the Workflow Service. 
       # we need to always do this to determine whether there are high priority jobs pending.
-      results = Dor::WorkflowService.get_objects_for_workstep(step[:prereq], step[:name], nil, nil, with_priority: true, limit: step[:limit])
-      ap({:results => results})
+      results = Dor::WorkflowService.get_objects_for_workstep(
+                  process[:prereq],
+                  step, 
+                  nil, 
+                  nil, 
+                  with_priority: true, 
+                  limit: process[:limit]
+                )
       ROBOT_LOG.debug { "Found #{results.size} druids" }
+      return 0 unless results.size > 0
       
       # search the priority queues to determine whether we need to enqueue to them
       needs_work = false
       
       # if we have jobs at a priority level for which the job queue is empty
       priority_classes(results.values).each do |priority|
-        ROBOT_LOG.debug { "Checking priority queue for #{step[:name]} #{priority}..." }
-        needs_work = true if priority_queue_empty?(step[:name], priority)
+        ROBOT_LOG.debug { "Checking priority queue for #{step} #{priority}..." }
+        needs_work = true if priority_queue_empty?(step, priority)
       end
       
       # if we have any high priority jobs at all
-      needs_work = true if has_priority_items?(results)
+      needs_work = true if has_priority_items?(results.values)
       
       ROBOT_LOG.debug { "needs_work=#{needs_work}" }
-      return unless needs_work
+      return 0 unless needs_work
       
       # perform the mediation
+      n = 0
       results.each do |druid, priority|
-        begin # preferably within atomic transaction
-          enqueue(step[:name], druid, priority_class(priority))
-          update_status_to_enqueued(step[:name], druid)
+        begin # XXX preferably within atomic transaction
+          enqueue(step, druid, priority_class(priority))
+          mark_enqueued(step, druid)
+          n += 1
         rescue Exception => e
-          ROBOT_LOG.error("Cannot enqueue job: #{step[:name]} #{druid} priority=#{priority}: #{e}")
+          ROBOT_LOG.error("Cannot enqueue job: #{step} #{druid} priority=#{priority}: #{e}")
           raise e
         end
       end
+      n
     end
     
     # Converts the given priority number into a priority class
@@ -121,11 +131,10 @@ module RobotMaster
       end
     end
     
-    protected
-    
+    # @param [Array] priorities
     # @return [Boolean] true if the results queue has any high priority items
-    def has_priority_items?(results)
-      results.each_value.any? { |priority| priority > 0 }
+    def has_priority_items?(priorities)
+      priorities.each.any? { |priority| priority > 0 }
     end
     
     # @param [String] step a fully qualified name
@@ -151,15 +160,21 @@ module RobotMaster
     #
     # @param [String] step fully qualified name
     # @param [String] druid
-    # @param [Symbol] priority `:high`, `:default`, or `:low`
+    # @param [Symbol] priority see `priority_class`
     # @return [Hash] returns the `:queue` name and `klass` name enqueued
     def enqueue(step, druid, priority)
       raise ArgumentError, "Step must be fully qualified: #{step}" unless qualified?(step)
       ROBOT_LOG.debug { "enqueue #{step} #{druid} #{priority}" }
+      
+      # generate the specific priority queue name
       queue = queue_name(step, priority)
-      r, w, s = unqualify(step)
+      
+      # generate the robot job class name
+      r, w, s = parse_qualified(step)
       klass = "Robots::#{w.sub('WF', '').camelcase}::#{s.sub('-', '_').camelcase}"
       ROBOT_LOG.debug { "enqueue_to: #{queue} #{klass} #{druid}" }
+      
+      # perform the enqueue to Resque
       Resque.enqueue_to(queue.to_sym, klass, druid)
       { :queue => queue, :klass => klass }
     end
@@ -168,38 +183,45 @@ module RobotMaster
     # 
     # @param [String] step fully qualified name
     # @param [String] druid
-    def update_status_to_enqueued(step, druid)
+    # @return [Symbol] the new status value
+    def mark_enqueued(step, druid)
       raise ArgumentError, "Step must be fully qualified: #{step}" unless qualified?(step)
-      ROBOT_LOG.debug { "update_status_to_enqueued #{step} #{druid}" }
-      r, w, s = unqualify(step)
-      # raise NotImplementedError # XXX
+      ROBOT_LOG.debug { "mark_enqueued #{step} #{druid}" }
+      r, w, s = parse_qualified(step)
       # WorkflowService.update_workflow_status(r, druid, w, s, 'queued')
+      :queued
     end
 
     # Parses the process XML to extract name and prereqs
     #
     # @return [Hash] with `:name` and `:prereq` keys
     # @example
-    #   <process name="remediate-object" sequence="6">
-    #     <label>Ensure object conforms to latest DOR standards and schemas</label>
-    #     <prereq>content-metadata</prereq>
-    #     <prereq>descriptive-metadata</prereq>
-    #     <prereq>technical-metadata</prereq>
-    #     <prereq>rights-metadata</prereq>
-    #   </process>
-    # 
+    #   parse_process_node '
+    #     <workflow-def id="accessionWF" repository="dor">
+    #       <process name="remediate-object" sequence="6">
+    #         <label>Ensure object conforms to latest DOR standards and schemas</label>
+    #         <prereq>content-metadata</prereq>
+    #         <prereq>descriptive-metadata</prereq>
+    #         <prereq>technical-metadata</prereq>
+    #         <prereq>rights-metadata</prereq>
+    #       </process>
+    #     </workflow-def>
+    #   ')
     #   => {
-    #     :name => 'remediate-object',
+    #     :name => 'dor:accessionWF:remediate-object',
     #     :prereq => [
-    #         'content-metadata',
-    #         'descriptive-metadata',
-    #         'technical-metadata',
-    #         'rights-metadata'
+    #         'dor:accessionWF:content-metadata',
+    #         'dor:accessionWF:descriptive-metadata',
+    #         'dor:accessionWF:technical-metadata',
+    #         'dor:accessionWF:rights-metadata'
     #      ]
     #   }
     # 
     def parse_process_node(node)
-      step = node['name']
+      name = node['name']
+      name = qualify(name) unless qualified?(name)
+      skip = node['skip-queue'].is_a?(String) and node['skip-queue'].downcase == 'true'
+      
       prereqs = []
       node.xpath('prereq').each do |prereq|
         qualified_prereq = prereq.text
@@ -208,7 +230,7 @@ module RobotMaster
         end
         prereqs << qualified_prereq
       end
-      { :name => step, :prereq => prereqs }
+      { :name => name, :prereq => prereqs, :skip => skip }
     end
         
     # Converts all priority numbers into the possible priority classes.
@@ -220,11 +242,7 @@ module RobotMaster
     #     priority_classes([1000, 101, 100, -100, -1, 99, 150])
     #     => [:critical, :high, :low]
     def priority_classes(priorities)
-      priorities.uniq.sort.collect {|priority| priority_class(priority) }.uniq
-    end
-    
-    def unqualify(step)
-      step.split(/:/, 3)
+      priorities.uniq.sort.reverse.collect {|priority| priority_class(priority) }.uniq
     end
     
     # Constructs the Resque priority queue name
@@ -233,8 +251,8 @@ module RobotMaster
     # @param [Symbol | Integer] priority
     # @return [String] the Resque queue name of the form: `repo_myWF_my-step_priority`
     def queue_name(step, priority)
-      raise ArgumentError, "Step must be fully qualified: #{step}" unless qualified?(step)
-      r, w, s = unqualify(step)
+      step = qualify(step) unless qualified?(step)
+      r, w, s = parse_qualified(step)
       [ 
         r, 
         w, 
@@ -242,5 +260,39 @@ module RobotMaster
         priority.is_a?(Integer) ? priority_class(priority) : priority
       ].join('_')
     end
+    
+    protected
+    # @param [String] step an unqualified name
+    # @return [String] fully qualified name
+    # @example
+    #   qualify('jp2-create')
+    #   => 'dor:assemblyWF:jp2-create'
+    #   qualify('dor:assemblyWF:jp2-create')
+    #   => 'dor:assemblyWF:jp2-create'
+    def qualify(step)
+      return step if qualified?(step)
+      "#{@repository}:#{@workflow}:#{step}"
+    end
+    
+    # @return [Boolean] true if step is a qualified name, 
+    # like dor:assemblyWF:jp2-create
+    # @example
+    #   qualified?("dor:assemblyWF:jp2-create")
+    #   => true
+    #   qualified?("jp2-create")
+    #   => false
+    def qualified?(step)
+      step =~ /:/
+    end
+    
+    # @return [Array] the repository, workflow, and step values
+    # @example
+    #   parse_qualified("dor:assemblyWF:jp2-create")
+    #   => ['dor', 'assemblyWF', 'jp2-create']
+    def parse_qualified(step)
+      return [@repository, @workflow, step] unless qualified?(step)
+      step.split(/:/, 3)
+    end
+    
   end
 end
