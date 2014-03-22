@@ -1,5 +1,8 @@
 $LOAD_PATH.unshift(File.join(File.dirname(__FILE__), '..', 'lib'))
 
+require 'simplecov'
+SimpleCov.start
+
 require 'bundler/setup'
 Bundler.require(:default, :development)
 
@@ -7,7 +10,6 @@ require 'rubygems'
 require 'rspec'
 require 'awesome_print'
 require 'equivalent-xml'
-
 
 RSpec.configure do |config|
   

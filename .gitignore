@@ -5,3 +5,4 @@ rdoc
 log
 config/environments
 Gemfile.lock
+coverage
