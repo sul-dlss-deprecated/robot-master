@@ -1,23 +1,75 @@
 require File.expand_path(File.dirname(__FILE__) + '/../spec_helper')
 require File.expand_path(File.dirname(__FILE__) + '/../../config/boot')
 
+class WorkflowTest < RobotMaster::Workflow
+  # expose protected methods
+  def qualify(step); super(step); end
+  def qualified?(step); super(step); end
+  def parse_qualified(step); super(step); end
+end
+
 describe RobotMaster do
-  let(:priorities) {  
-    %w{critical high default low}.map(&:to_sym)
-  }
   subject(:master) {
-    RobotMaster::Workflow.new('dor', 'accessionWF')
+    WorkflowTest.new('dor', 'accessionWF')
   }
   
-  it '#queue_name' do
-    priorities.each do |priority|
-      expect(master.queue_name('foo-bar', priority)).to eq "dor_accessionWF_foo-bar_#{priority}"
-    end
-    expect(master.queue_name('foo-bar', 0)).to eq 'dor_accessionWF_foo-bar_default'
-    expect(master.queue_name('dor:someWF:foo-bar', -1)).to eq 'dor_someWF_foo-bar_low'
+  it 'initialization errors' do
+    expect {
+      WorkflowTest.new('dor', 'willNotFindWF')
+    }.to raise_error(Exception)
   end
   
-  context '#priority_class' do
+  context '#qualify' do
+    it "simple" do
+      expect(master.qualify('foo-bar')).to eq 'dor:accessionWF:foo-bar'
+    end
+  end
+
+  context '#qualified?' do
+    it "yes" do
+      expect(master.qualified?('dor:accessionWF:foo-bar')).to be true
+    end
+    
+    it "no" do
+      expect(master.qualified?('a')).to be false
+      expect(master.qualified?('a:b')).to be false
+      expect(master.qualified?('a:b:c:d')).to be false
+    end
+  end
+  
+  context '#parse_qualified' do
+    it 'does something' do
+      expect(master.parse_qualified('dor:assemblyWF:jp2-create')).to eq ['dor', 'assemblyWF', 'jp2-create']
+      
+    end
+  end
+  
+  context '#queue_name' do
+    let(:priorities) {  
+      %w{critical high default low}.map(&:to_sym)
+    }
+    
+    it 'handles priority symbols' do
+      priorities.each do |priority|
+        expect(master.queue_name('foo-bar', priority)).to eq "dor_accessionWF_foo-bar_#{priority}"
+      end
+    end
+    
+    it 'handles default' do
+      expect(master.queue_name('foo-bar')).to eq 'dor_accessionWF_foo-bar_default'      
+    end
+    
+    it 'handles priority numbers' do
+      expect(master.queue_name('foo-bar', 0)).to eq 'dor_accessionWF_foo-bar_default'
+      expect(master.queue_name('foo-bar', 1)).to eq 'dor_accessionWF_foo-bar_high'      
+    end
+    
+    it 'handles qualified names' do
+      expect(master.queue_name('dor:someWF:foo-bar')).to eq 'dor_someWF_foo-bar_default'      
+    end
+  end
+  
+  context '#priority_classes' do
     it 'critical' do
       expect(master.priority_classes([101, 1000])).to eq [:critical]
     end
@@ -41,12 +93,12 @@ describe RobotMaster do
   
   context '#has_priority_items?' do
     it 'false' do
-      [[0], [0, -1], [0, -100, 0]].each do |i|
+      [[0], [0, -1], [0, -100, 0], [:default, :low]].each do |i|
         expect(master.has_priority_items?(i)).to be false
       end
     end
     it 'true' do
-      [[1], [0, 1, 0], [0, 100, 1000]].each do |i|
+      [[1], [0, 1, 0], [0, 100, 1000], [:critical], [:high, :low]].each do |i|
         expect(master.has_priority_items?(i)).to be true
       end
     end
@@ -115,13 +167,32 @@ describe RobotMaster do
       end
     end
     
-    it 'with qualified name' do
-      doc = Nokogiri::XML('
+    context 'with qualified name' do
+      let(:doc) {
+        Nokogiri::XML('
        <process name="foo-bar">
          <prereq>dor:assemblyWF:jp2-create</prereq>
-        </process>')
-      expect(master.parse_process_node(doc.root)[:name]).to eq 'dor:accessionWF:foo-bar'
-      expect(master.parse_process_node(doc.root)[:prereq]).to eq ['dor:assemblyWF:jp2-create']
+        </process>'
+        )
+      }
+      it 'should' do
+        expect(master.parse_process_node(doc.root)[:name]).to eq 'dor:accessionWF:foo-bar'
+        expect(master.parse_process_node(doc.root)[:prereq]).to eq ['dor:assemblyWF:jp2-create']
+      end
+    end
+    
+    context "malformed prereq" do
+      let(:doc) {
+        Nokogiri::XML('
+         <process name="remediate-object">
+           <Prereq>content-metadata</Prereq>
+          </process>'
+        )
+      }
+      it 'should' do
+        expect(master.parse_process_node(doc.root)[:prereq]).to eq []
+      end
     end
   end
+  
 end
