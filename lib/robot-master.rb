@@ -221,8 +221,14 @@ module RobotMaster
     def parse_process_node(node)
       name = node['name']
       name = qualify(name) unless qualified?(name)
-      skip = node['skip-queue'].is_a?(String) and node['skip-queue'].downcase == 'true'
-      
+      skip = false
+      if (node['skip-queue'].is_a?(String) and 
+          node['skip-queue'].downcase == 'true') or
+         (node['status'].is_a?(String) and 
+          node['status'].downcase != 'waiting')
+        skip = true
+      end
+
       prereqs = []
       node.xpath('prereq').each do |prereq|
         qualified_prereq = prereq.text
