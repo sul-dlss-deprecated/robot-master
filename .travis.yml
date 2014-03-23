@@ -9,4 +9,4 @@ rvm:
 before_install:
   - mkdir log
   - mkdir config/environments
-  - touch config/environments/development.rb
+  - cp config/example_environment.rb config/environments/development.rb
