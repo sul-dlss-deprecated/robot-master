@@ -3,6 +3,7 @@ doc
 .yardoc
 rdoc
 log
+*.log
 config/environments
 Gemfile.lock
 coverage
