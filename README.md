@@ -27,6 +27,32 @@ Algorithm
 	  end
 	end
 
+Operation
+---------
+
+Designed to run from cron, like so:
+
+in production:
+
+    bin/robot-master --environment=production --log-level=warn accessionWF
+
+for testing:
+
+    bin/robot-master --environment=testing accessionWF
+	
+for development:
+
+    RESTCLIENT_LOG=stdout bin/robot-master --log-level=debug accessionWF shelve publish
+	
+Usage
+-----
+
+	Usage:	robot-master [flags] [repo:]workflow [step [step2 ...]]
+	        --repository=REPOSITORY      Use the given repository (default: dor)
+	        --environment=ENV            Use the given environment (default: development)
+	        --log-level=LEVEL            Use the given log-level (default: info)
+	    -v, --verbose                    Run verbosely, use multiple times for debug level output
+
 Configuration
 -------------
 
@@ -39,30 +65,6 @@ For processes that do not need Resque queues, use the `skip-queue` attribute fla
     <process name="foobar" skip-queue="true"/>
 
 Use `RESTCLIENT_LOG=stdout` to view HTTP traffic.
-
-Operation
----------
-
-Designed to run from cron, like so in production:
-
-    bin/robot-master --environment=production accessionWF
-
-for testing:
-
-    bin/robot-master --environment=testing accessionWF shelve
-	
-for development:
-
-    RESTCLIENT_LOG=stdout bin/robot-master --environment=development --log-level=debug accessionWF shelve publish
-	
-Usage
------
-
-	Usage:	robot-master [flags] [repo:]workflow [step [step2 ...]]
-	        --repository=REPOSITORY      Use the given repository (default: dor)
-	        --environment=ENV            Use the given environment (default: development)
-	        --log-level=LEVEL            Use the given log-level (default: info)
-	    -v, --verbose                    Run verbosely, use multiple times for debug level output
 
 Workflow objects
 ----------------
