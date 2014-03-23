@@ -73,15 +73,21 @@ class RobotMasterCLI
     ENV['ROBOT_LOG'] = flags[:robot_log]
     ap({:env => ENV}) if flags[:debug]
     begin
-      puts "Loading boot file..." if flags[:verbose]
+      puts "Loading boot file..." if flags[:debug]
       require File.expand_path(File.dirname(__FILE__) + '/../config/boot')
     rescue Exception => e
       raise ArgumentError, "Missing boot file: #{e.message}"
     end
     
     # Perform actual work finally
-    ROBOT_LOG.info("Starting RobotMaster #{RobotMaster::VERSION}: workflow=#{flags[:workflow]}")
-    perform(flags[:workflow], flags)
+    ROBOT_LOG.info("Starting RobotMaster #{RobotMaster::VERSION}: #{flags[:workflow]}")
+    begin
+      perform(flags[:workflow], flags)
+    rescue Exception => e
+      ROBOT_LOG.error("#{flags[:workflow]}: #{e}")
+      raise e
+    end
+    
     ROBOT_LOG.info("Finish RobotMaster: workflow=#{flags[:workflow]}")
   end
 end
