@@ -25,7 +25,7 @@ class RobotMasterCLI
       :repository => 'dor',
       :robot_environment => ENV['ROBOT_ENVIRONMENT'] || 'development',
       :robot_log_level => ENV['ROBOT_LOG_LEVEL'] || 'info',
-      :log_output => STDOUT
+      :robot_log => ENV['ROBOT_LOG'] || 'robot-master.log'
     }
     
     args = %w{--help} if args.nil? or args.empty?
@@ -40,6 +40,9 @@ class RobotMasterCLI
       end
       opts.on('--log-level=LEVEL', "Use the given log-level (default: #{flags[:robot_log_level]})") do |v|
         flags[:robot_log_level] = v
+      end      
+      opts.on('--log=FILE', "Use the given log file (default: #{flags[:robot_log]})") do |v|
+        flags[:robot_log] = v
       end      
       opts.on('-v', '--verbose', 'Run verbosely, use multiple times for debug level output') do
         flags[:debug] = true if flags[:verbose]  # -vv
@@ -67,6 +70,7 @@ class RobotMasterCLI
     ENV['ROBOT_ENVIRONMENT'] = flags[:robot_environment]
     ENV['ROBOT_LOG_LEVEL'] = flags[:robot_log_level]
     ENV['ROBOT_LOG_LEVEL'] = 'debug' if flags[:debug]
+    ENV['ROBOT_LOG'] = flags[:robot_log]
     ap({:env => ENV}) if flags[:debug]
     begin
       puts "Loading boot file..." if flags[:verbose]
