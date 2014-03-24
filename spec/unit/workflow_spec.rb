@@ -6,9 +6,10 @@ class WorkflowTest < RobotMaster::Workflow
   def qualify(step); super(step); end
   def qualified?(step); super(step); end
   def parse_qualified(step); super(step); end
+  def parse_process_node(node); super(node); end
 end
 
-describe RobotMaster do
+describe RobotMaster::Workflow do
   subject(:master) {
     WorkflowTest.new('dor', 'accessionWF')
   }
@@ -18,7 +19,7 @@ describe RobotMaster do
       WorkflowTest.new('dor', 'willNotFindWF')
     }.to raise_error(Exception)
   end
-  
+
   context '#qualify' do
     it "simple" do
       expect(master.qualify('foo-bar')).to eq 'dor:accessionWF:foo-bar'
@@ -29,81 +30,46 @@ describe RobotMaster do
     it "yes" do
       expect(master.qualified?('dor:accessionWF:foo-bar')).to be true
     end
-    
+  
     it "no" do
       expect(master.qualified?('a')).to be false
       expect(master.qualified?('a:b')).to be false
       expect(master.qualified?('a:b:c:d')).to be false
     end
   end
-  
+
   context '#parse_qualified' do
     it 'does something' do
       expect(master.parse_qualified('dor:assemblyWF:jp2-create')).to eq ['dor', 'assemblyWF', 'jp2-create']
-      
+    
     end
   end
-  
+
   context '#queue_name' do
     let(:priorities) {  
       %w{critical high default low}.map(&:to_sym)
     }
-    
+  
     it 'handles priority symbols' do
       priorities.each do |priority|
         expect(master.queue_name('foo-bar', priority)).to eq "dor_accessionWF_foo-bar_#{priority}"
       end
     end
-    
+  
     it 'handles default' do
       expect(master.queue_name('foo-bar')).to eq 'dor_accessionWF_foo-bar_default'      
     end
-    
+  
     it 'handles priority numbers' do
       expect(master.queue_name('foo-bar', 0)).to eq 'dor_accessionWF_foo-bar_default'
       expect(master.queue_name('foo-bar', 1)).to eq 'dor_accessionWF_foo-bar_high'      
     end
-    
+  
     it 'handles qualified names' do
       expect(master.queue_name('dor:someWF:foo-bar')).to eq 'dor_someWF_foo-bar_default'      
     end
   end
-  
-  context '#priority_classes' do
-    it 'critical' do
-      expect(master.priority_classes([101, 1000])).to eq [:critical]
-    end
-    
-    it 'high' do
-      expect(master.priority_classes([1, 10, 100])).to eq [:high]
-    end
-    
-    it 'default' do
-      expect(master.priority_class(0)).to equal :default
-    end
-    
-    it 'low' do
-      expect(master.priority_classes([-1, -10, -100, -1000])).to eq [:low]
-    end
-  
-    it 'critical and low' do
-      expect(master.priority_classes([-100, 1000, -1, 150])).to eq [:critical, :low]
-    end
-  end
-  
-  context '#has_priority_items?' do
-    it 'false' do
-      [[0], [0, -1], [0, -100, 0], [:default, :low]].each do |i|
-        expect(master.has_priority_items?(i)).to be false
-      end
-    end
-    it 'true' do
-      [[1], [0, 1, 0], [0, 100, 1000], [:critical], [:high, :low]].each do |i|
-        expect(master.has_priority_items?(i)).to be true
-      end
-    end
-  end
-  
+
   context '#parse_process_node' do
     it 'empty' do
       doc = Nokogiri::XML('<process name="initiate"/>')
@@ -130,7 +96,7 @@ describe RobotMaster do
       doc = Nokogiri::XML('<process name="initiate" skip-queue="false"/>')
       expect(master.parse_process_node(doc.root)[:skip]).to be false
     end
-  
+
     context "single prereq" do
       let(:doc) {
         Nokogiri::XML('
@@ -145,7 +111,7 @@ describe RobotMaster do
           ]
       end
     end
-  
+
     context 'multiple prereqs' do
       let(:doc) {
         Nokogiri::XML('
@@ -166,7 +132,7 @@ describe RobotMaster do
           ]
       end
     end
-    
+  
     context 'with qualified name' do
       let(:doc) {
         Nokogiri::XML('
@@ -180,7 +146,7 @@ describe RobotMaster do
         expect(master.parse_process_node(doc.root)[:prereq]).to eq ['dor:assemblyWF:jp2-create']
       end
     end
-    
+  
     context "malformed prereq" do
       let(:doc) {
         Nokogiri::XML('
@@ -194,5 +160,4 @@ describe RobotMaster do
       end
     end
   end
-  
 end
