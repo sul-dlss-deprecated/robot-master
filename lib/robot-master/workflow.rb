@@ -1,4 +1,3 @@
-# Single module for all robot master code
 module RobotMaster
 
   # Manages a workflow to enqueue jobs into a priority queue
@@ -56,6 +55,25 @@ module RobotMaster
       self
     end
 
+
+    # Generate the queue name from step and priority
+    # 
+    # @param [String] step fully qualified name
+    # @param [Symbol | Integer] priority
+    # @return [String] the queue name
+    # @example
+    #     queue_name('dor:assemblyWF:jp2-create')
+    #     => 'dor_assemblyWF_jp2-create_default'
+    #     queue_name('dor:assemblyWF:jp2-create', 100)
+    #     => 'dor_assemblyWF_jp2-create_high'
+    def queue_name(step, priority = :default)
+      [ 
+        parse_qualified(qualify(step)),
+        priority.is_a?(Integer) ? Priority.priority_class(priority) : priority
+      ].flatten.join('_')
+    end
+    
+    protected
     # Queries the workflow service for druids waiting for given process step, and 
     # enqueues them to the appropriate priority queue
     #
@@ -173,25 +191,6 @@ module RobotMaster
       # WorkflowService.update_workflow_status(r, druid, w, s, 'queued')
       :queued
     end
-
-    # Generate the queue name from step and priority
-    # 
-    # @param [String] step fully qualified name
-    # @param [Symbol | Integer] priority
-    # @return [String] the queue name
-    # @example
-    #     queue_name('dor:assemblyWF:jp2-create')
-    #     => 'dor_assemblyWF_jp2-create_default'
-    #     queue_name('dor:assemblyWF:jp2-create', 100)
-    #     => 'dor_assemblyWF_jp2-create_high'
-    def queue_name(step, priority = :default)
-      [ 
-        parse_qualified(qualify(step)),
-        priority.is_a?(Integer) ? Priority.priority_class(priority) : priority
-      ].flatten.join('_')
-    end
-    
-    protected
     
     # Parses the process XML to extract name and prereqs only.
     # Supports skipping the process using `skip-queue="true"`

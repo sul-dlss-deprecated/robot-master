@@ -1,6 +1,9 @@
 module RobotMaster
   # Maps priority values into priority classes
   class Priority
+    # all possible priority classes
+    PRIORITIES = %w{critical high default low}.map(&:to_sym)
+    
     class << self
       # Converts the given priority number into a priority class
       # 
