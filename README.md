@@ -34,7 +34,7 @@ Designed to run from cron, like so:
 
 in production:
 
-    bin/robot-master --environment=production --log-level=warn accessionWF
+    bin/robot-master --environment=production --log-level=warn dor:accessionWF
 
 for testing:
 
