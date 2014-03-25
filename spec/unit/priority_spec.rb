@@ -56,14 +56,18 @@ describe RobotMaster::Priority do
 
   context '#has_priority_items?' do
     it 'false' do
-      [[], [0], [0, -1], [0, -100, 0], [:default, :low]].each do |i|
+      [[], [0], [0, -1], [0, -100, 0], [0.0], [:default, :low]].each do |i|
         expect(subject.has_priority_items?(i)).to be_false
       end
     end
     it 'true' do
-      [[1], [0, 1, 0], [0, 100, 1000], [:critical], [:high, :low]].each do |i|
+      [[1], [0, 1, 0], [0, 100, 1000], [10.1], [:critical], [:high, :low]].each do |i|
         expect(subject.has_priority_items?(i)).to be_true
       end
+    end
+    
+    it 'illegal arguments' do
+      expect { subject.has_priority_items?(%w{critical high}) }.to raise_error(ArgumentError)
     end
   end
 end

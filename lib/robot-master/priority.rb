@@ -38,9 +38,12 @@ module RobotMaster
       #    => true
       def has_priority_items?(priorities)
         priorities.each.any? { |priority|
+          unless priority.is_a?(Symbol) or priority.is_a?(Numeric)
+            raise ArgumentError, "Illegal priority value #{priority}" 
+          end
           [:critical, :high].include?(
-            priority.is_a?(Integer) ?
-              priority_class(priority) :
+            priority.is_a?(Numeric) ?
+              priority_class(priority.to_i) :
               priority
             )
         }
