@@ -88,7 +88,8 @@ module RobotMaster
     #     prereq: ['dor:assemblyWF:start-assembly','dor:someOtherWF:other-step']
     #   )
     def perform_on_process(process)
-      step = qualify(process[:name])
+      step = process[:name]
+      raise ArgumentError, "Process name not fully qualified #{step}" unless qualified?(step)
 
       ROBOT_LOG.info("Processing #{step}")
       ROBOT_LOG.debug { "depends on #{process[:prereq].join(',')}" }
@@ -107,7 +108,8 @@ module RobotMaster
       ROBOT_LOG.debug { "Found #{results.size} druids" }
       return 0 unless results.size > 0
       
-      # search the priority queues to determine whether we need to enqueue to them
+      # search the priority queues to determine whether we need to 
+      # enqueue to them, for either empty queues or high priority items
       needs_work = false
       
       # if we have jobs at a priority level for which the job queue is empty

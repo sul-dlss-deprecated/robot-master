@@ -10,9 +10,21 @@ class WorkflowTest < RobotMaster::Workflow
 end
 
 describe RobotMaster::Workflow do
-  subject(:master) {
+  subject {
     WorkflowTest.new('dor', 'accessionWF')
   }
+  
+  it 'expected methods' do
+    %w{
+      parse_process_node 
+      parse_qualified 
+      qualified? 
+      qualify 
+      queue_name
+    }.map(&:to_sym).each do |proc|
+      expect(subject.respond_to?(proc)).to be_true
+    end
+  end
   
   it 'initialization errors' do
     expect {
@@ -22,25 +34,25 @@ describe RobotMaster::Workflow do
 
   context '#qualify' do
     it "simple" do
-      expect(master.qualify('foo-bar')).to eq 'dor:accessionWF:foo-bar'
+      expect(subject.qualify('foo-bar')).to eq 'dor:accessionWF:foo-bar'
     end
   end
 
   context '#qualified?' do
     it "yes" do
-      expect(master.qualified?('dor:accessionWF:foo-bar')).to be true
+      expect(subject.qualified?('dor:accessionWF:foo-bar')).to be true
     end
   
     it "no" do
-      expect(master.qualified?('a')).to be false
-      expect(master.qualified?('a:b')).to be false
-      expect(master.qualified?('a:b:c:d')).to be false
+      expect(subject.qualified?('a')).to be false
+      expect(subject.qualified?('a:b')).to be false
+      expect(subject.qualified?('a:b:c:d')).to be false
     end
   end
 
   context '#parse_qualified' do
     it 'does something' do
-      expect(master.parse_qualified('dor:assemblyWF:jp2-create')).to eq ['dor', 'assemblyWF', 'jp2-create']
+      expect(subject.parse_qualified('dor:assemblyWF:jp2-create')).to eq ['dor', 'assemblyWF', 'jp2-create']
     
     end
   end
@@ -52,49 +64,49 @@ describe RobotMaster::Workflow do
   
     it 'handles priority symbols' do
       priorities.each do |priority|
-        expect(master.queue_name('foo-bar', priority)).to eq "dor_accessionWF_foo-bar_#{priority}"
+        expect(subject.queue_name('foo-bar', priority)).to eq "dor_accessionWF_foo-bar_#{priority}"
       end
     end
   
     it 'handles default' do
-      expect(master.queue_name('foo-bar')).to eq 'dor_accessionWF_foo-bar_default'      
+      expect(subject.queue_name('foo-bar')).to eq 'dor_accessionWF_foo-bar_default'      
     end
   
     it 'handles priority numbers' do
-      expect(master.queue_name('foo-bar', 0)).to eq 'dor_accessionWF_foo-bar_default'
-      expect(master.queue_name('foo-bar', 1)).to eq 'dor_accessionWF_foo-bar_high'      
+      expect(subject.queue_name('foo-bar', 0)).to eq 'dor_accessionWF_foo-bar_default'
+      expect(subject.queue_name('foo-bar', 1)).to eq 'dor_accessionWF_foo-bar_high'      
     end
   
     it 'handles qualified names' do
-      expect(master.queue_name('dor:someWF:foo-bar')).to eq 'dor_someWF_foo-bar_default'      
+      expect(subject.queue_name('dor:someWF:foo-bar')).to eq 'dor_someWF_foo-bar_default'      
     end
   end
 
   context '#parse_process_node' do
     it 'empty' do
       doc = Nokogiri::XML('<process name="initiate"/>')
-      expect(master.parse_process_node(doc.root)[:name]).to eq 'dor:accessionWF:initiate'
-      expect(master.parse_process_node(doc.root)[:skip]).to be false
+      expect(subject.parse_process_node(doc.root)[:name]).to eq 'dor:accessionWF:initiate'
+      expect(subject.parse_process_node(doc.root)[:skip]).to be false
     end
 
     it 'waiting' do
       doc = Nokogiri::XML('<process name="initiate" status="waiting"/>')
-      expect(master.parse_process_node(doc.root)[:skip]).to be false
+      expect(subject.parse_process_node(doc.root)[:skip]).to be false
     end
 
     it 'completed' do
       doc = Nokogiri::XML('<process name="initiate" status="completed"/>')
-      expect(master.parse_process_node(doc.root)[:skip]).to be true
+      expect(subject.parse_process_node(doc.root)[:skip]).to be true
     end
 
     it 'skip-queue' do
       doc = Nokogiri::XML('<process name="initiate" skip-queue="true"/>')
-      expect(master.parse_process_node(doc.root)[:skip]).to be true
+      expect(subject.parse_process_node(doc.root)[:skip]).to be true
     end
 
     it 'skip-queue false' do
       doc = Nokogiri::XML('<process name="initiate" skip-queue="false"/>')
-      expect(master.parse_process_node(doc.root)[:skip]).to be false
+      expect(subject.parse_process_node(doc.root)[:skip]).to be false
     end
 
     context "single prereq" do
@@ -106,7 +118,7 @@ describe RobotMaster::Workflow do
         )
       }
       it 'should' do
-        expect(master.parse_process_node(doc.root)[:prereq]).to eq [
+        expect(subject.parse_process_node(doc.root)[:prereq]).to eq [
              'dor:accessionWF:content-metadata'
           ]
       end
@@ -124,7 +136,7 @@ describe RobotMaster::Workflow do
         )
       }
       it 'should' do
-        expect(master.parse_process_node(doc.root)[:prereq]).to eq [
+        expect(subject.parse_process_node(doc.root)[:prereq]).to eq [
              'dor:accessionWF:content-metadata',
              'dor:accessionWF:descriptive-metadata',
              'dor:accessionWF:technical-metadata',
@@ -142,8 +154,8 @@ describe RobotMaster::Workflow do
         )
       }
       it 'should' do
-        expect(master.parse_process_node(doc.root)[:name]).to eq 'dor:accessionWF:foo-bar'
-        expect(master.parse_process_node(doc.root)[:prereq]).to eq ['dor:assemblyWF:jp2-create']
+        expect(subject.parse_process_node(doc.root)[:name]).to eq 'dor:accessionWF:foo-bar'
+        expect(subject.parse_process_node(doc.root)[:prereq]).to eq ['dor:assemblyWF:jp2-create']
       end
     end
   
@@ -156,7 +168,7 @@ describe RobotMaster::Workflow do
         )
       }
       it 'should' do
-        expect(master.parse_process_node(doc.root)[:prereq]).to eq []
+        expect(subject.parse_process_node(doc.root)[:prereq]).to eq []
       end
     end
   end
