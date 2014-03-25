@@ -51,12 +51,12 @@ describe RobotMaster::Priority do
   context '#has_priority_items?' do
     it 'false' do
       [[], [0], [0, -1], [0, -100, 0], [:default, :low]].each do |i|
-        expect(priority.has_priority_items?(i)).to be false
+        expect(priority.has_priority_items?(i)).to be_false
       end
     end
     it 'true' do
       [[1], [0, 1, 0], [0, 100, 1000], [:critical], [:high, :low]].each do |i|
-        expect(priority.has_priority_items?(i)).to be true
+        expect(priority.has_priority_items?(i)).to be_true
       end
     end
   end
