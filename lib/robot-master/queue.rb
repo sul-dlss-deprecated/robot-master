@@ -14,6 +14,9 @@ module RobotMaster
       #     => 'dor_assemblyWF_jp2-create_high'
       def queue_name(step, priority = :default)
         Workflow.assert_qualified(step)
+        unless priority.is_a?(Integer) or Priority::PRIORITIES.include?(priority)
+          raise ArgumentError, "Unknown priority: #{priority}"
+        end
         [ 
           Workflow.parse_qualified(step),
           priority.is_a?(Integer) ? Priority.priority_class(priority) : priority
