@@ -2,16 +2,44 @@ module RobotMaster
 
   # Manages a workflow to enqueue jobs into a priority queue
   class Workflow
+    
     # Perform workflow queueing on the given workflow
     #
     # @param [String] repository
     # @param [String] workflow
     # @return [RobotMaster::Workflow]
     def self.perform(repository, workflow)
-      master = RobotMaster::Workflow.new(repository, workflow)
+      master = new(repository, workflow)
       master.perform
     end
 
+    # @return [Boolean] true if step is a qualified name, 
+    # like dor:assemblyWF:jp2-create
+    # @example
+    #   qualified?("dor:assemblyWF:jp2-create")
+    #   => true
+    #   qualified?("jp2-create")
+    #   => false
+    def self.qualified?(step)
+      /^\w+:\w+:[\w\-]+$/ === step
+    end
+    
+    # @param [String] step fully qualified step name
+    # @raise [ArgumentError] if `step` is not fully qualified
+    def self.assert_qualified(step)
+      raise ArgumentError, "step not qualified: #{step}" unless qualified?(step)
+    end
+
+    # @param [String] step fully qualified step name
+    # @return [Array] the repository, workflow, and step values
+    # @example
+    #   parse_qualified("dor:assemblyWF:jp2-create")
+    #   => ['dor', 'assemblyWF', 'jp2-create']
+    def self.parse_qualified(step)
+      assert_qualified(step)
+      step.split(/:/, 3)
+    end
+    
     # @param [String] repository
     # @param [String] workflow
     # @raise [Exception] if cannot read workflow configuration
@@ -54,24 +82,6 @@ module RobotMaster
       end
       self
     end
-
-
-    # Generate the queue name from step and priority
-    # 
-    # @param [String] step fully qualified name
-    # @param [Symbol | Integer] priority
-    # @return [String] the queue name
-    # @example
-    #     queue_name('dor:assemblyWF:jp2-create')
-    #     => 'dor_assemblyWF_jp2-create_default'
-    #     queue_name('dor:assemblyWF:jp2-create', 100)
-    #     => 'dor_assemblyWF_jp2-create_high'
-    def queue_name(step, priority = :default)
-      [ 
-        parse_qualified(qualify(step)),
-        priority.is_a?(Integer) ? Priority.priority_class(priority) : priority
-      ].flatten.join('_')
-    end
     
     protected
     # Queries the workflow service for druids waiting for given process step, and 
@@ -89,8 +99,8 @@ module RobotMaster
     #   )
     def perform_on_process(process)
       step = process[:name]
-      raise ArgumentError, "Process name not fully qualified #{step}" unless qualified?(step)
-
+      self.class.assert_qualified(step)
+      
       ROBOT_LOG.info("Processing #{step}")
       ROBOT_LOG.debug { "depends on #{process[:prereq].join(',')}" }
       
@@ -138,62 +148,7 @@ module RobotMaster
       end
       n
     end
-    
-    # @param [String] step a fully qualified name
-    # @param [Symbol, Integer] priority
-    # @param [Integer] threshold The number of items below which the queue is considered empty
-    # @return [Boolean] true if the queue for the step is "empty"
-    def queue_empty?(step, priority, threshold = 100)
-      raise ArgumentError, "Step must be fully qualified: #{step}" unless qualified?(step)
-      queue = queue_name(step, priority)
-      n = Resque.size(queue)
-      ROBOT_LOG.debug { "queue size=#{n} #{queue}"}
-      (n < threshold)
-    end
-    
-    # Adds the given item to the priority queue for this step
-    #
-    # Job names for the given step are converted like so:
-    #
-    # - `dor:assemblyWF:jp2-create` into `Robots::Assembly::Jp2Create`
-    # - `dor:etdSubmitWF:binder-transfer` into `Robots:EtdSubmit::BinderTransfer`
-    #
-    # @param [String] step fully qualified name
-    # @param [String] druid
-    # @param [Symbol] priority see `priority_class`
-    # @return [Hash] returns the `:queue` name and `klass` name enqueued
-    def enqueue(step, druid, priority)
-      raise ArgumentError, "Step must be fully qualified: #{step}" unless qualified?(step)
-      ROBOT_LOG.debug { "enqueue #{step} #{druid} #{priority}" }
-      
-      # generate the specific priority queue name
-      queue = queue_name(step, priority)
-      
-      # generate the robot job class name
-      r, w, s = parse_qualified(step)
-      klass = "Robots::#{w.sub('WF', '').camelcase}::#{s.sub('-', '_').camelcase}"
-      ROBOT_LOG.debug { "enqueue_to: #{queue} #{klass} #{druid}" }
-      
-      # perform the enqueue to Resque
-      Resque.enqueue_to(queue.to_sym, klass, druid)
-      
-      { :queue => queue, :klass => klass }
-    end
-    
-    # Updates the status from `waiting` (implied) to `queued` in the Workflow Service
-    # 
-    # @param [String] step fully qualified name
-    # @param [String] druid
-    # @return [Symbol] the new status value
-    def mark_enqueued(step, druid)
-      raise ArgumentError, "Step must be fully qualified: #{step}" unless qualified?(step)
-      ROBOT_LOG.debug { "mark_enqueued #{step} #{druid}" }
-      
-      r, w, s = parse_qualified(step)
-      # WorkflowService.update_workflow_status(r, druid, w, s, 'queued')
-      :queued
-    end
-    
+        
     # Parses the process XML to extract name and prereqs only.
     # Supports skipping the process using `skip-queue="true"`
     # or `status="completed"` as `process` attributes.
@@ -251,28 +206,11 @@ module RobotMaster
     #   qualify('dor:assemblyWF:jp2-create')
     #   => 'dor:assemblyWF:jp2-create'
     def qualify(step)
-      return step if qualified?(step)
-      "#{@repository}:#{@workflow}:#{step}"
-    end
-    
-    # @return [Boolean] true if step is a qualified name, 
-    # like dor:assemblyWF:jp2-create
-    # @example
-    #   qualified?("dor:assemblyWF:jp2-create")
-    #   => true
-    #   qualified?("jp2-create")
-    #   => false
-    def qualified?(step)
-      (step =~ /:/) == 3
-    end
-    
-    # @return [Array] the repository, workflow, and step values
-    # @example
-    #   parse_qualified("dor:assemblyWF:jp2-create")
-    #   => ['dor', 'assemblyWF', 'jp2-create']
-    def parse_qualified(step)
-      return [@repository, @workflow, step] unless qualified?(step)
-      step.split(/:/, 3)
+      if self.class.qualified?(step)
+        step
+      else
+        "#{@repository}:#{@workflow}:#{step}"
+      end
     end
     
   end

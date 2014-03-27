@@ -4,8 +4,6 @@ require File.expand_path(File.dirname(__FILE__) + '/../../config/boot')
 class WorkflowTest < RobotMaster::Workflow
   # expose protected methods
   def qualify(step); super(step); end
-  def qualified?(step); super(step); end
-  def parse_qualified(step); super(step); end
   def parse_process_node(node); super(node); end
 end
 
@@ -17,10 +15,7 @@ describe RobotMaster::Workflow do
   it 'expected methods' do
     %w{
       parse_process_node 
-      parse_qualified 
-      qualified? 
-      qualify 
-      queue_name
+      qualify
     }.map(&:to_sym).each do |proc|
       expect(subject.respond_to?(proc)).to be_true
     end
@@ -40,45 +35,20 @@ describe RobotMaster::Workflow do
 
   context '#qualified?' do
     it "yes" do
-      expect(subject.qualified?('dor:accessionWF:foo-bar')).to be true
+      expect(described_class.qualified?('dor:accessionWF:foo-bar')).to be true
     end
   
     it "no" do
-      expect(subject.qualified?('a')).to be false
-      expect(subject.qualified?('a:b')).to be false
-      expect(subject.qualified?('a:b:c:d')).to be false
+      expect(described_class.qualified?('a')).to be false
+      expect(described_class.qualified?('a:b')).to be false
+      expect(described_class.qualified?('a:b:c:d')).to be false
     end
   end
-
+  
   context '#parse_qualified' do
     it 'does something' do
-      expect(subject.parse_qualified('dor:assemblyWF:jp2-create')).to eq ['dor', 'assemblyWF', 'jp2-create']
-    
-    end
-  end
-
-  context '#queue_name' do
-    let(:priorities) {  
-      %w{critical high default low}.map(&:to_sym)
-    }
+      expect(described_class.parse_qualified('dor:assemblyWF:jp2-create')).to eq ['dor', 'assemblyWF', 'jp2-create']
   
-    it 'handles priority symbols' do
-      priorities.each do |priority|
-        expect(subject.queue_name('foo-bar', priority)).to eq "dor_accessionWF_foo-bar_#{priority}"
-      end
-    end
-  
-    it 'handles default' do
-      expect(subject.queue_name('foo-bar')).to eq 'dor_accessionWF_foo-bar_default'      
-    end
-  
-    it 'handles priority numbers' do
-      expect(subject.queue_name('foo-bar', 0)).to eq 'dor_accessionWF_foo-bar_default'
-      expect(subject.queue_name('foo-bar', 1)).to eq 'dor_accessionWF_foo-bar_high'      
-    end
-  
-    it 'handles qualified names' do
-      expect(subject.queue_name('dor:someWF:foo-bar')).to eq 'dor_someWF_foo-bar_default'      
     end
   end
 

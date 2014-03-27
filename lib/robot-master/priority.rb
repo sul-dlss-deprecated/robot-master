@@ -1,9 +1,9 @@
 module RobotMaster
   # Maps priority values into priority classes
-  class Priority
+  module Priority
     # all possible priority classes
     PRIORITIES = %w{critical high default low}.map(&:to_sym)
-    
+  
     class << self
       # Converts the given priority number into a priority class
       # 
@@ -25,14 +25,15 @@ module RobotMaster
           :default
         end
       end
-    
+  
       # @param [Array<Integer>, Array<Symbol>] priorities
-      # @return [Boolean] true if the results queue has any high or critical priority items
+      # @return [Boolean] true if the results queue has any high 
+      #   or critical priority items
       #
       # @example
       #    has_priority_items?([0, -1, -1, 0])
       #    => false
-      #    has_priority_items?([0, 0, 0, 1])
+      #    has_priority_items?([0, 0, 1])
       #    => true
       #    has_priority_items?([:default, :default, :high])
       #    => true
@@ -48,7 +49,7 @@ module RobotMaster
             )
         }
       end
-    
+  
       # Converts all priority numbers into the possible priority classes.
       #
       # @param [Array<Integer>] priorities
@@ -63,6 +64,7 @@ module RobotMaster
           priority_class(priority)
         end.uniq
       end
+      
     end
   end
 end
