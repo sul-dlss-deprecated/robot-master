@@ -72,13 +72,39 @@ describe RobotMaster::Queue do
       Resque.redis = MockRedis.new
     end
     
-    it 'default' do
+    it 'no jobs' do
+      q = described_class.queue_name('a:b:c')
+      expect(Resque.size(q)).to eq 0
+    end
+    
+    it 'single job' do
+      q = described_class.queue_name('a:b:c')
+      expect(Resque.size(q)).to eq 0
       described_class.enqueue('a:b:c', 'aa111bb2222', :default)
-      expect(Resque.size('a_b_c_default')).to eq 1
-      expect(Resque.peek('a_b_c_default')).to eq({
+      expect(Resque.size(q)).to eq 1
+      expect(Resque.peek(q)).to eq({
         "class"=>"Robots::A::B::C", 
         "args"=>["aa111bb2222"]
         })
     end
+    
+    it 'N jobs' do
+      n = 100
+      q = described_class.queue_name('a:b:c')
+      expect(Resque.size(q)).to eq 0
+      n.times do |i|
+        described_class.enqueue('a:b:c', 'aa111bb2222', :default)
+        expect(Resque.size(q)).to eq (i+1)
+      end
+      
+      n.times do |i|
+        expect(Resque.pop(q)).to eq({
+          "class"=>"Robots::A::B::C", 
+          "args"=>["aa111bb2222"]
+          })
+      end
+      expect(Resque.size(q)).to eq 0
+    end
+    
   end
 end
