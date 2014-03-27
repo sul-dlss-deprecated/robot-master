@@ -27,7 +27,7 @@ module RobotMaster
       # @param [Symbol, Integer] priority
       # @param [Integer] threshold The number of items below which the queue is considered empty
       # @return [Boolean] true if the queue for the step is "empty"
-      def queue_empty?(step, priority, threshold = 100)
+      def queue_empty?(step, priority = :default, threshold = 100)
         Workflow.assert_qualified(step)
         queue = queue_name(step, priority)
         n = Resque.size(queue)
@@ -55,7 +55,12 @@ module RobotMaster
     
         # generate the robot job class name
         r, w, s = Workflow.parse_qualified(step)
-        klass = "Robots::#{r.camelcase}::#{w.sub('WF', '').camelcase}::#{s.sub('-', '_').camelcase}"
+        klass = [
+          'Robots',
+          r.camelcase,
+          w.sub('WF', '').camelcase,
+          s.sub('-', '_').camelcase
+        ].join('::')
         ROBOT_LOG.debug { "enqueue_to: #{queue} #{klass} #{druid}" }
     
         # perform the enqueue to Resque
