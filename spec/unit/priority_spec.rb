@@ -18,6 +18,7 @@ describe RobotMaster::Priority do
   context '#priority_class' do
     it 'critical' do
       expect(described_class.priority_class(101)).to equal :critical
+      expect(described_class.priority_class(2**32-1)).to equal :critical
     end
     
     it 'high' do
@@ -32,6 +33,7 @@ describe RobotMaster::Priority do
     
     it 'low' do
       expect(described_class.priority_class(-1)).to equal :low
+      expect(described_class.priority_class(-2**32-1)).to equal :low
     end
   end
 
