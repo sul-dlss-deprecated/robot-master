@@ -9,6 +9,12 @@ describe RobotMaster::Priority do
     expect(described_class.respond_to?(:has_priority_items?)).to be_true
   end
   
+  it 'illegal arguments' do
+    expect { 
+      described_class.has_priority_items?(%w{critical high}) 
+    }.to raise_error(ArgumentError)
+  end
+  
   context '#priority_class' do
     it 'critical' do
       expect(described_class.priority_class(101)).to equal :critical
@@ -61,10 +67,6 @@ describe RobotMaster::Priority do
       [[1], [0, 1, 0], [0, 100, 1000], [10.1], [:critical], [:high, :low]].each do |i|
         expect(described_class.has_priority_items?(i)).to be_true
       end
-    end
-    
-    it 'illegal arguments' do
-      expect { described_class.has_priority_items?(%w{critical high}) }.to raise_error(ArgumentError)
     end
   end
 end
