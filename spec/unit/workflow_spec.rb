@@ -12,11 +12,8 @@ describe RobotMaster::Workflow do
     WorkflowTest.new('dor', 'accessionWF')
   }
   
-  it 'expected methods' do
-    %w{
-      parse_process_node 
-      qualify
-    }.map(&:to_sym).each do |proc|
+  it 'expected public methods' do
+    %w{perform qualify}.map(&:to_sym).each do |proc|
       expect(subject.respond_to?(proc)).to be_true
     end
   end
@@ -41,11 +38,18 @@ describe RobotMaster::Workflow do
     it "no" do
       expect(described_class.qualified?('a')).to be false
       expect(described_class.qualified?('a:b')).to be false
+      expect(described_class.qualified?('a:b-c')).to be false
       expect(described_class.qualified?('a:b:c:d')).to be false
     end
   end
   
   context '#parse_qualified' do
+    it 'fails' do
+      expect { 
+        described_class.parse_qualified('jp2-create') 
+      }.to raise_error(ArgumentError)
+    end
+  
     it 'does something' do
       expect(described_class.parse_qualified('dor:assemblyWF:jp2-create')).to eq ['dor', 'assemblyWF', 'jp2-create']
   
@@ -55,8 +59,9 @@ describe RobotMaster::Workflow do
   context '#parse_process_node' do
     it 'empty' do
       doc = Nokogiri::XML('<process name="initiate"/>')
-      expect(subject.parse_process_node(doc.root)[:name]).to eq 'dor:accessionWF:initiate'
-      expect(subject.parse_process_node(doc.root)[:skip]).to be false
+      step = subject.parse_process_node(doc.root)
+      expect(step[:name]).to eq 'dor:accessionWF:initiate'
+      expect(step[:skip]).to be false
     end
 
     it 'waiting' do
@@ -124,8 +129,9 @@ describe RobotMaster::Workflow do
         )
       }
       it 'should' do
-        expect(subject.parse_process_node(doc.root)[:name]).to eq 'dor:accessionWF:foo-bar'
-        expect(subject.parse_process_node(doc.root)[:prereq]).to eq ['dor:assemblyWF:jp2-create']
+        step = subject.parse_process_node(doc.root)
+        expect(step[:name]).to eq 'dor:accessionWF:foo-bar'
+        expect(step[:prereq]).to eq ['dor:assemblyWF:jp2-create']
       end
     end
   
