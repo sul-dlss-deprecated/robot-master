@@ -2,6 +2,8 @@ require File.expand_path(File.dirname(__FILE__) + '/../spec_helper')
 require File.expand_path(File.dirname(__FILE__) + '/../../config/boot')
 
 describe RobotMaster::Queue do
+  let(:threshold) { 100 }
+  let(:step) { 'a:b:c' }
   
   context '#queue_name' do
     it 'handles priority symbols' do
@@ -12,7 +14,7 @@ describe RobotMaster::Queue do
 
     it 'does not handle illegal priority symbols' do
       expect { 
-        described_class.queue_name('a:b:c', :bogus) 
+        described_class.queue_name(step, :bogus) 
       }.to raise_error(ArgumentError)
     end
 
@@ -27,10 +29,10 @@ describe RobotMaster::Queue do
     end
 
     it 'handles priority numbers' do
-      expect(described_class.queue_name('a:b:c', -1)).to eq 'a_b_c_low'
-      expect(described_class.queue_name('a:b:c', 0)).to eq 'a_b_c_default'
-      expect(described_class.queue_name('a:b:c', 1)).to eq 'a_b_c_high'      
-      expect(described_class.queue_name('a:b:c', 101)).to eq 'a_b_c_critical'
+      expect(described_class.queue_name(step, -1)).to eq 'a_b_c_low'
+      expect(described_class.queue_name(step, 0)).to eq 'a_b_c_default'
+      expect(described_class.queue_name(step, 1)).to eq 'a_b_c_high'      
+      expect(described_class.queue_name(step, 101)).to eq 'a_b_c_critical'
     end
   end
   
@@ -44,26 +46,26 @@ describe RobotMaster::Queue do
     end
     
     it 'no queue' do
-      described_class.queue_empty?('a:b:c', 0).should be_true
+      described_class.queue_empty?(step).should be_true
     end
     
     it 'queue single job' do
-      Resque.enqueue_to(described_class.queue_name('a:b:c'), 'Foo')
-      described_class.queue_empty?('a:b:c', 0, 1).should be_false
+      Resque.enqueue_to(described_class.queue_name(step), 'Foo')
+      described_class.queue_empty?(step, :default, 1).should be_false
     end
 
     it 'queue threshold jobs' do
-      100.times do |i|
-        Resque.enqueue_to(described_class.queue_name('a:b:c'), 'Foo')
+      threshold.times do |i|
+        Resque.enqueue_to(described_class.queue_name(step), 'Foo')
       end
-      described_class.queue_empty?('a:b:c', 0).should be_false
+      described_class.queue_empty?(step).should be_false
     end
 
     it 'queue not-quite threshold jobs' do
-      99.times do |i|
-        Resque.enqueue_to(described_class.queue_name('a:b:c'), 'Foo')
+      (threshold-1).times do |i|
+        Resque.enqueue_to(described_class.queue_name(step), 'Foo')
       end
-      described_class.queue_empty?('a:b:c', 0).should be_true
+      described_class.queue_empty?(step).should be_true
     end
   end
   
@@ -73,14 +75,14 @@ describe RobotMaster::Queue do
     end
     
     it 'no jobs' do
-      q = described_class.queue_name('a:b:c')
+      q = described_class.queue_name(step)
       expect(Resque.size(q)).to eq 0
     end
     
     it 'single job' do
-      q = described_class.queue_name('a:b:c')
+      q = described_class.queue_name(step)
       expect(Resque.size(q)).to eq 0
-      described_class.enqueue('a:b:c', 'aa111bb2222', :default)
+      described_class.enqueue(step, 'aa111bb2222', :default)
       expect(Resque.size(q)).to eq 1
       expect(Resque.peek(q)).to eq({
         "class"=>"Robots::A::B::C", 
@@ -89,11 +91,11 @@ describe RobotMaster::Queue do
     end
     
     it 'N jobs' do
-      n = 100
-      q = described_class.queue_name('a:b:c')
+      n = threshold
+      q = described_class.queue_name(step)
       expect(Resque.size(q)).to eq 0
       n.times do |i|
-        described_class.enqueue('a:b:c', 'aa111bb2222', :default)
+        described_class.enqueue(step, 'aa111bb2222', :default)
         expect(Resque.size(q)).to eq (i+1)
       end
       
