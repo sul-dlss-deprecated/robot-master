@@ -83,6 +83,21 @@ module RobotMaster
       self
     end
     
+    # Updates the status from `waiting` (implied) to `queued` in the Workflow Service
+    # 
+    # @param [String] step fully qualified name
+    # @param [String] druid
+    # @return [Symbol] the new status value
+    def mark_enqueued(step, druid)
+      Workflow.assert_qualified(step)
+      ROBOT_LOG.debug { "mark_enqueued #{step} #{druid}" }
+  
+      r, w, s = Workflow.parse_qualified(step)
+      # WorkflowService.update_workflow_status(r, druid, w, s, 'queued')
+      :queued
+    end
+    
+    
     protected
     # Queries the workflow service for druids waiting for given process step, and 
     # enqueues them to the appropriate priority queue

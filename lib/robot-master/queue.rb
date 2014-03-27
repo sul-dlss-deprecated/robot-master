@@ -55,7 +55,7 @@ module RobotMaster
     
         # generate the robot job class name
         r, w, s = Workflow.parse_qualified(step)
-        klass = "Robots::#{w.sub('WF', '').camelcase}::#{s.sub('-', '_').camelcase}"
+        klass = "Robots::#{r.camelcase}::#{w.sub('WF', '').camelcase}::#{s.sub('-', '_').camelcase}"
         ROBOT_LOG.debug { "enqueue_to: #{queue} #{klass} #{druid}" }
     
         # perform the enqueue to Resque
@@ -63,21 +63,6 @@ module RobotMaster
     
         { :queue => queue, :klass => klass }
       end
-  
-      # Updates the status from `waiting` (implied) to `queued` in the Workflow Service
-      # 
-      # @param [String] step fully qualified name
-      # @param [String] druid
-      # @return [Symbol] the new status value
-      def mark_enqueued(step, druid)
-        Workflow.assert_qualified(step)
-        ROBOT_LOG.debug { "mark_enqueued #{step} #{druid}" }
-    
-        r, w, s = Workflow.parse_qualified(step)
-        # WorkflowService.update_workflow_status(r, druid, w, s, 'queued')
-        :queued
-      end
-      
     end
   end
 end
