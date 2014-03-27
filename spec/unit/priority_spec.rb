@@ -4,15 +4,25 @@ require File.expand_path(File.dirname(__FILE__) + '/../../config/boot')
 describe RobotMaster::Priority do
   
   it 'expected methods' do
-    expect(described_class.respond_to?(:priority_class)).to be_true
-    expect(described_class.respond_to?(:priority_classes)).to be_true
-    expect(described_class.respond_to?(:has_priority_items?)).to be_true
+    %w{
+      priority_class 
+      priority_classes 
+      has_priority_items?
+    }.map(&:to_sym).each do |k|
+      expect(described_class.respond_to?(k)).to be_true
+    end
   end
   
   it 'illegal arguments' do
     expect { 
       described_class.has_priority_items?(%w{critical high}) 
     }.to raise_error(ArgumentError)
+  end
+
+  it 'wrong type' do
+    expect { 
+      described_class.has_priority_items?('critical') 
+    }.to raise_error(NoMethodError)
   end
   
   context '#priority_class' do
