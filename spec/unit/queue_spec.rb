@@ -67,4 +67,18 @@ describe RobotMaster::Queue do
     end
   end
   
+  context '#enqueue' do
+    before do
+      Resque.redis = MockRedis.new
+    end
+    
+    it 'default' do
+      described_class.enqueue('a:b:c', 'aa111bb2222', :default)
+      expect(Resque.size('a_b_c_default')).to eq 1
+      expect(Resque.peek('a_b_c_default')).to eq({
+        "class"=>"Robots::A::B::C", 
+        "args"=>["aa111bb2222"]
+        })
+    end
+  end
 end
