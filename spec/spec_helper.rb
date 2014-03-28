@@ -1,5 +1,8 @@
 $LOAD_PATH.unshift(File.join(File.dirname(__FILE__), '..', 'lib'))
 
+ENV['ROBOT_ENVIRONMENT'] = 'development'
+ENV['ROBOT_LOG_LEVEL'] = 'debug'
+
 require 'simplecov'
 SimpleCov.start
 
