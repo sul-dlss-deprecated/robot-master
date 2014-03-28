@@ -9,6 +9,7 @@ module RobotMaster
     # @param [String] workflow
     # @return [RobotMaster::Workflow]
     def self.perform(repository, workflow)
+      ROBOT_LOG.debug { "Workflow.perform(#{repository}, #{workflow})" }
       master = new(repository, workflow)
       master.perform
     end
@@ -117,7 +118,7 @@ module RobotMaster
       self.class.assert_qualified(step)
       
       ROBOT_LOG.info("Processing #{step}")
-      ROBOT_LOG.debug { "depends on #{process[:prereq].join(',')}" }
+      ROBOT_LOG.debug { "-- depends on #{process[:prereq].join(',')}" }
       
       # fetch pending jobs for this step from the Workflow Service. 
       # we need to always do this to determine whether there are 
@@ -140,7 +141,7 @@ module RobotMaster
       # if we have jobs at a priority level for which the job queue is empty
       Priority.priority_classes(results.values).each do |priority|
         ROBOT_LOG.debug { "Checking priority queue for #{step} #{priority}..." }
-        needs_work = true if queue_empty?(step, priority)
+        needs_work = true if Queue.queue_empty?(step, priority)
       end
       
       # if we have any high priority jobs at all
@@ -153,7 +154,7 @@ module RobotMaster
       n = 0
       results.each do |druid, priority|
         begin # XXX preferably within atomic transaction
-          enqueue(step, druid, priority_class(priority))
+          Queue.enqueue(step, druid, Priority.priority_class(priority))
           mark_enqueued(step, druid)
           n += 1
         rescue Exception => e
