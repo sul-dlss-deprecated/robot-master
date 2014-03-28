@@ -148,4 +148,55 @@ describe RobotMaster::Workflow do
       end
     end
   end
+  
+  context '#self.perform' do
+    let(:queues) { [
+        "dor_assemblyWF_accessioning-initiate_low",
+        "dor_assemblyWF_accessioning-initiate_default",
+        "dor_assemblyWF_accessioning-initiate_high",
+        "dor_assemblyWF_accessioning-initiate_critical",
+        "dor_assemblyWF_exif-collect_low",
+        "dor_assemblyWF_exif-collect_default",
+        "dor_assemblyWF_exif-collect_high",
+        "dor_assemblyWF_exif-collect_critical",
+        "dor_assemblyWF_checksum-compute_low",
+        "dor_assemblyWF_checksum-compute_default",
+        "dor_assemblyWF_checksum-compute_high",
+        "dor_assemblyWF_checksum-compute_critical",
+        "dor_assemblyWF_jp2-create_low",
+        "dor_assemblyWF_jp2-create_default",
+        "dor_assemblyWF_jp2-create_high",
+        "dor_assemblyWF_jp2-create_critical"
+      ] }
+    before(:each) do
+      Dor::WorkflowService.stub(:get_objects_for_workstep).and_return({
+        "druid:aa111bb2222" => 1000,
+        "druid:py156ps0477" => 100,
+        "druid:tt628cb6479" => 0,
+        "druid:ct021wp7863" => -100
+      })
+      Resque.redis = MockRedis.new
+    end
+    
+    it 'dor:assemblyWF' do
+      described_class.perform('dor', 'assemblyWF')
+      expect(Resque.queues).to eq(queues)
+      expect(Resque.peek('dor_assemblyWF_jp2-create_critical')).to eq({
+        'class' => 'Robots::Dor::Assembly::Jp2Create',
+        'args' => [ 'druid:aa111bb2222' ]
+      })
+      expect(Resque.peek('dor_assemblyWF_jp2-create_high')).to eq({
+        'class' => 'Robots::Dor::Assembly::Jp2Create',
+        'args' => [ 'druid:py156ps0477' ]
+      })
+      expect(Resque.peek('dor_assemblyWF_jp2-create_default')).to eq({
+        'class' => 'Robots::Dor::Assembly::Jp2Create',
+        'args' => [ 'druid:tt628cb6479' ]
+      })
+      expect(Resque.peek('dor_assemblyWF_jp2-create_low')).to eq({
+        'class' => 'Robots::Dor::Assembly::Jp2Create',
+        'args' => [ 'druid:ct021wp7863' ]
+      })
+    end
+  end
 end
