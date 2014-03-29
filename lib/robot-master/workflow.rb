@@ -158,7 +158,7 @@ module RobotMaster
           mark_enqueued(step, druid)
           n += 1
         rescue Exception => e
-          ROBOT_LOG.error("Cannot enqueue job: #{step} #{druid} priority=#{priority}: #{e}")
+          ROBOT_LOG.error("Cannot enqueue job: #{step} #{druid} #{priority}: #{e}")
           raise e
         end
       end
