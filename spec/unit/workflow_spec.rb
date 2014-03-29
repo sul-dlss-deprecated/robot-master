@@ -149,54 +149,163 @@ describe RobotMaster::Workflow do
     end
   end
   
-  context '#self.perform' do
-    let(:queues) { [
-        "dor_assemblyWF_accessioning-initiate_low",
-        "dor_assemblyWF_accessioning-initiate_default",
-        "dor_assemblyWF_accessioning-initiate_high",
-        "dor_assemblyWF_accessioning-initiate_critical",
-        "dor_assemblyWF_exif-collect_low",
-        "dor_assemblyWF_exif-collect_default",
-        "dor_assemblyWF_exif-collect_high",
-        "dor_assemblyWF_exif-collect_critical",
-        "dor_assemblyWF_checksum-compute_low",
-        "dor_assemblyWF_checksum-compute_default",
-        "dor_assemblyWF_checksum-compute_high",
-        "dor_assemblyWF_checksum-compute_critical",
-        "dor_assemblyWF_jp2-create_low",
-        "dor_assemblyWF_jp2-create_default",
-        "dor_assemblyWF_jp2-create_high",
-        "dor_assemblyWF_jp2-create_critical"
-      ] }
+  context '#self.perform without priority' do
     before(:each) do
       Dor::WorkflowService.stub(:get_objects_for_workstep).and_return({
-        "druid:aa111bb2222" => 1000,
-        "druid:py156ps0477" => 100,
-        "druid:tt628cb6479" => 0,
-        "druid:ct021wp7863" => -100
+        'druid:aa111bb2222' => 0,
+        'druid:py156ps0477' => 0,
+        'druid:tt628cb6479' => 0,
+        'druid:ct021wp7863' => 0
+      })
+      Resque.redis = MockRedis.new
+    end
+  
+    context 'dor:assemblyWF' do
+      let(:queues) { %w{
+        dor_assemblyWF_accessioning-initiate_default
+        dor_assemblyWF_exif-collect_default
+        dor_assemblyWF_checksum-compute_default
+        dor_assemblyWF_jp2-create_default
+        }
+      }
+    
+      it 'should perform' do
+        described_class.perform('dor', 'assemblyWF')
+        # ap({:queues => Resque.queues})
+        expect(Resque.queues).to eq(queues)
+        { 
+          'accessioning-initiate' => 'AccessioningInitiate',
+          'exif-collect' => 'ExifCollect',
+          'checksum-compute' => 'ChecksumCompute',
+          'jp2-create' => 'Jp2Create'
+        }.each do |k,v|
+          q = %Q{dor_assemblyWF_#{k}_default}
+          expect(Resque.size(q)).to eq 4
+          %w{
+            druid:aa111bb2222 
+            druid:py156ps0477 
+            druid:tt628cb6479 
+            druid:ct021wp7863
+          }.each do |druid|
+            expect(Resque.pop(q)).to eq({
+              'class' => %Q{Robots::Dor::Assembly::#{v}},
+              'args' => [ druid ]
+            })
+          end
+          expect(Resque.size(q)).to eq 0
+        end
+      end
+    end
+  end
+  
+  context '#self.perform with priority' do
+    before(:each) do
+      Dor::WorkflowService.stub(:get_objects_for_workstep).and_return({
+        'druid:aa111bb2222' => 101,
+        'druid:py156ps0477' => 1,
+        'druid:tt628cb6479' => 0,
+        'druid:ct021wp7863' => -1
       })
       Resque.redis = MockRedis.new
     end
     
-    it 'dor:assemblyWF' do
-      described_class.perform('dor', 'assemblyWF')
-      expect(Resque.queues).to eq(queues)
-      expect(Resque.peek('dor_assemblyWF_jp2-create_critical')).to eq({
-        'class' => 'Robots::Dor::Assembly::Jp2Create',
-        'args' => [ 'druid:aa111bb2222' ]
-      })
-      expect(Resque.peek('dor_assemblyWF_jp2-create_high')).to eq({
-        'class' => 'Robots::Dor::Assembly::Jp2Create',
-        'args' => [ 'druid:py156ps0477' ]
-      })
-      expect(Resque.peek('dor_assemblyWF_jp2-create_default')).to eq({
-        'class' => 'Robots::Dor::Assembly::Jp2Create',
-        'args' => [ 'druid:tt628cb6479' ]
-      })
-      expect(Resque.peek('dor_assemblyWF_jp2-create_low')).to eq({
-        'class' => 'Robots::Dor::Assembly::Jp2Create',
-        'args' => [ 'druid:ct021wp7863' ]
-      })
-    end
+    context 'dor:assemblyWF' do
+      let(:queues) { %w{
+        dor_assemblyWF_accessioning-initiate_low
+        dor_assemblyWF_accessioning-initiate_default
+        dor_assemblyWF_accessioning-initiate_high
+        dor_assemblyWF_accessioning-initiate_critical
+        dor_assemblyWF_exif-collect_low
+        dor_assemblyWF_exif-collect_default
+        dor_assemblyWF_exif-collect_high
+        dor_assemblyWF_exif-collect_critical
+        dor_assemblyWF_checksum-compute_low
+        dor_assemblyWF_checksum-compute_default
+        dor_assemblyWF_checksum-compute_high
+        dor_assemblyWF_checksum-compute_critical
+        dor_assemblyWF_jp2-create_low
+        dor_assemblyWF_jp2-create_default
+        dor_assemblyWF_jp2-create_high
+        dor_assemblyWF_jp2-create_critical
+        }
+      }
+  
+      it 'should perform' do
+        described_class.perform('dor', 'assemblyWF')
+        expect(Resque.queues).to eq(queues)
+        { 
+          'accessioning-initiate' => 'AccessioningInitiate',
+          'exif-collect' => 'ExifCollect',
+          'checksum-compute' => 'ChecksumCompute',
+          'jp2-create' => 'Jp2Create'
+        }.each do |k,v|
+          q = %Q{dor_assemblyWF_#{k}_critical}
+          expect(Resque.size(q)).to eq 1
+          expect(Resque.pop(q)).to eq({
+            'class' => %Q{Robots::Dor::Assembly::#{v}},
+            'args' => [ 'druid:aa111bb2222' ]
+          })
+          expect(Resque.size(q)).to eq 0
+          
+          q = %Q{dor_assemblyWF_#{k}_high}
+          expect(Resque.size(q)).to eq 1
+          expect(Resque.pop(q)).to eq({
+            'class' => %Q{Robots::Dor::Assembly::#{v}},
+            'args' => [ 'druid:py156ps0477' ]
+          })
+          expect(Resque.size(q)).to eq 0
+          
+          q = %Q{dor_assemblyWF_#{k}_default}
+          expect(Resque.size(q)).to eq 1
+          expect(Resque.pop(q)).to eq({
+            'class' => %Q{Robots::Dor::Assembly::#{v}},
+            'args' => [ 'druid:tt628cb6479' ]
+          })
+          expect(Resque.size(q)).to eq 0
+          
+          q = %Q{dor_assemblyWF_#{k}_low}
+          expect(Resque.size(q)).to eq 1
+          expect(Resque.pop(q)).to eq({
+            'class' => %Q{Robots::Dor::Assembly::#{v}},
+            'args' => [ 'druid:ct021wp7863' ]
+          })
+          expect(Resque.size(q)).to eq 0
+        end
+      end
+    end    
   end
+  
+  context '#self.perform with exception' do
+    before(:each) do
+      Dor::WorkflowService.stub(:get_objects_for_workstep).and_return({
+        'druid:aa111bb2222' => 0
+      })
+      Resque.redis = MockRedis.new
+      Resque.stub(:enqueue_to).and_raise(Exception)
+    end
+    
+    context 'dor:assemblyWF' do
+      it 'should perform' do
+        expect {
+          described_class.perform('dor', 'assemblyWF')          
+        }.to raise_error(Exception)
+        expect(Resque.queues).to eq([])
+      end
+    end    
+  end
+
+  context '#self.perform with no prereq' do
+    before(:each) do
+      Resque.redis = MockRedis.new
+    end
+    
+    context 'dor:disseminationWF' do
+      it 'should perform' do
+        described_class.perform('dor', 'disseminationWF')          
+        expect(Resque.queues).to eq([])
+      end
+    end    
+  end
+
+
 end
