@@ -82,7 +82,9 @@ describe RobotMaster::Queue do
     it 'single job' do
       q = described_class.queue_name(step)
       expect(Resque.size(q)).to eq 0
-      described_class.enqueue(step, 'aa111bb2222', :default)
+      r = described_class.enqueue(step, 'aa111bb2222', :default)
+      expect(r[:queue]).to eq q
+      expect(r[:klass]).to eq 'Robots::A::B::C'
       expect(Resque.size(q)).to eq 1
       expect(Resque.peek(q)).to eq({
         "class"=>"Robots::A::B::C", 
