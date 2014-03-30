@@ -84,8 +84,9 @@ module RobotMaster
         ROBOT_LOG.info("Queued #{n} jobs for #{process[:name]}") if n > 0
       end
       self
-    end
+    end    
     
+    protected
     # Updates the status from `waiting` (implied) to `queued` in the Workflow Service
     # 
     # @param [String] step fully qualified name
@@ -99,9 +100,7 @@ module RobotMaster
       # WorkflowService.update_workflow_status(r, druid, w, s, 'queued')
       :queued
     end
-    
-    
-    protected
+
     # Queries the workflow service for druids waiting for given process step, and 
     # enqueues them to the appropriate priority queue
     #
