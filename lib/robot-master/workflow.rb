@@ -73,13 +73,15 @@ module RobotMaster
           next
         end
         
-        # doit
-        unless process[:prereq].empty? 
-          perform_on_process(process)
-        else
-          # XXX: REST API doesn't return priorities without prereqs
-          ROBOT_LOG.warn("Skipping process #{process[:name]} without prereqs")
+        # XXX: REST API doesn't return priorities without prereqs
+        if process[:prereq].empty? 
+          ROBOT_LOG.warn("Skipping #{process[:name]}: Missing required prereqs")
+          next
         end
+        
+        # doit
+        n = perform_on_process(process)
+        ROBOT_LOG.info("Queued #{n} jobs for #{process[:name]}") if n > 0
       end
       self
     end
