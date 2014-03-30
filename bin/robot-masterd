@@ -10,7 +10,7 @@ shift
 test ! -d "config/workflows/${repository}" && \
   echo "$0: No '$repository' configuration files" && exit -1
 
-test ! -x Xbin/robot-master && \
+test ! -x bin/robot-master && \
   echo "$0: Cannot run 'bin/robot-master'" && exit -1
 
 while [ true ]; do
