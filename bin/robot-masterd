@@ -4,19 +4,31 @@
 #
 [ $# = 0 ] && echo "Usage: robot-masterd repository [robot-master-flags]" && exit -1
 
+# parse arguments
 repository=$1
 shift
 
+# validate parameters
 test ! -d "config/workflows/${repository}" && \
-  echo "$0: No '$repository' configuration files" && exit -1
+  echo "robot-masterd: No '$repository' configuration files" && exit -1
 
 test ! -x bin/robot-master && \
-  echo "$0: Cannot run 'bin/robot-master'" && exit -1
+  echo "robot-masterd: Cannot execute 'bin/robot-master'" && exit -1
 
+# setup environment
+PATH=bin:$PATH
+nsec=${ROBOT_MASTERD_SLEEP:-5}
+pidfile=${ROBOT_MASTERD_PIDFILE:-robot-masterd.pid}
+
+# remove pidfile on exit
+trap "rm $pidfile; exit" SIGHUP SIGINT SIGTERM
+echo $$ > $pidfile
+
+# work forever running robot-master on the repository workflows
 while [ true ]; do
   for fn in config/workflows/${repository}/*WF.xml; do
-    bin/robot-master $* "${repository}:$(basename ${fn} .xml)"
-    sleep 1
+    robot-master $* "${repository}:$(basename ${fn} .xml)"
+    sleep $nsec
   done
-  sleep 1
+  sleep $nsec
 done
