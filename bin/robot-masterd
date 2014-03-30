@@ -1,0 +1,22 @@
+#!/bin/bash
+#
+# Usage: robot-masterd repository [robot-master-flags]
+#
+[ $# = 0 ] && echo "Usage: robot-masterd repository [robot-master-flags]" && exit -1
+
+repository=$1
+shift
+
+test ! -d "config/workflows/${repository}" && \
+  echo "$0: No '$repository' configuration files" && exit -1
+
+test ! -x Xbin/robot-master && \
+  echo "$0: Cannot run 'bin/robot-master'" && exit -1
+
+while [ true ]; do
+  for fn in config/workflows/${repository}/*WF.xml; do
+    bin/robot-master $* "${repository}:$(basename ${fn} .xml)"
+    sleep 1
+  done
+  sleep 1
+done
