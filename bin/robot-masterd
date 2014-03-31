@@ -15,20 +15,17 @@ test ! -d "config/workflows/${repository}" && \
 test ! -x bin/robot-master && \
   echo "robot-masterd: Cannot execute 'bin/robot-master'" && exit -1
 
-# setup environment
-PATH=bin:$PATH
-nsec=${ROBOT_MASTERD_SLEEP:-5}
-pidfile=${ROBOT_MASTERD_PIDFILE:-robot-masterd.pid}
-
 # remove pidfile on exit
+pidfile="${ROBOT_MASTERD_PIDFILE:-robot-masterd.pid}"
 trap "rm $pidfile; exit" SIGHUP SIGINT SIGTERM
 echo $$ > $pidfile
 
 # work forever running robot-master on the repository workflows
-while [ true ]; do
+PATH=bin:$PATH
+while [ -r $pidfile ]; do
   for fn in config/workflows/${repository}/*WF.xml; do
     robot-master $* "${repository}:$(basename ${fn} .xml)"
-    sleep $nsec
+    sleep 1
   done
-  sleep $nsec
+  sleep ${ROBOT_MASTERD_SLEEP:-60}
 done
