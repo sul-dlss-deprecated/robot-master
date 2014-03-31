@@ -26,7 +26,7 @@ module RobotMaster
     # @param [Symbol, Integer] priority
     # @param [Integer] threshold The number of items below which the queue is considered empty
     # @return [Boolean] true if the queue for the step is "empty"
-    def self.queue_empty?(step, priority = :default, threshold = 100)
+    def self.needs_work?(step, priority = :default, threshold = 100)
       Workflow.assert_qualified(step)
       queue = queue_name(step, priority)
       n = Resque.size(queue)

@@ -36,36 +36,36 @@ describe RobotMaster::Queue do
     end
   end
   
-  context '#queue_empty?' do
+  context '#needs_work?' do
     before do
       Resque.redis = MockRedis.new
     end
     
     it 'illegal arguments' do
-      expect { described_class.queue_empty? }.to raise_error(ArgumentError)
+      expect { described_class.needs_work? }.to raise_error(ArgumentError)
     end
     
     it 'no queue' do
-      described_class.queue_empty?(step).should be_true
+      described_class.needs_work?(step).should be_true
     end
     
     it 'queue single job' do
       Resque.enqueue_to(described_class.queue_name(step), 'Foo')
-      described_class.queue_empty?(step, :default, 1).should be_false
+      described_class.needs_work?(step, :default, 1).should be_false
     end
 
     it 'queue threshold jobs' do
       threshold.times do |i|
         Resque.enqueue_to(described_class.queue_name(step), 'Foo')
       end
-      described_class.queue_empty?(step).should be_false
+      described_class.needs_work?(step).should be_false
     end
 
     it 'queue not-quite threshold jobs' do
       (threshold-1).times do |i|
         Resque.enqueue_to(described_class.queue_name(step), 'Foo')
       end
-      described_class.queue_empty?(step).should be_true
+      described_class.needs_work?(step).should be_true
     end
   end
   

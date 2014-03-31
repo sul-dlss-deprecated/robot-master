@@ -141,12 +141,11 @@ module RobotMaster
       
       # if we have jobs at a priority level for which the job queue is empty
       Priority.priority_classes(results.values).each do |priority|
-        ROBOT_LOG.debug { "Checking priority queue for #{step} #{priority}..." }
-        needs_work = true if Queue.queue_empty?(step, priority)
+        needs_work ||= Queue.needs_work?(step, priority)
       end
       
       # if we have any high priority jobs at all
-      needs_work = true if Priority.has_priority_items?(results.values)
+      needs_work ||= Priority.has_priority_items?(results.values)
       
       ROBOT_LOG.debug { "needs_work=#{needs_work}" }
       return 0 unless needs_work
