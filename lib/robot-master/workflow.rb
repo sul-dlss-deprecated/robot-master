@@ -154,9 +154,10 @@ module RobotMaster
       n = 0
       results.each do |druid, priority|
         begin # XXX preferably within atomic transaction
-          mark_enqueued(step, druid)
-          Queue.enqueue(step, druid, Priority.priority_class(priority))
-          n += 1
+          if mark_enqueued(step, druid) == :queued
+            Queue.enqueue(step, druid, Priority.priority_class(priority))
+            n += 1
+          end
         rescue Exception => e
           ROBOT_LOG.error("Cannot enqueue job: #{step} #{druid} #{priority}: #{e}")
           raise e
