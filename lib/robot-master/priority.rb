@@ -37,7 +37,7 @@ module RobotMaster
     #    has_priority_items?([:default, :default, :high])
     #    => true
     def self.has_priority_items?(priorities)
-      priorities.each.any? { |priority|
+      priorities.each.any? do |priority|
         unless priority.is_a?(Symbol) or priority.is_a?(Numeric)
           raise ArgumentError, "Illegal priority value #{priority}" 
         end
@@ -46,7 +46,7 @@ module RobotMaster
             priority_class(priority.to_i) :
             priority
           )
-      }
+      end
     end
 
     # Converts all priority numbers into the possible priority classes.
@@ -59,7 +59,7 @@ module RobotMaster
     #     => [:critical, :high, :low]
     def self.priority_classes(priorities)
       # iterate in high-to-low order on unique priorities
-      priorities.uniq.sort.reverse.collect do |priority| 
+      priorities.sort.reverse.uniq.collect do |priority| 
         priority_class(priority)
       end.uniq
     end
