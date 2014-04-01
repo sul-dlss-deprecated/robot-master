@@ -28,7 +28,7 @@ class RobotMasterCLI
       :loop => 0,
       :robot_environment => ENV['ROBOT_ENVIRONMENT'] || 'development',
       :robot_log_level => ENV['ROBOT_LOG_LEVEL'] || 'info',
-      :robot_log => ENV['ROBOT_LOG'] || 'robot-master.log'
+      :robot_log => ENV['ROBOT_LOG'] || '-'
     }
     
     args = %w{--help} if args.nil? or args.empty?
@@ -78,6 +78,7 @@ class RobotMasterCLI
     ENV['ROBOT_LOG_LEVEL'] = flags[:robot_log_level]
     ENV['ROBOT_LOG_LEVEL'] = 'debug' if flags[:debug]
     ENV['ROBOT_LOG'] = flags[:robot_log]
+    ENV['ROBOT_LOG'] = 'stdout' if ENV['ROBOT_LOG'] == '-'
     ap({:env => ENV}) if flags[:debug]
     begin
       puts "Loading boot file..." if flags[:debug]
