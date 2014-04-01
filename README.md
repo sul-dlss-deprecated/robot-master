@@ -36,9 +36,9 @@ There are 2 command-line programs: `robot-master` and `controller`:
     Usage: controller [ boot | start | status | stop | restart | log | quit ]
      
     Example:
-        % controller boot    # start bluepilld
-        % controller status  # check on status of jobs
-        % controller stop    # stop jobs
+        % controller boot    # start bluepilld and all robot-masters
+        % controller status  # check on status of all robot-masters
+        % controller stop    # stop all robot-masters 
         % controller quit    # stop bluepilld
       
 Environment variables supported:
