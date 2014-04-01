@@ -10,6 +10,5 @@ rvm:
   - 2.1.0
 
 before_install:
-  - mkdir log
   - mkdir config/environments
   - cp config/example_environment.rb config/environments/development.rb
