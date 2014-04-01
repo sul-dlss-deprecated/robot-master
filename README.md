@@ -47,21 +47,21 @@ for development:
 Usage
 -----
 
-  Usage:	robot-master [flags] [repo:]workflow
-          --repository=REPOSITORY      Use the given repository (default: dor)
-          --environment=ENV            Use the given environment (default: development)
-          --log-level=LEVEL            Use the given log-level (default: info)
-          --log=FILE                   Use the given log file (default: robot-master.log)
-      -R, --repeat-every=SECONDS       Keep running every SECONDS in an infinite loop
-      -v, --verbose                    Run verbosely, use multiple times for debug level output
+    Usage:	robot-master [flags] [repo:]workflow
+            --repository=REPOSITORY      Use the given repository (default: dor)
+            --environment=ENV            Use the given environment (default: development)
+            --log-level=LEVEL            Use the given log-level (default: info)
+            --log=FILE                   Use the given log file (default: robot-master.log)
+        -R, --repeat-every=SECONDS       Keep running every SECONDS in an infinite loop
+        -v, --verbose                    Run verbosely, use multiple times for debug level output
       
       
 Environment variables supported:
 
-  ROBOT_ENVIRONMENT
-  ROBOT_LOG_LEVEL
-  ROBOT_LOG
-  RESTCLIENT_LOG
+    ROBOT_ENVIRONMENT
+    ROBOT_LOG_LEVEL
+    ROBOT_LOG
+    RESTCLIENT_LOG
     
 Configuration
 -------------
