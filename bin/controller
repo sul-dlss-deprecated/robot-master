@@ -3,8 +3,7 @@
 # Usage: controller [ boot | start | status | stop | restart | log | quit ]
 #
 # Example:
-#   % controller boot    # start bluepilld
-#   % controller start   # start jobs
+#   % controller boot    # start bluepilld and jobs
 #   % controller status  # check on status of jobs
 #   % controller stop    # stop jobs
 #   % controller quit    # stop bluepilld
