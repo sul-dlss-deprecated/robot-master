@@ -22,6 +22,7 @@ Gem::Specification.new do |s|
  
   s.required_rubygems_version = ">= 1.3.6"
   
+  s.add_dependency 'bluepill', '~> 0.0.64'
   s.add_dependency 'dor-workflow-service', '~> 1.6.0' #'~> 1.5.1'
   s.add_dependency 'druid-tools', '~> 0.3.0'
   s.add_dependency 'nokogiri', '~> 1.6.1'
@@ -29,14 +30,14 @@ Gem::Specification.new do |s|
   
   s.add_development_dependency 'awesome_print'
   s.add_development_dependency 'equivalent-xml'
+  s.add_development_dependency 'mock_redis'
   s.add_development_dependency 'pry'
   s.add_development_dependency 'rake'
-  s.add_development_dependency 'simplecov'
   s.add_development_dependency 'rdoc'
   s.add_development_dependency 'redcarpet' # provides Markdown
   s.add_development_dependency 'rspec'
+  s.add_development_dependency 'simplecov'
   s.add_development_dependency 'version_bumper'
   s.add_development_dependency 'yard'
-  s.add_development_dependency 'mock_redis'
  
 end
