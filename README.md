@@ -30,29 +30,39 @@ Algorithm
 Operation
 ---------
 
-Designed to run from cron, like so:
+Example command line runs for:
 
 in production:
 
-    bin/robot-master --environment=production --log-level=warn dor:accessionWF
+    ROBOT_ENVIRONMENT=production bin/robot-master --repeat-every=60 dor:accessionWF
 
 for testing:
 
-    bin/robot-master --environment=testing accessionWF
+    bin/robot-master --repeat-every=60 --environment=testing dor:accessionWF
 	
 for development:
 
-    RESTCLIENT_LOG=stdout bin/robot-master --log-level=debug accessionWF shelve publish
+    RESTCLIENT_LOG=stdout bin/robot-master -vv --log-level=debug --log=debug.log dor:accessionWF
 	
 Usage
 -----
 
-	Usage:	robot-master [flags] [repo:]workflow [step [step2 ...]]
-	        --repository=REPOSITORY      Use the given repository (default: dor)
-	        --environment=ENV            Use the given environment (default: development)
-	        --log-level=LEVEL            Use the given log-level (default: info)
-	    -v, --verbose                    Run verbosely, use multiple times for debug level output
+  Usage:	robot-master [flags] [repo:]workflow
+          --repository=REPOSITORY      Use the given repository (default: dor)
+          --environment=ENV            Use the given environment (default: development)
+          --log-level=LEVEL            Use the given log-level (default: info)
+          --log=FILE                   Use the given log file (default: robot-master.log)
+      -R, --repeat-every=SECONDS       Keep running every SECONDS in an infinite loop
+      -v, --verbose                    Run verbosely, use multiple times for debug level output
+      
+      
+Environment variables supported:
 
+  ROBOT_ENVIRONMENT
+  ROBOT_LOG_LEVEL
+  ROBOT_LOG
+  RESTCLIENT_LOG
+    
 Configuration
 -------------
 
