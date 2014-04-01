@@ -9,9 +9,11 @@ module RobotMaster
     # @param [String] workflow
     # @return [RobotMaster::Workflow]
     def self.perform(repository, workflow)
-      ROBOT_LOG.debug { "Workflow.perform(#{repository}, #{workflow})" }
+      start = Time.now
+      ROBOT_LOG.debug { "Start Workflow.perform(#{repository}, #{workflow})" }
       master = new(repository, workflow)
       master.perform
+      ROBOT_LOG.debug { "Finished Workflow.perform(#{repository}, #{workflow}): #{Time.now - start} seconds" }
     end
 
     # @return [Boolean] true if step is a qualified name, 
