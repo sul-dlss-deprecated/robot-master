@@ -21,8 +21,8 @@ Bluepill.application 'robot-master',
           # process configuration
           process.working_dir = WORKDIR
           process.group = "#{e}"
-          process.stdout = process.stderr = "#{WORKDIR}/log/#{e}_#{wf}.log"
-          process.pid_file "#{WORKDIR}/run/#{e}_#{wf}.pid"
+          process.stdout = process.stderr = "#{WORKDIR}/log/#{e}_#{wf.sub(':', '_')}.log"
+          process.pid_file "#{WORKDIR}/run/#{e}_#{wf.sub(':', '_')}.pid"
           
           # we use bluepill to daemonize
           process.daemonize = true
@@ -30,8 +30,7 @@ Bluepill.application 'robot-master',
           # graceful stops
           process.stop_grace_time = 60.seconds
           process.stop_signals = [
-            :quit, 45.seconds,
-            :term, 10.seconds,
+            :term, 30.seconds,
             :kill              # no mercy
           ]
           
