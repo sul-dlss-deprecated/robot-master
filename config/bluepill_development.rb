@@ -1,4 +1,4 @@
-WORKDIR='/home/lyberadmin/robot-master/current'
+WORKDIR=File.expand_path(File.join(File.dirname(__FILE__), '..'))
 WORKFLOW_STEPS = %w{
   dor:accessionWF
   dor:assemblyWF
