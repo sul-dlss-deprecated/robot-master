@@ -1,10 +1,76 @@
-robot-master
-============
+# robot-master
 
 Mediates jobs from the Workflow service to the Resque priority queues.
 
-Algorithm
----------
+## Configuration
+
+Your `config/environments/ENVIRONMENT.rb` should have (see `config/example_environment.rb`):
+
+    WORKFLOW_URL = 'http://127.0.0.1/workflow/'
+    REDIS_URL = '127.0.0.1:6379/resque:mynamespace' # hostname:port[:db][/namespace]
+    ENV['ROBOT_ENVIRONMENT'] ||= 'development'
+    ENV['ROBOT_LOG'] ||= 'stdout'
+    ENV['ROBOT_LOG_LEVEL'] ||= 'debug'
+
+For processes that do not need Resque queues, use the `skip-queue` attribute flag in `config/workflows`.
+
+    <process name="foobar" skip-queue="true"/>
+
+For debugging, to view HTTP traffic use:
+
+    RESTCLIENT_LOG=stdout
+
+## Usage
+
+There are 2 command-line programs: `robot-master` and `controller`:
+
+    Usage:  robot-master [flags] [repo:]workflow
+            --repository=REPOSITORY      Use the given repository (default: dor)
+            --environment=ENV            Use the given environment (default: development)
+            --log-level=LEVEL            Use the given log-level (default: info)
+            --log=FILE                   Use the given log file (default: robot-master.log)
+        -R, --repeat-every=SECONDS       Keep running every SECONDS in an infinite loop
+        -v, --verbose                    Run verbosely, use multiple times for debug level output
+      
+     
+    Usage: controller [ boot | start | status | stop | restart | log | quit ]
+     
+    Example:
+        % controller boot    # start bluepilld
+        % controller status  # check on status of jobs
+        % controller stop    # stop jobs
+        % controller quit    # stop bluepilld
+      
+Environment variables supported:
+
+    ROBOT_ENVIRONMENT
+    ROBOT_LOG_LEVEL
+    ROBOT_LOG
+    RESTCLIENT_LOG
+    
+## Operation
+
+To run all of the workflows, use:
+
+    ROBOT_ENVIRONMENT=production controller boot
+    
+To run just the `accessionWF` workflow:
+
+in production:
+
+    bin/robot-master --repeat-every=60 --environment=producdtion dor:accessionWF
+    
+for testing:
+
+    bin/robot-master --repeat-every=60 --environment=testing dor:accessionWF
+  
+for development (runs once):
+
+    RESTCLIENT_LOG=stdout bin/robot-master -vv --log-level=debug dor:accessionWF
+
+## Algorithm
+
+in pseudo-code:
 
     foreach repository do
       foreach workflow do
@@ -27,65 +93,9 @@ Algorithm
       end
     end
 
-Operation
----------
+##### Workflow objects
 
-Example command line runs for:
-
-in production:
-
-    ROBOT_ENVIRONMENT=production bin/robot-master --repeat-every=60 dor:accessionWF
-
-for testing:
-
-    bin/robot-master --repeat-every=60 --environment=testing dor:accessionWF
-  
-for development:
-
-    RESTCLIENT_LOG=stdout bin/robot-master -vv --log-level=debug --log=debug.log dor:accessionWF
-  
-Usage
------
-
-    Usage:  robot-master [flags] [repo:]workflow
-            --repository=REPOSITORY      Use the given repository (default: dor)
-            --environment=ENV            Use the given environment (default: development)
-            --log-level=LEVEL            Use the given log-level (default: info)
-            --log=FILE                   Use the given log file (default: robot-master.log)
-        -R, --repeat-every=SECONDS       Keep running every SECONDS in an infinite loop
-        -v, --verbose                    Run verbosely, use multiple times for debug level output
-      
-      
-Environment variables supported:
-
-    ROBOT_ENVIRONMENT
-    ROBOT_LOG_LEVEL
-    ROBOT_LOG
-    RESTCLIENT_LOG
-    
-Configuration
--------------
-
-Your `config/environments/ENVIRONMENT.rb` should have (see `config/example_environment.rb`):
-
-    WORKFLOW_URL = 'http://127.0.0.1/workflow/'
-    REDIS_URL = '127.0.0.1:6379/resque:mynamespace' # hostname:port[:db][/namespace]
-    ENV['ROBOT_ENVIRONMENT'] ||= 'development'
-    ENV['ROBOT_LOG'] ||= 'stdout'
-    ENV['ROBOT_LOG_LEVEL'] ||= 'debug'
-
-For processes that do not need Resque queues, use the `skip-queue` attribute flag.
-
-    <process name="foobar" skip-queue="true"/>
-
-For debugging, to view HTTP traffic use:
-
-    RESTCLIENT_LOG=stdout
-
-Workflow objects
-----------------
-
-These are the druids in production for the various workflow objects. `config/workflows` has cached copies of these.
+These are the druids in production for the various workflow objects. `config/workflows/dor` has cached copies of these.
 
     1   bb163sd6279 DOR sdrIngestWF              
     2   dd778qy4284 DOR dpgImageWF
