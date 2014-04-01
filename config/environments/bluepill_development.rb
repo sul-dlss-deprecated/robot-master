@@ -1,4 +1,4 @@
-WORKDIR=File.expand_path(File.join(File.dirname(__FILE__), '..'))
+WORKDIR=File.expand_path(File.join(File.dirname(__FILE__), '..', '..'))
 WORKFLOW_STEPS = %w{
   dor:accessionWF
   dor:assemblyWF
