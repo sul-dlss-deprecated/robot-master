@@ -92,13 +92,20 @@ module RobotMaster
     # @param [String] step fully qualified name
     # @param [String] druid
     # @return [Symbol] the new status value
-    def mark_enqueued(step, druid)
+    # @raise [Exception] if the workflow service cannot update status due to
+    #     invalid state transition
+    def mark_enqueued(step, druid, mark_status = :queued)
       Workflow.assert_qualified(step)
-      ROBOT_LOG.debug { "mark_enqueued #{step} #{druid}" }
+      ROBOT_LOG.debug { "mark_enqueued #{step} #{druid} #{mark_status}" }
   
       r, w, s = Workflow.parse_qualified(step)
-      # WorkflowService.update_workflow_status(r, druid, w, s, 'queued')
-      :queued
+      begin
+        # WorkflowService.update_workflow_status(r, druid, w, s, mark_status, expected: 'waiting')
+      rescue => e
+        ROBOT_LOG.warn("Update workflow status failed for waiting->queued transition: #{e}")
+        raise e
+      end
+      mark_status
     end
 
     # Queries the workflow service for druids waiting for given process step, and 
@@ -154,13 +161,12 @@ module RobotMaster
       n = 0
       results.each do |druid, priority|
         begin # XXX preferably within atomic transaction
-          if mark_enqueued(step, druid) == :queued
-            Queue.enqueue(step, druid, Priority.priority_class(priority))
-            n += 1
-          end
-        rescue Exception => e
-          ROBOT_LOG.error("Cannot enqueue job: #{step} #{druid} #{priority}: #{e}")
-          raise e
+          mark_enqueued(step, druid)
+          Queue.enqueue(step, druid, Priority.priority_class(priority))
+          n += 1
+        rescue => e
+          ROBOT_LOG.warn("Cannot enqueue job: #{step} #{druid} #{priority}: #{e}")
+          # continue to the next job
         end
       end
       n
