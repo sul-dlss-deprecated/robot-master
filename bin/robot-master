@@ -100,6 +100,7 @@ class RobotMasterCLI
       
       # sleep for a while if we're looping, otherwise quit
       if flags[:loop] > 0
+        ROBOT_LOG.debug { "Waiting #{flags[:loop]} seconds before next run" }
         sleep flags[:loop]
       else
         break
