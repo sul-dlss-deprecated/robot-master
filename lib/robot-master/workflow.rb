@@ -54,7 +54,7 @@ module RobotMaster
       fn = "config/workflows/#{@repository}/#{@workflow}.xml"
       ROBOT_LOG.debug { "Reading #{fn}" }
       @config = begin
-        Nokogiri::XML(File.open(fn))
+        Nokogiri::XML(File.read(fn))
       rescue Exception => e
         ROBOT_LOG.error("Cannot load workflow object: #{fn}")
         raise e
