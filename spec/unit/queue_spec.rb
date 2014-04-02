@@ -84,10 +84,10 @@ describe RobotMaster::Queue do
       expect(Resque.size(q)).to eq 0
       r = described_class.enqueue(step, 'aa111bb2222', :default)
       expect(r[:queue]).to eq q
-      expect(r[:klass]).to eq 'Robots::A::B::C'
+      expect(r[:klass]).to eq 'Robots::ARepo::B::C'
       expect(Resque.size(q)).to eq 1
       expect(Resque.peek(q)).to eq({
-        "class"=>"Robots::A::B::C", 
+        "class"=>"Robots::ARepo::B::C", 
         "args"=>["aa111bb2222"]
         })
     end
@@ -103,7 +103,7 @@ describe RobotMaster::Queue do
       
       n.times do |i|
         expect(Resque.pop(q)).to eq({
-          "class"=>"Robots::A::B::C", 
+          "class"=>"Robots::ARepo::B::C", 
           "args"=>["aa111bb2222"]
           })
       end

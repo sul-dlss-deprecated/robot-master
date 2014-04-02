@@ -188,7 +188,7 @@ describe RobotMaster::Workflow do
             druid:ct021wp7863
           }.each do |druid|
             expect(Resque.pop(q)).to eq({
-              'class' => %Q{Robots::Dor::Assembly::#{v}},
+              'class' => %Q{Robots::DorRepo::Assembly::#{v}},
               'args' => [ druid ]
             })
           end
@@ -242,7 +242,7 @@ describe RobotMaster::Workflow do
           q = %Q{dor_assemblyWF_#{k}_critical}
           expect(Resque.size(q)).to eq 1
           expect(Resque.pop(q)).to eq({
-            'class' => %Q{Robots::Dor::Assembly::#{v}},
+            'class' => %Q{Robots::DorRepo::Assembly::#{v}},
             'args' => [ 'druid:aa111bb2222' ]
           })
           expect(Resque.size(q)).to eq 0
@@ -250,7 +250,7 @@ describe RobotMaster::Workflow do
           q = %Q{dor_assemblyWF_#{k}_high}
           expect(Resque.size(q)).to eq 1
           expect(Resque.pop(q)).to eq({
-            'class' => %Q{Robots::Dor::Assembly::#{v}},
+            'class' => %Q{Robots::DorRepo::Assembly::#{v}},
             'args' => [ 'druid:py156ps0477' ]
           })
           expect(Resque.size(q)).to eq 0
@@ -258,7 +258,7 @@ describe RobotMaster::Workflow do
           q = %Q{dor_assemblyWF_#{k}_default}
           expect(Resque.size(q)).to eq 1
           expect(Resque.pop(q)).to eq({
-            'class' => %Q{Robots::Dor::Assembly::#{v}},
+            'class' => %Q{Robots::DorRepo::Assembly::#{v}},
             'args' => [ 'druid:tt628cb6479' ]
           })
           expect(Resque.size(q)).to eq 0
@@ -266,7 +266,7 @@ describe RobotMaster::Workflow do
           q = %Q{dor_assemblyWF_#{k}_low}
           expect(Resque.size(q)).to eq 1
           expect(Resque.pop(q)).to eq({
-            'class' => %Q{Robots::Dor::Assembly::#{v}},
+            'class' => %Q{Robots::DorRepo::Assembly::#{v}},
             'args' => [ 'druid:ct021wp7863' ]
           })
           expect(Resque.size(q)).to eq 0
