@@ -26,7 +26,7 @@ Gem::Specification.new do |s|
   s.add_dependency 'druid-tools', '~> 0.3.0'
   s.add_dependency 'nokogiri', '~> 1.6.1'
   s.add_dependency 'resque', '~> 1.25.2'
-  s.add_dependency 'robot-controller', '~> 0.0.4'
+  s.add_dependency 'robot-controller', '~> 0.1.0'
   
   s.add_development_dependency 'awesome_print'
   s.add_development_dependency 'equivalent-xml'
