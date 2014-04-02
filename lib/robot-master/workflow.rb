@@ -102,7 +102,9 @@ module RobotMaster
   
       r, w, s = Workflow.parse_qualified(step)
       begin
-        # WorkflowService.update_workflow_status(r, druid, w, s, mark_status, expected: 'waiting')
+        if ENV['ROBOT_MASTER_ENABLE_UPDATE_WORKFLOW_STATUS'] == 'yes'
+          WorkflowService.update_workflow_status(r, druid, w, s, mark_status, expected: 'waiting')
+        end
       rescue => e
         ROBOT_LOG.warn("Update workflow status failed for waiting->queued transition: #{e}")
         raise e
