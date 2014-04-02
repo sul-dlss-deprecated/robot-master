@@ -33,13 +33,15 @@ There are 2 command-line programs: `robot-master` and `controller`:
         -v, --verbose                    Run verbosely, use multiple times for debug level output
       
      
-    Usage: controller [ boot | start | status | stop | restart | log | quit ]
-     
+    Usage: controller [ boot | quit ]
+           controller [ start | status | stop | restart | log ] [worker]
+
     Example:
-        % controller boot    # start bluepilld and all robot-masters
-        % controller status  # check on status of all robot-masters
-        % controller stop    # stop all robot-masters 
-        % controller quit    # stop bluepilld
+      % controller boot    # start bluepilld and jobs
+      % controller status  # check on status of jobs
+      % controller log dor_accessionWF_descriptive-metadata # view log for worker
+      % controller stop    # stop jobs
+      % controller quit    # stop bluepilld
       
 Environment variables supported:
 
@@ -48,7 +50,7 @@ Environment variables supported:
     ROBOT_LOG
     RESTCLIENT_LOG
     
-## Operation
+## `robot-master` operation
 
 To run all of the workflows, use:
 
@@ -67,6 +69,13 @@ for testing:
 for development (runs once):
 
     RESTCLIENT_LOG=stdout bin/robot-master -vv --log-level=debug dor:accessionWF
+
+other examples:
+
+    robot-master accessionWF
+    robot-master dor:accessionWF
+    robot-master --repeat-every=60 dor:accessionWF  # daemon mode
+    robot-master --repository=sdr sdrIngestWF
 
 ## Algorithm
 
