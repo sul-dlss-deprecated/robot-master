@@ -2,11 +2,9 @@ doc
 .rvmrc
 .yardoc
 rdoc
-log
 *.log
 config/environments/development.rb
 config/environments/testing.rb
 config/environments/production.rb
 Gemfile.lock
 coverage
-run
