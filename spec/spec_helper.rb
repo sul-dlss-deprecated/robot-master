@@ -13,7 +13,6 @@ Bundler.require(:default, :development)
 require 'rubygems'
 require 'rspec'
 require 'awesome_print'
-require 'equivalent-xml'
 
 RSpec.configure do |config|
   

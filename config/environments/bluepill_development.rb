@@ -22,7 +22,9 @@ Bluepill.application 'robot-master',
           process.working_dir = WORKDIR
           process.group = "#{e}"
           process.stdout = process.stderr = "#{WORKDIR}/log/#{e}_#{wf.sub(':', '_')}.log"
-          process.pid_file "#{WORKDIR}/run/#{e}_#{wf.sub(':', '_')}.pid"
+          
+          # let bluepill manage pid files
+          # process.pid_file "#{WORKDIR}/run/#{e}_#{wf.sub(':', '_')}.pid"
           
           # we use bluepill to daemonize
           process.daemonize = true
