@@ -7,7 +7,7 @@ Bluepill.application 'robot-master',
   :log_file => "#{WORKDIR}/log/bluepill.log" do |app|
   %w{development}.each do |e|
       WORKFLOW_STEPS.each do |wf|
-        app.process("#{e}_#{wf}") do |process|
+        app.process(wf) do |process|
           # use environment for these robot master flags variables
           process.environment = {
             'ROBOT_ENVIRONMENT' => 'development',
