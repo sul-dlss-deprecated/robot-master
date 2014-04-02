@@ -56,7 +56,7 @@ module RobotMaster
       r, w, s = Workflow.parse_qualified(step)
       klass = [
         'Robots',
-        r.camelcase,
+        r.camelcase + 'Repo', # 'Dor' conflicts with dor-services
         w.sub('WF', '').camelcase,
         s.sub('-', '_').camelcase
       ].join('::')
