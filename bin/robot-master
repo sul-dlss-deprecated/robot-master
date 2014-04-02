@@ -1,14 +1,12 @@
 #!/usr/bin/env ruby
 #
-# Usage: robot-master [-v] [repository:]workflow [step [step2 ...]]
+# Usage: robot-master [-v] [repository:]workflow
 #        where repository = 'dor' by default
 #
 # @example
 #   robot-master accessionWF
 #   robot-master dor:accessionWF
 #   robot-master --repeat-every=60 dor:accessionWF  # daemon mode
-#   robot-master assemblyWF jp2-create
-#   robot-master gisDeliveryWF load-raster load-vector
 #   robot-master --repository=sdr sdrIngestWF
 #
 require 'optparse'
