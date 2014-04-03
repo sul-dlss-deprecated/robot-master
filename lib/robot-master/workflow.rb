@@ -187,13 +187,13 @@ module RobotMaster
     # Parses the process XML to extract name and prereqs only.
     # Supports skipping the process using `skip-queue="true"`
     # or `status="completed"` as `process` attributes.
-    # Support limiting queueing with `batch-limit` attribute.
+    # Support limiting queueing with `queue-limit` attribute.
     #
     # @return [Hash] with `:name` and `:prereq` and `:skip` and `:limit` keys
     # @example
     #   parse_process_node '
     #     <workflow-def id="accessionWF" repository="dor">
-    #       <process name="remediate-object" batch-limit="123">
+    #       <process name="remediate-object" queue-limit="123">
     #         <prereq>content-metadata</prereq>
     #         <prereq>descriptive-metadata</prereq>
     #         <prereq>technical-metadata</prereq>
@@ -235,7 +235,7 @@ module RobotMaster
         :name => name, 
         :prereq => prereqs, 
         :skip => skip,
-        :limit => (node['batch-limit'] ? node['batch-limit'].to_i : nil )
+        :limit => (node['queue-limit'] ? node['queue-limit'].to_i : nil )
       }
     end
     
