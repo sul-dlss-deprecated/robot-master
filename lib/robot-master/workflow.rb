@@ -99,7 +99,7 @@ module RobotMaster
     # 
     # @param [String] step fully qualified name
     # @param [String] druid
-    # @return [Symbol] the new status value
+    # @return [String] the new status value
     # @raise [Exception] if the workflow service cannot update status due to
     #     invalid state transition
     def mark_enqueued(step, druid, mark_status = 'queued')
@@ -109,7 +109,7 @@ module RobotMaster
       r, w, s = Workflow.parse_qualified(step)
       begin
         if ENV['ROBOT_MASTER_ENABLE_UPDATE_WORKFLOW_STATUS'] == 'yes'
-          Dor::WorkflowService.update_workflow_status(r, druid, w, s, mark_status, expected: 'waiting')
+          Dor::WorkflowService.update_workflow_status(r, druid, w, s, mark_status.to_s, expected: 'waiting')
         end
       rescue => e
         ROBOT_LOG.warn("Update workflow status failed for waiting->queued transition: #{e}")
