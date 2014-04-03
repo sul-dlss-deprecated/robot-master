@@ -102,7 +102,7 @@ module RobotMaster
     # @return [Symbol] the new status value
     # @raise [Exception] if the workflow service cannot update status due to
     #     invalid state transition
-    def mark_enqueued(step, druid, mark_status = :queued)
+    def mark_enqueued(step, druid, mark_status = 'queued')
       Workflow.assert_qualified(step)
       ROBOT_LOG.debug { "mark_enqueued #{step} #{druid} #{mark_status}" }
   
