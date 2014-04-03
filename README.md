@@ -32,6 +32,8 @@ There are 2 command-line programs: `robot-master` and `controller`:
         -R, --repeat-every=SECONDS       Keep running every SECONDS in an infinite loop
         -v, --verbose                    Run verbosely, use multiple times for debug level output
       
+   
+If using `controller` then you also need to edit `config/environments/bluepill_*.rb`
      
     Usage: controller [ boot | quit ]
            controller [ start | status | stop | restart | log ] [worker]
@@ -50,6 +52,7 @@ Environment variables supported:
     ROBOT_LOG
     RESTCLIENT_LOG
     
+    
 ## `robot-master` operation
 
 To run all of the workflows, use:
@@ -60,7 +63,7 @@ To run just the `accessionWF` workflow:
 
 in production:
 
-    bin/robot-master --repeat-every=60 --environment=producdtion dor:accessionWF
+    bin/robot-master --repeat-every=60 --environment=production dor:accessionWF
     
 for testing:
 
@@ -76,6 +79,10 @@ other examples:
     robot-master dor:accessionWF
     robot-master --repeat-every=60 dor:accessionWF  # daemon mode
     robot-master --repository=sdr sdrIngestWF
+
+To enable status updates in the Workflow service you need to configure the environment variable
+`ROBOT_MASTER_ENABLE_UPDATE_WORKFLOW_STATUS="Yes"`. The status updates will mark items as `queued` before
+queueing them into the Resque priority queue.
 
 ## Algorithm
 
