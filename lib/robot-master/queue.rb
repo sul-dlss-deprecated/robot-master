@@ -49,7 +49,6 @@ module RobotMaster
     # @return [Hash] returns the `:queue` name and `klass` name enqueued
     def self.enqueue(step, druid, priority, opts = {})
       Workflow.assert_qualified(step)
-      ROBOT_LOG.debug { "enqueue #{step} #{druid} #{priority}" }
   
       # generate the specific priority queue name
       queue = queue_name(step, priority)
@@ -63,9 +62,9 @@ module RobotMaster
         w.sub('WF', '').camelcase,
         s.sub('-', '_').camelcase
       ].join('::')
-      ROBOT_LOG.debug { "enqueue_to: #{queue} #{klass} #{druid}" }
   
       # perform the enqueue to Resque
+      ROBOT_LOG.debug { "enqueue_to: #{queue} #{klass} #{druid}" }
       Resque.enqueue_to(queue.to_sym, klass, druid)
   
       { :queue => queue, :klass => klass }
