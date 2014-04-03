@@ -319,13 +319,10 @@ describe RobotMaster::Workflow do
   end
 
   context '#limit' do
-    it 'should pass limit flag' do
+    it 'should pass limit flag from workflow xml' do
       Resque.redis = MockRedis.new
       xml = File.read('spec/fixtures/fakeWF.xml')
       wf = RobotMaster::Workflow.new('dor', 'fakeWF', xml)
-      # Dor::WorkflowService.stub(:get_objects_for_workstep).and_return({
-      #   'druid:aa111bb2222' => 0
-      # })
       wf.stub(:perform_on_process).with({
           :name => "dor:fakeWF:finish",
         :prereq => [ "dor:fakeWF:start" ],
@@ -334,7 +331,18 @@ describe RobotMaster::Workflow do
       }) { 0 } # don't actually run perform on process
       wf.perform
     end
+    it 'should use default limit from workflow xml' do
+      Resque.redis = MockRedis.new
+      xml = File.read('spec/fixtures/noLimitsWF.xml')
+      wf = RobotMaster::Workflow.new('dor', 'noLimitsWF', xml)
+      wf.stub(:perform_on_process).with({
+          :name => "dor:noLimitsWF:finish",
+        :prereq => [ "dor:noLimitsWF:start" ],
+          :skip => false,
+         :limit => nil
+      }) { 0 } # don't actually run perform on process
+      wf.perform
+    end
   end
-
 
 end

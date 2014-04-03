@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+<workflow-def id="noLimitsWF" repository="dor">
+	<process name="start" sequence="1"/>
+	<process name="finish" sequence="2">
+		<prereq>start</prereq>
+	</process>
+</workflow-def>
