@@ -10,12 +10,7 @@ SimpleCov.start
 require 'bundler/setup'
 Bundler.require(:default, :development)
 
-require 'rubygems'
-require 'rspec'
-require 'awesome_print'
-
-RSpec.configure do |config|
-  
+RSpec.configure do |config|  
 end
 
 Rails = Object.new unless defined? Rails

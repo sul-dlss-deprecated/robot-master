@@ -307,5 +307,34 @@ describe RobotMaster::Workflow do
     end    
   end
 
+  context '#initialize with XML' do
+    it 'should initialize' do
+      xml = File.read('spec/fixtures/fakeWF.xml')
+      wf = RobotMaster::Workflow.new('dor', 'fakeWF', xml)
+      expect(wf.class).to eq RobotMaster::Workflow
+      expect(wf.repository).to eq 'dor'
+      expect(wf.workflow).to eq 'fakeWF'
+      wf.config.root.should be_equivalent_to(Nokogiri::XML(xml).root)
+    end
+  end
+
+  context '#limit' do
+    it 'should pass limit flag' do
+      Resque.redis = MockRedis.new
+      xml = File.read('spec/fixtures/fakeWF.xml')
+      wf = RobotMaster::Workflow.new('dor', 'fakeWF', xml)
+      # Dor::WorkflowService.stub(:get_objects_for_workstep).and_return({
+      #   'druid:aa111bb2222' => 0
+      # })
+      wf.stub(:perform_on_process).with({
+          :name => "dor:fakeWF:finish",
+        :prereq => [ "dor:fakeWF:start" ],
+          :skip => false,
+         :limit => 1
+      }) { 0 } # don't actually run perform on process
+      wf.perform
+    end
+  end
+
 
 end

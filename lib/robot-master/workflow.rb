@@ -3,6 +3,8 @@ module RobotMaster
   # Manages a workflow to enqueue jobs into a priority queue
   class Workflow
     
+    attr_reader :repository, :workflow, :config
+        
     # Perform workflow queueing on the given workflow
     #
     # @param [String] repository
@@ -45,16 +47,20 @@ module RobotMaster
     
     # @param [String] repository
     # @param [String] workflow
+    # @param [String] workflow definition XML
     # @raise [Exception] if cannot read workflow configuration
-    def initialize(repository, workflow)
+    def initialize(repository, workflow, xml = nil)
       @repository = repository
       @workflow = workflow
       
       # fetch the workflow object from our configuration cache
-      fn = "config/workflows/#{@repository}/#{@workflow}.xml"
-      ROBOT_LOG.debug { "Reading #{fn}" }
+      if xml.nil?
+        fn = "config/workflows/#{@repository}/#{@workflow}.xml"
+        ROBOT_LOG.debug { "Reading #{fn}" }
+        xml = File.read(fn)
+      end
       @config = begin
-        Nokogiri::XML(File.read(fn))
+        Nokogiri::XML(xml)
       rescue Exception => e
         ROBOT_LOG.error("Cannot load workflow object: #{fn}")
         raise e
@@ -118,17 +124,19 @@ module RobotMaster
     # @param [Hash] process
     # @option process [String] :name a fully qualified step name
     # @option process [Array<String>] :prereq fully qualified step names
-    # @option process [Integer] :limit maximum number to poll from Workflow service
+    # @option process [Integer] :limit maximum number to poll from Workflow service (defaults to 100)
     # @return [Integer] the number of jobs enqueued
     # @example
     #   perform_on_process(
     #     name: 'dor:assemblyWF:checksum-compute', 
-    #     prereq: ['dor:assemblyWF:start-assembly','dor:someOtherWF:other-step']
+    #     prereq: ['dor:assemblyWF:start-assembly','dor:someOtherWF:other-step'],
+    #     limit: 100
     #   )
     def perform_on_process(process)
       step = process[:name]
       self.class.assert_qualified(step)
-      
+      process[:limit] ||= 100
+
       ROBOT_LOG.info("Processing #{step}")
       ROBOT_LOG.debug { "-- depends on #{process[:prereq].join(',')}" }
       
@@ -143,7 +151,7 @@ module RobotMaster
                   with_priority: true, 
                   limit: process[:limit]
                 )
-      ROBOT_LOG.debug { "Found #{results.size} druids" }
+      ROBOT_LOG.debug { "Found #{results.size} druids: limited to #{process[:limit]}" }
       return 0 unless results.size > 0
       
       # search the priority queues to determine whether we need to 
@@ -179,12 +187,13 @@ module RobotMaster
     # Parses the process XML to extract name and prereqs only.
     # Supports skipping the process using `skip-queue="true"`
     # or `status="completed"` as `process` attributes.
+    # Support limiting queueing with `batch-limit` attribute.
     #
-    # @return [Hash] with `:name` and `:prereq` and `:skip` keys
+    # @return [Hash] with `:name` and `:prereq` and `:skip` and `:limit` keys
     # @example
     #   parse_process_node '
     #     <workflow-def id="accessionWF" repository="dor">
-    #       <process name="remediate-object">
+    #       <process name="remediate-object" batch-limit="123">
     #         <prereq>content-metadata</prereq>
     #         <prereq>descriptive-metadata</prereq>
     #         <prereq>technical-metadata</prereq>
@@ -200,7 +209,8 @@ module RobotMaster
     #         'dor:accessionWF:technical-metadata',
     #         'dor:accessionWF:rights-metadata'
     #      ],
-    #      :skip => false
+    #      :skip => false,
+    #      :limit => 123
     #   }
     # 
     def parse_process_node(node)
@@ -221,7 +231,12 @@ module RobotMaster
         qualify(prereq.text)
       end
       
-      { :name => name, :prereq => prereqs, :skip => skip }
+      { 
+        :name => name, 
+        :prereq => prereqs, 
+        :skip => skip,
+        :limit => (node['batch-limit'] ? node['batch-limit'].to_i : nil )
+      }
     end
     
     
