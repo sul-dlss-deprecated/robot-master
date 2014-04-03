@@ -81,7 +81,7 @@ other examples:
     robot-master --repository=sdr sdrIngestWF
 
 To enable status updates in the Workflow service you need to configure the environment variable
-`ROBOT_MASTER_ENABLE_UPDATE_WORKFLOW_STATUS="Yes"`. The status updates will mark items as `queued` before
+`ROBOT_MASTER_ENABLE_UPDATE_WORKFLOW_STATUS="yes"`. The status updates will mark items as `queued` before
 queueing them into the Resque priority queue.
 
 ## Algorithm
