@@ -11,10 +11,15 @@ Your `config/environments/ENVIRONMENT.rb` should have (see `config/example_envir
     ENV['ROBOT_ENVIRONMENT'] ||= 'development'
     ENV['ROBOT_LOG'] ||= 'stdout'
     ENV['ROBOT_LOG_LEVEL'] ||= 'debug'
+    ENV['RESTCLIENT_LOG'] ||= 'stdout'
 
 For processes that do not need Resque queues, use the `skip-queue` attribute flag in `config/workflows`.
 
     <process name="foobar" skip-queue="true"/>
+
+To limit Resque queues, use the `queue-limit` attribute flag in `config/workflows`.
+
+    <process name="foobar" queue-limit="10"/>
 
 For debugging, to view HTTP traffic use:
 
@@ -41,7 +46,7 @@ If using `controller` then you also need to edit `config/environments/bluepill_*
     Example:
       % controller boot    # start bluepilld and jobs
       % controller status  # check on status of jobs
-      % controller log dor_accessionWF_descriptive-metadata # view log for worker
+      % controller log dor_accessionWF # view log for worker
       % controller stop    # stop jobs
       % controller quit    # stop bluepilld
       
@@ -69,20 +74,14 @@ for testing:
 
     bin/robot-master --repeat-every=60 --environment=testing dor:accessionWF
   
-for development (runs once):
+for development (runs once with debugging):
 
-    RESTCLIENT_LOG=stdout bin/robot-master -vv --log-level=debug dor:accessionWF
+    bin/robot-master -vv dor:accessionWF
 
-other examples:
-
-    robot-master accessionWF
-    robot-master dor:accessionWF
-    robot-master --repeat-every=60 dor:accessionWF  # daemon mode
-    robot-master --repository=sdr sdrIngestWF
-
-To enable status updates in the Workflow service you need to configure the environment variable
-`ROBOT_MASTER_ENABLE_UPDATE_WORKFLOW_STATUS="yes"`. The status updates will mark items as `queued` before
-queueing them into the Resque priority queue.
+To enable status updates in the Workflow service you need to configure the environment
+variable `ROBOT_MASTER_ENABLE_UPDATE_WORKFLOW_STATUS="yes"`. The status updates will mark
+items as `queued` before queueing them into the Resque priority queue (WARNING: be sure
+you want to enable this!)
 
 ## Algorithm
 
