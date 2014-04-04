@@ -74,10 +74,13 @@ class RobotMasterCLI
     # boot up
     ENV['ROBOT_ENVIRONMENT'] = flags[:robot_environment]
     ENV['ROBOT_LOG_LEVEL'] = flags[:robot_log_level]
-    ENV['ROBOT_LOG_LEVEL'] = 'debug' if flags[:debug]
     ENV['ROBOT_LOG'] = flags[:robot_log]
     ENV['ROBOT_LOG'] = 'stdout' if ENV['ROBOT_LOG'] == '-'
-    ap({:env => ENV}) if flags[:debug]
+    if flags[:debug]
+      ENV['ROBOT_LOG_LEVEL'] = 'debug'
+      ENV['RESTCLIENT_LOG'] ||= 'stdout'
+      ap({:env => ENV})
+    end
     begin
       puts "Loading boot file..." if flags[:debug]
       require File.expand_path(File.dirname(__FILE__) + '/../config/boot')
@@ -101,7 +104,7 @@ class RobotMasterCLI
         ROBOT_LOG.debug { "Waiting #{flags[:loop]} seconds before next run" }
         sleep flags[:loop]
       else
-        break
+        break # iterate once
       end
     end
     
