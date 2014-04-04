@@ -1,0 +1,1 @@
+server 'sul-lyberservices-test.stanford.edu', user: 'lyberadmin', roles: %w{app}
