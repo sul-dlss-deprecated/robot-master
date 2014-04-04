@@ -299,21 +299,25 @@ describe RobotMaster::Workflow do
       Resque.redis = MockRedis.new
     end
     
-    context 'dor:disseminationWF' do
-      it 'should perform' do
-        described_class.perform('dor', 'disseminationWF')          
-        expect(Resque.queues).to eq([])
-      end
-    end    
+    it 'should run empty prereq' do
+      xml = File.read('spec/fixtures/singleStepWF.xml')
+      wf = RobotMaster::Workflow.new('dor', 'singleStepWF', xml)
+      Dor::WorkflowService.stub(:get_objects_for_workstep).and_return({
+        'druid:aa111bb2222' => 0
+      })
+      wf.perform
+      expect(Resque.queues).to eq(['dor_singleStepWF_doit_default'])
+    end
+    
   end
 
   context '#initialize with XML' do
     it 'should initialize' do
-      xml = File.read('spec/fixtures/fakeWF.xml')
-      wf = RobotMaster::Workflow.new('dor', 'fakeWF', xml)
+      xml = File.read('spec/fixtures/singleStepWF.xml')
+      wf = RobotMaster::Workflow.new('dor', 'singleStepWF', xml)
       expect(wf.class).to eq RobotMaster::Workflow
       expect(wf.repository).to eq 'dor'
-      expect(wf.workflow).to eq 'fakeWF'
+      expect(wf.workflow).to eq 'singleStepWF'
       wf.config.root.should be_equivalent_to(Nokogiri::XML(xml).root)
     end
   end
@@ -321,11 +325,11 @@ describe RobotMaster::Workflow do
   context '#limit' do
     it 'should pass limit flag from workflow xml' do
       Resque.redis = MockRedis.new
-      xml = File.read('spec/fixtures/fakeWF.xml')
-      wf = RobotMaster::Workflow.new('dor', 'fakeWF', xml)
+      xml = File.read('spec/fixtures/singleStepWF.xml')
+      wf = RobotMaster::Workflow.new('dor', 'singleStepWF', xml)
       wf.stub(:perform_on_process).with({
-          :name => "dor:fakeWF:finish",
-        :prereq => [ "dor:fakeWF:start" ],
+          :name => "dor:singleStepWF:doit",
+        :prereq => [ ],
           :skip => false,
          :limit => 1
       }) { 0 } # don't actually run perform on process
@@ -333,11 +337,13 @@ describe RobotMaster::Workflow do
     end
     it 'should use default limit from workflow xml' do
       Resque.redis = MockRedis.new
-      xml = File.read('spec/fixtures/noLimitsWF.xml')
-      wf = RobotMaster::Workflow.new('dor', 'noLimitsWF', xml)
+      xml = '<workflow-def id="singleStepWF" repository="dor">
+	<process name="doit" sequence="1"/>
+</workflow-def>'
+      wf = RobotMaster::Workflow.new('dor', 'singleStepWF', xml)
       wf.stub(:perform_on_process).with({
-          :name => "dor:noLimitsWF:finish",
-        :prereq => [ "dor:noLimitsWF:start" ],
+          :name => 'dor:singleStepWF:doit',
+        :prereq => [ ],
           :skip => false,
          :limit => nil
       }) { 0 } # don't actually run perform on process

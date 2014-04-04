@@ -1,0 +1,4 @@
+<?xml version="1.0"?>
+<workflow-def id="singleStepWF" repository="dor">
+	<process name="doit" queue-limit="1" sequence="1"/>
+</workflow-def>
