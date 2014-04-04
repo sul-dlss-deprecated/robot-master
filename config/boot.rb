@@ -16,8 +16,8 @@ ROBOT_LOG.level = Logger::SEV_LABEL.index(ENV['ROBOT_LOG_LEVEL'].upcase) || Logg
 # if running under debugging and using stdout, then run unbuffered
 STDOUT.sync = true if ENV['ROBOT_LOG_LEVEL'].downcase == 'debug' and ENV['ROBOT_LOG'].downcase == 'stdout'
 
+# @see https://github.com/sul-dlss/dor-workflow-service
 require 'dor-workflow-service'
-WORKFLOW_URL ||= 'http://127.0.0.1/workflow'
 Dor::WorkflowService.configure(WORKFLOW_URL)
 
 # @see http://rubydoc.info/gems/redis/3.0.7/file/README.md
@@ -31,7 +31,6 @@ Dor::WorkflowService.configure(WORKFLOW_URL)
 #   Redis::Distributed - a distributed redis connection that will be used as-is
 #   Hash - a redis connection hash (e.g. {:host => 'localhost', :port => 6379, :db => 0})
 require 'resque'
-REDIS_URL ||= "localhost:6379/resque:#{ENV['ROBOT_ENVIRONMENT']}"
 Resque.redis = REDIS_URL
 
 require 'active_support/core_ext' # camelcase
