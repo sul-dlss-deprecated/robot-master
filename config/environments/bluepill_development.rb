@@ -3,19 +3,12 @@ WORKFLOW_STEPS = %w{
   dor:accessionWF
   dor:assemblyWF
 }
+
 Bluepill.application 'robot-master', 
   :log_file => "#{WORKDIR}/log/bluepill.log" do |app|
-  %w{development}.each do |e|
+  [ENV['ROBOT_ENVIRONMENT']].each do |e|
       WORKFLOW_STEPS.each do |wf|
         app.process(wf) do |process|
-          # use environment for these robot master flags variables
-          process.environment = {
-            'ROBOT_ENVIRONMENT' => 'development',
-            'ROBOT_LOG_LEVEL' => 'debug',
-            'ROBOT_LOG' => 'stdout',
-            'RESTCLIENT_LOG' => 'stdout'
-          }
-          
           process.start_command "bin/robot-master -vv --repeat-every=60 #{wf}"
 
           # process configuration
