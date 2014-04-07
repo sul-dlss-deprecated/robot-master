@@ -2,6 +2,7 @@ WORKDIR=File.expand_path(File.join(File.dirname(__FILE__), '..', '..'))
 WORKFLOW_STEPS = %w{
   dor:accessionWF
   dor:assemblyWF
+  dor:disseminationWF
 }
 
 Bluepill.application 'robot-master', 
