@@ -29,7 +29,7 @@ Gem::Specification.new do |s|
   
   s.add_development_dependency 'awesome_print'
   s.add_development_dependency 'capistrano'
-  s.add_development_dependency 'capistrano-bundler'
+  # s.add_development_dependency 'capistrano-bundler'
   s.add_development_dependency 'equivalent-xml', '~> 0.3.0' # 0.4.x breaks RSpec
   s.add_development_dependency 'mock_redis'
   s.add_development_dependency 'pry'
