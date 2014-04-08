@@ -3,5 +3,4 @@ doc
 .yardoc
 rdoc
 *.log
-Gemfile.lock
 coverage
