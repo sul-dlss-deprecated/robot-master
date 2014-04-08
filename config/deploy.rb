@@ -2,7 +2,7 @@
 lock '3.1.0'
 
 set :application, 'robot-master'
-set :repo_url, 'git@github.com:sul-dlss/robot-master.git'
+set :repo_url, 'https://github.com/sul-dlss/robot-master.git'
 
 # Default branch is :master
 # ask :branch, proc { `git rev-parse --abbrev-ref HEAD`.chomp }
@@ -36,7 +36,7 @@ set :log_level, :info
 
 set :stages, %W(development staging production)
 
-set :linked_dirs, %w(log run config/environments config/certs)
+set :linked_dirs, %w(log run config/certs)
 
 namespace :deploy do
 
