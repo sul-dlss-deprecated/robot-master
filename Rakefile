@@ -14,4 +14,8 @@ task :clean do
   FileUtils.rm('coverage.data') if(File.exists? 'coverage.data')
 end
 
+task :restart do
+  puts 'Restarting...'
+end
+
 task :default => [:spec]
