@@ -22,16 +22,16 @@ Gem::Specification.new do |s|
  
   s.required_rubygems_version = ">= 1.3.6"
   
-  s.add_dependency 'dor-workflow-service', '~> 1.6.0'
+  s.add_dependency 'dor-workflow-service', '~> 1.6.2'
   s.add_dependency 'nokogiri', '~> 1.6.1'
   s.add_dependency 'resque', '~> 1.25.2'
   s.add_dependency 'robot-controller', '~> 0.2.0'
   
   s.add_development_dependency 'awesome_print'
-  s.add_development_dependency 'capistrano'
-  # s.add_development_dependency 'capistrano-bundler'
+  s.add_development_dependency 'capistrano', '~> 3.0'
+  s.add_development_dependency 'capistrano-bundler', '~> 1.1'
   s.add_development_dependency 'equivalent-xml', '~> 0.3.0' # 0.4.x breaks RSpec
-  s.add_development_dependency 'mock_redis'
+  s.add_development_dependency 'mock_redis', '~> 0.12.0'
   s.add_development_dependency 'pry'
   s.add_development_dependency 'rake'
   s.add_development_dependency 'rdoc'
