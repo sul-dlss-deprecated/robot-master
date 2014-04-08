@@ -37,6 +37,7 @@ set :log_level, :info
 set :stages, %W(development staging production)
 
 set :linked_dirs, %w(log run config/certs)
+set :linked_files, %w{config/environments/development.rb}
 
 namespace :deploy do
 
