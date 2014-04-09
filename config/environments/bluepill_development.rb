@@ -4,13 +4,14 @@ WORKFLOW_STEPS = %w{
   dor:assemblyWF
   dor:disseminationWF
 }
+REPEAT_EVERY = 15 # seconds
 
 Bluepill.application 'robot-master', 
   :log_file => "#{WORKDIR}/log/bluepill.log" do |app|
   [ENV['ROBOT_ENVIRONMENT']].each do |e|
       WORKFLOW_STEPS.each do |wf|
         app.process(wf) do |process|
-          process.start_command "bin/robot-master -vv --repeat-every=60 #{wf}"
+          process.start_command "bin/robot-master -vv --repeat-every=#{REPEAT_EVERY} #{wf}"
 
           # process configuration
           process.working_dir = WORKDIR
