@@ -1,2 +1,73 @@
-<h1>RobotMaster</h1>
-<p>This would have some customized content for DLSS...</p>
+
+<h1>Priority Queues with Jobs</h1>
+
+<table>
+<tr>
+  <th>Repo</th>
+  <th>Workflow</th>
+  <th>Robot</th>
+  <th>Priority</th>
+  <th>Jobs</th>
+</tr>
+<% n = 0 %>
+<% resque.queues.sort_by { |q| q.to_s }.each do |queue| %>
+    <% if (resque.size queue).to_i > 0 %>
+    <% n += resque.size queue %>
+    <tr>
+        <td><%= queue.split('_')[0] %></td>
+        <td><%= queue.split('_')[1] %></td>
+        <td><%= queue.split('_')[2] %></td>
+        <td><%= queue.split('_')[3] %></td>
+        <td class='size'><%= resque.size queue %></td>
+    </tr>
+    <% end %>
+    <% end %>
+<% if n == 0 %>
+    <tr>
+      <td colspan="5" class='no-data'>Nothing is happening right now...</td>
+    </tr>
+<% end %>
+</table>
+<% if n > 0 %>
+<p><%= n %> jobs ready
+<% end %>
+<hr/>
+<%
+workers = resque.working
+jobs = workers.collect {|w| w.job }
+worker_jobs = workers.zip(jobs)
+worker_jobs = worker_jobs.reject { |w, j| w.idle? }
+%>
+
+<h1 class='wi'><%= worker_jobs.size %> of <%= resque.workers.size %> Workers Working</h1>
+<p class='intro'>The list below contains all workers which are currently running a job.</p>
+<table class='workers'>
+<tr>
+  <th>Where</th>
+  <th>Priority</th>
+  <th>Processing</th>
+  <th>Druid</th>
+</tr>
+<% if worker_jobs.empty? %>
+<tr>
+  <td colspan="4" class='no-data'>Nothing is happening right now...</td>
+</tr>
+<% end %>
+
+<% worker_jobs.sort_by {|w, j| j['run_at'] ? j['run_at'] : '' }.each do |worker, job| %>
+  <tr>
+    <% host, pid, queues = worker.to_s.split(':') %>
+    <td class='where'><a href="<%=u "/workers/#{worker}" %>"><%= host %>:<%= pid %></a></td>
+    <td><%= job['queue'].split('_')[3] %></td>
+    <td class='process'>
+      <% if job['queue'] %>
+        <code><%= job['payload']['class'] %></code>
+      <% else %>
+        <span class='waiting'>Waiting for a job...</span>
+      <% end %>
+    </td>
+    <td class='process'><code><%= job['payload']['args'][0].split(/:/)[1] %></code>
+</td>
+  </tr>
+<% end %>
+</table>
