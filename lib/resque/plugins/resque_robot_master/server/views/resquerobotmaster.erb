@@ -1,5 +1,6 @@
 
 <h1>Priority Queues with Jobs</h1>
+<p class='intro'>The list below contains all priority queues with waiting job.</p>
 
 <table>
 <tr>
@@ -39,8 +40,8 @@ worker_jobs = workers.zip(jobs)
 worker_jobs = worker_jobs.reject { |w, j| w.idle? }
 %>
 
-<h1 class='wi'><%= worker_jobs.size %> of <%= resque.workers.size %> Workers Working</h1>
-<p class='intro'>The list below contains all workers which are currently running a job.</p>
+<h1 class='wi'>Robots Running Jobs</h1>
+<p class='intro'>The list below contains all robots which are currently running a job.</p>
 <table class='workers'>
 <tr>
   <th>Where</th>
@@ -69,5 +70,40 @@ worker_jobs = worker_jobs.reject { |w, j| w.idle? }
     <td class='process'><code><%= job['payload']['args'][0].split(/:/)[1] %></code>
 </td>
   </tr>
+<% end %>
+</table>
+<% if worker_jobs.size > 0 %>
+<p><%= worker_jobs.size %> robots running jobs</p>
+<% end %>
+<hr/>
+<% workers = Resque.workers %>
+
+<h1 class='wi'><%= workers.size %> Registered Robots</h1>
+<p class='intro'>The robots listed below are all registered as active on your cluster.</p>
+<table>
+<tr>
+  <th>Where</th>
+  <th>Repo</th>
+  <th>Workflow</th>
+  <th>Robot</th>
+  <th># Priorities</th>
+</tr>
+<% for worker in (workers = workers.sort_by { |w| w.to_s.split(':')[2].to_s }) %>
+<tr>
+
+  <% host, pid, queues = worker.to_s.split(':') %>
+  <td><a href="<%=u "workers/#{worker}"%>"><%= host %>:<%= pid %></a></td>
+  
+  <% q = queues.split(',').first %>
+  <td><%= q.split(/_/)[0] %></td>
+  <td><%= q.split(/_/)[1] %></td>
+  <td><%= q.split(/_/)[2] %></td>
+  <td><%= queues.split(',').size %></td>
+</tr>
+<% end %>
+<% if workers.empty? %>
+<tr>
+  <td colspan='5' class='no-data'>There are no registered workers</td>
+</tr>
 <% end %>
 </table>
