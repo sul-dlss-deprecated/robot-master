@@ -58,7 +58,7 @@ worker_jobs = worker_jobs.reject { |w, j| w.idle? }
 <% worker_jobs.sort_by {|w, j| j['run_at'] ? j['run_at'] : '' }.each do |worker, job| %>
   <tr>
     <% host, pid, queues = worker.to_s.split(':') %>
-    <td class='where'><a href="<%=u "/workers/#{worker}" %>"><%= host %>:<%= pid %></a></td>
+    <td class='where'><a href="<%=u "/workers/#{worker}" %>"><%= host.to_s.gsub(/\.stanford\.edu/, '') %>:<%= pid %></a></td>
     <td><%= job['queue'].split('_')[3] %></td>
     <td class='process'>
       <% if job['queue'] %>
@@ -86,19 +86,23 @@ worker_jobs = worker_jobs.reject { |w, j| w.idle? }
   <th>Repo</th>
   <th>Workflow</th>
   <th>Robot</th>
-  <th># Priorities</th>
+  <th>Priorities</th>
 </tr>
 <% for worker in (workers = workers.sort_by { |w| w.to_s.split(':')[2].to_s }) %>
 <tr>
 
   <% host, pid, queues = worker.to_s.split(':') %>
-  <td><a href="<%=u "workers/#{worker}"%>"><%= host %>:<%= pid %></a></td>
+  <td><a href="<%=u "workers/#{worker}"%>"><%= host.to_s.gsub(/\.stanford\.edu/, '') %>:<%= pid %></a></td>
   
   <% q = queues.split(',').first %>
   <td><%= q.split(/_/)[0] %></td>
   <td><%= q.split(/_/)[1] %></td>
   <td><%= q.split(/_/)[2] %></td>
-  <td><%= queues.split(',').size %></td>
+  <% if queues.split(',').size < 4 %>
+  <td><%= queues.split(',').map {|i| i.split(/_/)[3]}.join(' ') %></td>
+  <% else %>
+  <td>all</td>
+  <% end %>
 </tr>
 <% end %>
 <% if workers.empty? %>
