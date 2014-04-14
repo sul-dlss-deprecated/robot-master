@@ -122,7 +122,7 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
-  awesome_print
+  awesome_print (~> 1.2.0)
   capistrano (~> 3.0)
   capistrano-bundler (~> 1.1)
   dor-workflow-service (~> 1.6.2)
