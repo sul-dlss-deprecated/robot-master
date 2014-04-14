@@ -37,14 +37,18 @@ set :log_level, :info
 set :stages, %W(development staging production)
 
 set :linked_dirs, %w(log run config/certs)
-set :linked_files, %w{config/environments/development.rb}
+set :linked_files, %w{
+  config/environments/development.rb 
+}
 
 namespace :deploy do
 
   desc 'Restart application'
   task :restart do
-    on roles(:app), in: :sequence, wait: 5 do
-      # execute :rake, 'restart'
+    on roles(:app), in: :sequence, wait: 10 do
+      execute "cd #{release_path} && bundle exec controller stop"
+      execute "cd #{release_path} && bundle exec controller quit"
+      execute "cd #{release_path} && bundle exec controller boot"
     end
   end
 
