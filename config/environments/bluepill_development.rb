@@ -9,7 +9,7 @@ REPEAT_EVERY = 15 # seconds
 Bluepill.application 'robot-master', 
   :log_file => "#{WORKDIR}/log/bluepill.log" do |app|
   app.process('rackup') do |process|
-    process.start_command "bundle exec rackup"
+    process.start_command "bundle exec rackup -p 3000"
     process.working_dir = WORKDIR
     process.daemonize = true
     process.stdout = process.stderr = "#{WORKDIR}/log/rackup.log"
