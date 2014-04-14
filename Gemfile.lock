@@ -84,7 +84,7 @@ GEM
       vegas (~> 0.1.2)
     rest-client (1.6.7)
       mime-types (>= 1.16)
-    robot-controller (0.2.0)
+    robot-controller (0.2.1)
       bluepill (~> 0.0.66)
     rspec (2.14.1)
       rspec-core (~> 2.14.0)
