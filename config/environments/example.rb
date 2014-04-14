@@ -1,5 +1,6 @@
 # @see https://github.com/sul-dlss/dor-workflow-service
 WORKFLOW_URL = 'http://127.0.0.1/workflow/'
+WORKFLOW_TIMEOUT = 60 # in seconds
 
 # @see http://rubydoc.info/gems/redis/3.0.7/file/README.md
 # @see https://github.com/resque/resque

@@ -18,7 +18,8 @@ STDOUT.sync = true if ENV['ROBOT_LOG_LEVEL'].downcase == 'debug' and ENV['ROBOT_
 
 # @see https://github.com/sul-dlss/dor-workflow-service
 require 'dor-workflow-service'
-Dor::WorkflowService.configure(WORKFLOW_URL)
+WORKFLOW_TIMEOUT = 60 unless WORKFLOW_TIMEOUT
+Dor::WorkflowService.configure(WORKFLOW_URL, timeout: WORKFLOW_TIMEOUT)
 
 # @see http://rubydoc.info/gems/redis/3.0.7/file/README.md
 # @see https://github.com/resque/resque
