@@ -46,9 +46,11 @@ namespace :deploy do
   desc 'Restart application'
   task :restart do
     on roles(:app), in: :sequence, wait: 10 do
-      execute "cd #{release_path} && bundle exec controller stop"
-      execute "cd #{release_path} && bundle exec controller quit"
-      execute "cd #{release_path} && bundle exec controller boot"
+      within release_path do
+        execute :controller, :stop
+        execute :controller, :quit
+        execute :controller, :boot
+      end
     end
   end
 
