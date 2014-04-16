@@ -4,7 +4,7 @@
 #
 require 'optparse'
 require 'awesome_print'
-require 'open-uri'
+require 'rest-client'
 
 FEDORA_URL = 'https://sul-dor-prod.stanford.edu/fedora'
 WORKFLOWS = Hash[*%w{
@@ -22,15 +22,17 @@ WORKFLOWS = Hash[*%w{
   yp220bx1022 dor/versioningWF
 }]
 
+
 class RobotDownloadWorkflowsCLI
   def run(args)
+
     flags = {
       :verbose => false,
       :debug => false
     }
   
     OptionParser.new do |opts|
-      opts.banner = "Usage:\t#{File.basename(__FILE__)} [-v] [dor-url]"
+      opts.banner = "Usage:\t#{File.basename(__FILE__)} [-v] [dor-url cert_file key_file]"
       opts.on('-v', '--verbose', 'Run verbosely, use multiple times for debug level output') do
         flags[:debug] = true if flags[:verbose]  # -vv
         flags[:verbose] = true
@@ -40,19 +42,25 @@ class RobotDownloadWorkflowsCLI
     
     # Initialize the workflow, and set the repository if prepended with :
     dor_url = args.shift || FEDORA_URL
-    ap({:dor_url => dor_url, :flags => flags}) if flags[:debug]
+    cert_file = args.shift || 'config/certs/dlss-dev-drh-dor-prod.crt'
+    key_file = args.shift || 'config/certs/dlss-dev-drh-dor-prod.key'
+    ap({:dor_url => dor_url, :cert_file => cert_file, :key_file => key_file, :flags => flags}) if flags[:debug]
     
     WORKFLOWS.each do |druid, wf|
       ap({:druid => druid, :wf => wf, :flags => flags}) if flags[:debug]
-      url = URI.parse("#{FEDORA_URL}/objects/druid:#{druid}/datastreams/workflowDefinition/content")
+      uri = URI.parse("#{FEDORA_URL}/objects/druid:#{druid}/datastreams/workflowDefinition/content")
       fn = "config/workflows/#{wf}.xml"
       begin
-        puts "Downloading #{url} to #{fn}"
-        open(url) do |f|
-          xml = f.read
-          File.open(fn, 'wb').write(xml)
-        end
-      rescue OpenURI::HTTPError => e
+        puts "Downloading #{uri} to #{fn}"
+        res = RestClient::Resource.new(
+          uri.to_s,
+          :ssl_client_cert  =>  OpenSSL::X509::Certificate.new(File.read(cert_file)),
+          :ssl_client_key   =>  OpenSSL::PKey::RSA.new(File.read(key_file), ''),
+          :verify_ssl       =>  OpenSSL::SSL::VERIFY_PEER
+        )
+        ap({:res => res}) if flags[:debug]
+        File.open(fn, 'wb').write(res.get)
+      rescue OpenSSL::SSL::SSLError => e
         puts "#{e.class}: #{e}"
       end
       
