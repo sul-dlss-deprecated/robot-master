@@ -1,0 +1,64 @@
+#!/usr/bin/env ruby
+#
+# Usage: robot-download-workflow [-v] [dor-url]
+#
+require 'optparse'
+require 'awesome_print'
+require 'open-uri'
+
+FEDORA_URL = 'https://sul-dor-prod.stanford.edu/fedora'
+WORKFLOWS = Hash[*%w{
+  bb163sd6279 dor/sdrIngestWF
+  dd778qy4284 dor/dpgImageWF
+  dz388gs4054 dor/eemsAccessionWF
+  fy957df3135 dor/digitizationWF
+  gb941hc6393 dor/googleScannedBookWF
+  nb274zx7788 dor/disseminationWF
+  oo000oo0099 dor/hydrusAssemblyWF
+  rs056hz6024 dor/assemblyWF
+  sh219xb1690 dor/registrationWF
+  tm388wy6148 dor/accessionWF
+  vn914kc9255 dor/etdSubmitWF
+  yp220bx1022 dor/versioningWF
+}]
+
+class RobotDownloadWorkflowsCLI
+  def run(args)
+    flags = {
+      :verbose => false,
+      :debug => false
+    }
+  
+    OptionParser.new do |opts|
+      opts.banner = "Usage:\t#{File.basename(__FILE__)} [-v] [dor-url]"
+      opts.on('-v', '--verbose', 'Run verbosely, use multiple times for debug level output') do
+        flags[:debug] = true if flags[:verbose]  # -vv
+        flags[:verbose] = true
+      end
+    end.parse!(args)
+    ap({:args => args}) if flags[:debug]
+    
+    # Initialize the workflow, and set the repository if prepended with :
+    dor_url = args.shift || FEDORA_URL
+    ap({:dor_url => dor_url, :flags => flags}) if flags[:debug]
+    
+    WORKFLOWS.each do |druid, wf|
+      ap({:druid => druid, :wf => wf, :flags => flags}) if flags[:debug]
+      url = URI.parse("#{FEDORA_URL}/objects/druid:#{druid}/datastreams/workflowDefinition/content")
+      fn = "config/workflows/#{wf}.xml"
+      begin
+        puts "Downloading #{url} to #{fn}"
+        open(url) do |f|
+          xml = f.read
+          File.open(fn, 'wb').write(xml)
+        end
+      rescue OpenURI::HTTPError => e
+        puts "#{e.class}: #{e}"
+      end
+      
+    end
+  end
+end
+
+# __MAIN__
+RobotDownloadWorkflowsCLI.new.run(ARGV)
