@@ -4,3 +4,4 @@ doc
 rdoc
 *.log
 coverage
+config/certs
