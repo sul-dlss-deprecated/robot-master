@@ -16,12 +16,8 @@ class RobotSweeperCLI
     ap({:stale => stale}) if flags[:debug]
     stale.each do |h|
       h[:repo] = 'dor'
-      w = h[:workflow]
-      s = h[:step]
-      druid = h[:druid]
-      priority = h[:priority].to_i
-      ap({:h => h, :priority => priority}) if flags[:debug]
-      Dor::WorkflowService.update_workflow_status(h[:repo], druid, h[:workflow], h[:step], 'waiting', expected: 'queued')      
+      ap({:h => h}) if flags[:debug]
+      Dor::WorkflowService.update_workflow_status(h[:repo], h[:druid], h[:workflow], h[:step], 'waiting', expected: 'queued')      
     end
   end
   
