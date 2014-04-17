@@ -66,6 +66,10 @@ module RobotMaster
       # perform the enqueue to Resque
       ROBOT_LOG.debug { "enqueue_to: #{queue} #{klass} #{druid}" }
       Resque.enqueue_to(queue.to_sym, klass, druid)
+      
+      if opts[:logging]
+        Resque.enqueue_to('history', queue, klass, druid, Time.now)
+      end
   
       { :queue => queue, :klass => klass }
     end

@@ -168,7 +168,7 @@ module RobotMaster
       results.each do |druid, priority|
         begin # XXX preferably within atomic transaction
           mark_enqueued(step, druid)
-          Queue.enqueue(step, druid, Priority.priority_class(priority))
+          Queue.enqueue(step, druid, Priority.priority_class(priority), logging: process[:logging])
           n += 1
         rescue => e
           ROBOT_LOG.warn("Cannot enqueue job: #{step} #{druid} #{priority}: #{e}")
@@ -229,7 +229,8 @@ module RobotMaster
         :name => name, 
         :prereq => prereqs, 
         :skip => skip,
-        :limit => (node['queue-limit'] ? node['queue-limit'].to_i : nil )
+        :limit => (node['queue-limit'] ? node['queue-limit'].to_i : nil ),
+        :logging => ((node['skip-logging'] == 'true') ? false : true)
       }
     end
     
