@@ -10,14 +10,29 @@ require 'optparse'
 require 'awesome_print'
 
 class RobotSweeperCLI
+  
+  def monitor_stale(flags = {})
+    stale = Dor::WorkflowService.get_stale_queued_workflows('dor', hours_ago: 24, limit: 1000)
+    ap({:stale => stale}) if flags[:debug]
+    stale.each do |h|
+      h[:repo] = 'dor'
+      w = h[:workflow]
+      s = h[:step]
+      druid = h[:druid]
+      priority = h[:priority].to_i
+      ap({:h => h, :priority => priority}) if flags[:debug]
+      Dor::WorkflowService.update_workflow_status(h[:repo], druid, h[:workflow], h[:step], 'waiting', expected: 'queued')      
+    end
+  end
+  
   # XXX: sweep up failed job if the Workflow service thinks the object is :queued
   def sweep_job(job, flags = {})
     ap({:job => job}) if flags[:debug]
     status = Dor::WorkflowService.get_workflow_status(job[:repo], job[:druid], job[:workflow], job[:step])
-    ap({:status => status})
+    ap({:status => status}) if flags[:debug]
     ROBOT_LOG.debug { "Job for #{job[:druid]} has status '#{status}' from #{job[:error_q]}" }
     
-    if status == 'queued'
+    if flags[:change_to_errored] and status == 'queued'
       opts =  { :error_txt => "queue=#{job[:error_q]} backtrace=#{job[:error_backtrace]}" }
       ROBOT_LOG.info("Updating error status for #{job[:druid]} #{job[:error_msg]} #{opts}")
       Dor::WorkflowService.update_workflow_error_status(job[:repo], job[:druid], job[:workflow], job[:step], job[:error_msg], opts)
@@ -122,6 +137,7 @@ class RobotSweeperCLI
     while true do
       begin
         monitor_failed(flags)
+        monitor_stale(flags)
       rescue => e
         ROBOT_LOG.error("#{e}")
         raise e unless flags[:loop] > 0 # don't error out if looping
