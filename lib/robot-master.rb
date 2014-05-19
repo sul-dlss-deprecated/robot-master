@@ -4,6 +4,5 @@ module RobotMaster
   VERSION = File.read(File.join(File.dirname(__FILE__), '..', 'VERSION')).strip
 end
 
-require 'robot-master/priority'
 require 'robot-master/queue'
 require 'robot-master/workflow'

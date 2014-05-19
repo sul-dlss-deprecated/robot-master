@@ -6,16 +6,10 @@ describe RobotMaster::Queue do
   let(:step) { 'a:b:c' }
   
   context '#queue_name' do
-    it 'handles priority symbols' do
-      RobotMaster::Priority::PRIORITIES.each do |priority|
-        expect(described_class.queue_name('a:b:c-d', priority)).to eq "a_b_c-d_#{priority}"
+    it 'handles symbols' do
+      %w{* a aA a-A a-b A AA AAA AAAA AAAAA AAAAAA}.map(&:to_sym).each do |lane|
+        expect(described_class.queue_name('a:b:c-d', lane)).to eq "a_b_c-d_#{lane}"
       end
-    end
-
-    it 'does not handle illegal priority symbols' do
-      expect { 
-        described_class.queue_name(step, :bogus) 
-      }.to raise_error(ArgumentError)
     end
 
     it 'handles qualified names' do
@@ -28,44 +22,52 @@ describe RobotMaster::Queue do
       }.to raise_error(ArgumentError)
     end
 
-    it 'handles priority numbers' do
-      expect(described_class.queue_name(step, -1)).to eq 'a_b_c_low'
-      expect(described_class.queue_name(step, 0)).to eq 'a_b_c_default'
-      expect(described_class.queue_name(step, 1)).to eq 'a_b_c_high'      
-      expect(described_class.queue_name(step, 101)).to eq 'a_b_c_critical'
+    it 'does not handle malformed names' do
+      %w{A_B A@B}.each do |lane|
+        expect { 
+          described_class.queue_name(step, lane) 
+        }.to raise_error(ArgumentError)
+      end
+    end
+
+    it 'handles numbers' do
+      expect(described_class.queue_name(step, -1)).to eq 'a_b_c_-1'
+      expect(described_class.queue_name(step, 0)).to eq 'a_b_c_0'
+      expect(described_class.queue_name(step, 1)).to eq 'a_b_c_1'      
+      expect(described_class.queue_name(step, 99)).to eq 'a_b_c_99'
     end
   end
   
-  context '#needs_work?' do
+  context '#empty_slots' do
     before do
       Resque.redis = MockRedis.new
     end
     
     it 'illegal arguments' do
-      expect { described_class.needs_work? }.to raise_error(ArgumentError)
+      expect { described_class.empty_slots }.to raise_error(ArgumentError)
     end
     
     it 'no queue' do
-      described_class.needs_work?(step).should be_true
+      described_class.empty_slots(step).should eq 100
     end
     
     it 'queue single job' do
       Resque.enqueue_to(described_class.queue_name(step), 'Foo')
-      described_class.needs_work?(step, :default, 1).should be_false
+      described_class.empty_slots(step, :default, 1).should eq 0
     end
 
     it 'queue threshold jobs' do
       threshold.times do |i|
         Resque.enqueue_to(described_class.queue_name(step), 'Foo')
       end
-      described_class.needs_work?(step).should be_false
+      described_class.empty_slots(step).should eq 0
     end
 
     it 'queue not-quite threshold jobs' do
       (threshold-1).times do |i|
         Resque.enqueue_to(described_class.queue_name(step), 'Foo')
       end
-      described_class.needs_work?(step).should be_true
+      described_class.empty_slots(step).should eq 1
     end
   end
   
@@ -82,7 +84,7 @@ describe RobotMaster::Queue do
     it 'single job' do
       q = described_class.queue_name(step)
       expect(Resque.size(q)).to eq 0
-      r = described_class.enqueue(step, 'aa111bb2222', :default)
+      r = described_class.enqueue(step, 'aa111bb2222')
       expect(r[:queue]).to eq q
       expect(r[:klass]).to eq 'Robots::ARepo::B::C'
       expect(Resque.size(q)).to eq 1
@@ -97,7 +99,7 @@ describe RobotMaster::Queue do
       q = described_class.queue_name(step)
       expect(Resque.size(q)).to eq 0
       n.times do |i|
-        described_class.enqueue(step, 'aa111bb2222', :default)
+        described_class.enqueue(step, 'aa111bb2222')
         expect(Resque.size(q)).to eq (i+1)
       end
       

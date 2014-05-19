@@ -2,7 +2,7 @@ module RobotMaster
 
   # Manages a workflow to enqueue jobs into a priority queue
   class Workflow
-    
+    QUEUE_LIMIT_DEFAULT = 100
     attr_reader :repository, :workflow, :config
         
     # Perform workflow queueing on the given workflow
@@ -82,8 +82,8 @@ module RobotMaster
         end
         
         # doit
-        n = perform_on_process(process)
-        ROBOT_LOG.info("Queued #{n} jobs for #{process[:name]}") if n > 0
+        (n, lanes) = perform_on_process(process)
+        ROBOT_LOG.info("Queued #{n} jobs across #{lanes.size} lanes for #{process[:name]}") if n > 0
       end
       self
     end    
@@ -115,6 +115,21 @@ module RobotMaster
     # Queries the workflow service for druids waiting for given process step, and 
     # enqueues them to the appropriate priority queue
     #
+    # R is the set of robots
+    # foreach r in R
+    #   n is queue-limit(r), the limit for the given robot queues (defaults to 100)
+    #   L is the set of WorkflowService.lanes(r)
+    #   foreach l in L
+    #     J is the set of WorkflowService.jobs(r, l, n)
+    #     Q is the queue(r, l)
+    #     foreach j in J
+    #       while n is greater than |Q|
+    #          add j to Q
+    #       end
+    #     end
+    #   end
+    # end
+    #
     # @param [Hash] process
     # @option process [String] :name a fully qualified step name
     # @option process [Array<String>] :prereq fully qualified step names
@@ -129,53 +144,42 @@ module RobotMaster
     def perform_on_process(process)
       step = process[:name]
       self.class.assert_qualified(step)
-      process[:limit] ||= 100
+      process[:limit] ||= QUEUE_LIMIT_DEFAULT
 
       ROBOT_LOG.info("Processing #{step}")
       ROBOT_LOG.debug { "-- depends on #{process[:prereq].join(',')}" }
       
       # fetch pending jobs for this step from the Workflow Service. 
-      # we need to always do this to determine whether there are 
-      # high priority jobs pending.
-      results = Dor::WorkflowService.get_objects_for_workstep(
-                  process[:prereq],
-                  step, 
-                  nil, 
-                  nil, 
-                  with_priority: true, 
-                  limit: process[:limit]
-                )
-      ROBOT_LOG.debug { "Found #{results.size} druids: limited to #{process[:limit]}" }
-      return 0 unless results.size > 0
-      
-      # search the priority queues to determine whether we need to 
-      # enqueue to them, for either empty queues or high priority items
-      needs_work = false
-      
-      # if we have jobs at a priority level for which the job queue is empty
-      Priority.priority_classes(results.values).each do |priority|
-        needs_work ||= Queue.needs_work?(step, priority)
-      end
-      
-      # if we have any high priority jobs at all
-      needs_work ||= Priority.has_priority_items?(results.values)
-      
-      ROBOT_LOG.debug { "needs_work=#{needs_work}" }
-      return 0 unless needs_work
-      
-      # perform the mediation
+      lanes = ['default'] # XXX = Dor::WorkflowService.get_lanes(step)
       n = 0
-      results.each do |druid, priority|
-        begin # XXX preferably within atomic transaction
-          mark_enqueued(step, druid)
-          Queue.enqueue(step, druid, Priority.priority_class(priority))
-          n += 1
-        rescue => e
-          ROBOT_LOG.warn("Cannot enqueue job: #{step} #{druid} #{priority}: #{e}")
-          # continue to the next job
+      lanes.each do |lane|
+        results = Dor::WorkflowService.get_objects_for_workstep(
+                    process[:prereq],
+                    step,
+                    # lane, # XXX
+                    nil, 
+                    nil, 
+                    with_priority: true, 
+                    limit: process[:limit]
+                  )
+        ROBOT_LOG.debug { "Found #{results.size} druids: limited to #{n}" }
+        return 0 unless results.size > 0
+      
+        # perform the mediation
+        results.each do |druid, l| # XXX: update get_objects_for_workstep output
+          if Queue.empty_slots(step, l, process[:limit]) > 0
+            begin # XXX preferably within atomic transaction
+              mark_enqueued(step, druid)
+              Queue.enqueue(step, druid, l)
+              n += 1
+            rescue => e
+              ROBOT_LOG.warn("Cannot enqueue job: #{step} #{druid} #{l}: #{e}")
+              # continue to the next job
+            end
+          end
         end
       end
-      n
+      [n, lanes]
     end
         
     # Parses the process XML to extract name and prereqs only.

@@ -40,15 +40,21 @@ There are 2 command-line programs: `robot-master` and `controller`:
    
 If using `controller` then you also need to edit `config/environments/bluepill_*.rb`
      
-    Usage: controller [ boot | quit ]
-           controller [ start | status | stop | restart | log ] [worker]
+    Usage: controller ( boot | quit )
+           controller ( start | status | stop | restart | log ) [worker]
+           controller [--help]
 
     Example:
       % controller boot    # start bluepilld and jobs
       % controller status  # check on status of jobs
-      % controller log dor_accessionWF # view log for worker
+      % controller log dor_accessionWF_descriptive-metadata # view log for worker
       % controller stop    # stop jobs
       % controller quit    # stop bluepilld
+
+    Environment:
+      BLUEPILL_BASEDIR - where bluepill stores its state (default: run/bluepill)
+      BLUEPILL_LOGFILE - output log (default: log/bluepill.log)
+      ROBOT_ENVIRONMENT - (default: development)
       
 Environment variables supported:
 
@@ -90,16 +96,14 @@ in pseudo-code:
     foreach repository do
       foreach workflow do
         foreach process-step do
-          if priority queue needs jobs or priority jobs in workflow service
-            within transaction do
-              jobs = fetch N jobs with 'ready' status by priority from workflow service
-              jobs.each do |job|
-                mark job as 'queued' in workflow service
-              end
-            end
+          if queues need jobs then within transaction do
+            jobs = fetch N jobs with 'ready' status by priority from workflow service 
             jobs.each do |job|
-              enqueue job into Resque priority queue
+              mark job as 'queued' in workflow service
             end
+          end
+          jobs.each do |job|
+            enqueue job into Resque queue
           end
           foreach job in /failed queue do
             mark job status as 'error' in workflow service if not already marked

@@ -1,40 +1,42 @@
 module RobotMaster
-  # Manages a workflow to enqueue jobs into a priority queue
+  # Manages a workflow to enqueue jobs into a lane queue
   module Queue
-    # Generate the queue name from step and priority
+    # Generate the queue name from step and lane
     # 
     # @param [String] step fully qualified name
-    # @param [Symbol | Integer] priority
+    # @param [Symbol | String] lane
     # @return [String] the queue name
     # @example
     #     queue_name('dor:assemblyWF:jp2-create')
     #     => 'dor_assemblyWF_jp2-create_default'
-    #     queue_name('dor:assemblyWF:jp2-create', 100)
-    #     => 'dor_assemblyWF_jp2-create_high'
-    def self.queue_name(step, priority = :default)
+    #     queue_name('dor:assemblyWF:jp2-create', :mylane)
+    #     => 'dor_assemblyWF_jp2-create_mylane'
+    def self.queue_name(step, lane = :default)
       Workflow.assert_qualified(step)
-      unless priority.is_a?(Integer) or Priority::PRIORITIES.include?(priority)
-        raise ArgumentError, "Unknown priority: #{priority}"
+      unless lane.to_s =~ /^[a-zA-Z0-9-]+$/ or lane.to_s == '*'
+        raise ArgumentError, "Invalid lane specification: #{lane}"
       end
       [ 
         Workflow.parse_qualified(step),
-        priority.is_a?(Integer) ? Priority.priority_class(priority) : priority
+        lane.to_s
       ].flatten.join('_')
     end
 
+    # Counts the number of jobs a queue can accomodate given current workload in the queue
+    #
     # @param [String] step a fully qualified name
-    # @param [Symbol, Integer] priority
+    # @param [Symbol, String] lane
     # @param [Integer] threshold The number of items below which the queue is considered empty
-    # @return [Boolean] true if the queue for the step is "empty"
-    def self.needs_work?(step, priority = :default, threshold = 100)
+    # @return [Integer] number of "empty" slots in the queue
+    def self.empty_slots(step, lane = :default, threshold = 100)
       Workflow.assert_qualified(step)
-      queue = queue_name(step, priority)
+      queue = queue_name(step, lane)
       n = Resque.size(queue)
       ROBOT_LOG.debug { "queue size=#{n} #{queue}"}
-      (n < threshold)
+      n < threshold ? (threshold - n) : 0
     end
 
-    # Adds the given item to the priority queue for this step
+    # Adds the given item to the lane queue for this step
     #
     # Job names for the given step are converted like so:
     #
@@ -43,15 +45,15 @@ module RobotMaster
     #
     # @param [String] step fully qualified name
     # @param [String] druid
-    # @param [Symbol] priority see `priority_class`
+    # @param [Symbol | String] lane
     # @param [Hash] opts
     # @option opts [String] :repo_suffix suffix to append to the Repo component of the step name
     # @return [Hash] returns the `:queue` name and `klass` name enqueued
-    def self.enqueue(step, druid, priority, opts = {})
+    def self.enqueue(step, druid, lane = :default, opts = {})
       Workflow.assert_qualified(step)
   
-      # generate the specific priority queue name
-      queue = queue_name(step, priority)
+      # generate the specific lane queue name
+      queue = queue_name(step, lane)
   
       # generate the robot job class name
       opts[:repo_suffix] ||= 'Repo'
