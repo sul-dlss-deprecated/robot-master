@@ -149,31 +149,32 @@ module RobotMaster
       ROBOT_LOG.info("Processing #{step}")
       ROBOT_LOG.debug { "-- depends on #{process[:prereq].join(',')}" }
       
-      # fetch pending jobs for this step from the Workflow Service. 
-      lanes = ['default'] # XXX = Dor::WorkflowService.get_lanes(step)
+      # fetch pending jobs in all lanes for this step from the Workflow Service. 
       n = 0
+      lanes = Dor::WorkflowService.get_lane_ids(*(step.split(/:/)))
       lanes.each do |lane|
+        # only fetch the minimum results we'll need
+        # Note that we assume no robots working on the queue and robot-master runs periodically
+        nlimit = [process[:limit], Queue.empty_slots(step, lane, process[:limit])].min
+        next unless nlimit > 0
+        
         results = Dor::WorkflowService.get_objects_for_workstep(
                     process[:prereq],
                     step,
-                    # lane, # XXX
-                    nil, 
-                    nil, 
-                    with_priority: true, 
-                    limit: process[:limit]
+                    lane,
+                    limit: nlimit
                   )
-        ROBOT_LOG.debug { "Found #{results.size} druids: limited to #{n}" }
-        return 0 unless results.size > 0
-      
-        # perform the mediation
-        results.each do |druid, l| # XXX: update get_objects_for_workstep output
-          if Queue.empty_slots(step, l, process[:limit]) > 0
+        ROBOT_LOG.debug { "Found #{results.size} druids ready in lane #{lane}: limited to #{nlimit}" }
+              
+        # perform the mediation for this lane
+        results.each do |druid|
+          if Queue.empty_slots(step, lane, process[:limit]) > 0 # double check
             begin # XXX preferably within atomic transaction
               mark_enqueued(step, druid)
-              Queue.enqueue(step, druid, l)
+              Queue.enqueue(step, druid, lane)
               n += 1
             rescue => e
-              ROBOT_LOG.warn("Cannot enqueue job: #{step} #{druid} #{l}: #{e}")
+              ROBOT_LOG.warn("Cannot enqueue job: #{step} #{druid} #{lane}: #{e}")
               # continue to the next job
             end
           end
