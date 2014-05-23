@@ -1,9 +1,9 @@
 source 'https://rubygems.org'
 
-gem 'dor-workflow-service', '~> 1.6.2'
+gem 'dor-workflow-service', '~> 1.7.0'
 gem 'nokogiri', '~> 1.6.1'
 gem 'resque', '~> 1.25.2'
-gem 'robot-controller', '~> 0.2.0'
+gem 'robot-controller', '~> 0.3.0'
 gem 'awesome_print', '~> 1.2.0'
 
 group :development do

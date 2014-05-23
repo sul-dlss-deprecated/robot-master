@@ -1,19 +1,19 @@
 
-<h1>Priority Queues with Jobs</h1>
-<p class='intro'>The list below contains all priority queues with waiting job.</p>
+<h1>Lanes with Jobs</h1>
+<p class='intro'>The list below contains all lanes with waiting jobs.</p>
 
 <table>
 <tr>
   <th>Repo</th>
   <th>Workflow</th>
   <th>Robot</th>
-  <th>Priority</th>
+  <th>Lane</th>
   <th>Jobs</th>
 </tr>
 <% n = 0 %>
 <% resque.queues.sort_by { |q| q.to_s }.each do |queue| %>
     <% if (resque.size queue).to_i > 0 %>
-    <% n += resque.size queue %>
+    <%   n += resque.size queue %>
     <tr>
         <td><%= queue.split('_')[0] %></td>
         <td><%= queue.split('_')[1] %></td>
@@ -21,8 +21,8 @@
         <td><%= queue.split('_')[3] %></td>
         <td class='size'><%= resque.size queue %></td>
     </tr>
-    <% end %>
-    <% end %>
+  <% end %>
+<% end %>
 <% if n == 0 %>
     <tr>
       <td colspan="5" class='no-data'>Nothing is happening right now...</td>
@@ -45,7 +45,7 @@ worker_jobs = worker_jobs.reject { |w, j| w.idle? }
 <table class='workers'>
 <tr>
   <th>Where</th>
-  <th>Priority</th>
+  <th>Lane</th>
   <th>Processing</th>
   <th>Druid</th>
 </tr>
@@ -86,7 +86,7 @@ worker_jobs = worker_jobs.reject { |w, j| w.idle? }
   <th>Repo</th>
   <th>Workflow</th>
   <th>Robot</th>
-  <th>Priorities</th>
+  <th>Lanes</th>
 </tr>
 <% for worker in (workers = workers.sort_by { |w| w.to_s.split(':')[2].to_s }) %>
 <tr>
@@ -94,14 +94,16 @@ worker_jobs = worker_jobs.reject { |w, j| w.idle? }
   <% host, pid, queues = worker.to_s.split(':') %>
   <td><a href="<%=u "workers/#{worker}"%>"><%= host.to_s.gsub(/\.stanford\.edu/, '') %>:<%= pid %></a></td>
   
-  <% q = queues.split(',').first %>
+  <% qs = queues.split(',') %>
+  <% q = qs.first %>
   <td><%= q.split(/_/)[0] %></td>
   <td><%= q.split(/_/)[1] %></td>
   <td><%= q.split(/_/)[2] %></td>
-  <% if queues.split(',').size < 4 %>
-  <td><%= queues.split(',').map {|i| i.split(/_/)[3]}.join(' ') %></td>
+  <% if qs.size > 1 %>
+    <td><%= qs.map {|i| i.split(/_/)[3]}.join(' ') %></td>
   <% else %>
-  <td>all</td>
+  <%   z = q.split(/_/)[3] %>
+    <td><%= z == '*' ? 'all' : z %></td>
   <% end %>
 </tr>
 <% end %>
