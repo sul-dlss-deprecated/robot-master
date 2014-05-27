@@ -1,5 +1,5 @@
 # config valid only for Capistrano 3.2
-lock '3.2.0'
+lock '3.2.1'
 
 set :application, 'robot-master'
 set :repo_url, 'https://github.com/sul-dlss/robot-master.git'
