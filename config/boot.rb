@@ -13,8 +13,8 @@ ENV['ROBOT_LOG_LEVEL'] ||= 'info'
 ROBOT_LOG = Logger.new(ENV['ROBOT_LOG'].downcase == 'stdout' ? STDOUT : ENV['ROBOT_LOG'])
 ROBOT_LOG.level = Logger::SEV_LABEL.index(ENV['ROBOT_LOG_LEVEL'].upcase) || Logger::INFO
 
-# if running under debugging and using stdout, then run unbuffered
-STDOUT.sync = true if ENV['ROBOT_LOG_LEVEL'].downcase == 'debug' and ENV['ROBOT_LOG'].downcase == 'stdout'
+# if running using stdout, then run unbuffered
+STDOUT.sync = true if ENV['ROBOT_LOG'].downcase == 'stdout'
 
 # @see https://github.com/sul-dlss/dor-workflow-service
 require 'dor-workflow-service'
