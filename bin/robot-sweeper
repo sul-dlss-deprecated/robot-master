@@ -67,7 +67,7 @@ class RobotSweeperCLI
         :repo => failed['queue'].split(/_/)[0],
         :workflow => failed['queue'].split(/_/)[1],
         :step => failed['queue'].split(/_/)[2],
-        :priority => failed['queue'].split(/_/)[3],
+        :lane => failed['queue'].split(/_/)[3],
         :error_msg => "#{failed['exception']}: #{failed['error']}",
         :error_q => failed['queue'],
         :error_backtrace => failed['backtrace'].join("\n")
