@@ -10,10 +10,14 @@
   <th>Lane</th>
   <th>Jobs</th>
 </tr>
+<% m = 0 %>
 <% n = 0 %>
+<% l = {} %>
 <% resque.queues.sort_by { |q| q.to_s }.each do |queue| %>
     <% if (resque.size queue).to_i > 0 %>
+    <%   m += 1 %>
     <%   n += resque.size queue %>
+    <%   l[queue.split('_')[3]] = true %>
     <tr>
         <td><%= queue.split('_')[0] %></td>
         <td><%= queue.split('_')[1] %></td>
@@ -30,7 +34,7 @@
 <% end %>
 </table>
 <% if n > 0 %>
-<p><%= n %> jobs ready
+<p><%= n %> jobs ready in <%= m %> queues for <%= l.size %> lanes
 <% end %>
 <hr/>
 <%
