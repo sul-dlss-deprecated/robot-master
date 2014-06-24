@@ -8,7 +8,7 @@
     <label>Create JP2 derivatives for any images in object</label>
   </process>
   <process name="checksum-compute" sequence="3">
-    <prereq>jstart-assembly</prereq>
+    <prereq>start-assembly</prereq>
     <prereq>jp2-create</prereq>
     <label>Compute and compare checksums for any files referenced in contentMetadata</label>
   </process>
