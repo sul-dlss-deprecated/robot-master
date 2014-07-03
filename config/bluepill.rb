@@ -3,8 +3,8 @@ WORKFLOW_STEPS = %w{
   dor:accessionWF
   dor:assemblyWF
   dor:disseminationWF
-  dor::wasCrawlPreassemblyWF
-  dor::wasCrawlDisseminationWF
+  dor:wasCrawlPreassemblyWF
+  dor:wasCrawlDisseminationWF
 }
 REPEAT_EVERY = 15 # seconds
 
