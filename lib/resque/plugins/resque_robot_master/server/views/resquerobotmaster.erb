@@ -10,7 +10,7 @@
 <h1>Lanes with Jobs</h1>
 <p class='intro'>The list below contains all lanes with waiting jobs.</p>
 
-<table id='lane-table' class='stripe'>
+<table id='lane-table' class='display'>
 <thead>
 <tr>
   <th>Repo</th>
@@ -64,7 +64,7 @@ worker_jobs = worker_jobs.reject { |w, j| w.idle? }
 
 <h1 class='wi'>Robots Running Jobs</h1>
 <p class='intro'>The list below contains all robots which are currently running a job.</p>
-<table id='running-table' class='stripe'>
+<table id='running-table' class='display'>
   <thead>
 <tr>
   <th>Where</th>
@@ -112,7 +112,7 @@ worker_jobs = worker_jobs.reject { |w, j| w.idle? }
 
 <h1 class='wi'><%= workers.size %> Registered Robots</h1>
 <p class='intro'>The robots listed below are all registered as active on your cluster.</p>
-<table id='workers-table' class='stripe'>
+<table id='workers-table' class='display'>
   <thead>
 <tr>
   <th>Where</th>
