@@ -1,8 +1,17 @@
+<!-- DataTables CSS -->
+<link rel="stylesheet" type="text/css" href="//cdn.datatables.net/1.10.0/css/jquery.dataTables.css">
+  
+<!-- jQuery -->
+<script type="text/javascript" charset="utf8" src="//code.jquery.com/jquery-1.10.2.min.js"></script>
+  
+<!-- DataTables -->
+<script type="text/javascript" charset="utf8" src="//cdn.datatables.net/1.10.0/js/jquery.dataTables.min.js"></script>
 
 <h1>Lanes with Jobs</h1>
 <p class='intro'>The list below contains all lanes with waiting jobs.</p>
 
-<table>
+<table id='lane-table' class='display'>
+<thead>
 <tr>
   <th>Repo</th>
   <th>Workflow</th>
@@ -10,6 +19,8 @@
   <th>Lane</th>
   <th>Jobs</th>
 </tr>
+</thead>
+<tbody>
 <% m = 0 %>
 <% n = 0 %>
 <% l = {} %>
@@ -31,7 +42,14 @@
     <tr>
       <td colspan="5" class='no-data'>Nothing is happening right now...</td>
     </tr>
+<% else %>
+  <script>
+  $(document).ready(function() {
+      $('#lane-table').DataTable( { paging: false } );
+  } );
+  </script>
 <% end %>
+</tbody>
 </table>
 <% if n > 0 %>
 <p><%= n %> jobs ready in <%= m %> queues for <%= l.size %> lanes
@@ -46,17 +64,26 @@ worker_jobs = worker_jobs.reject { |w, j| w.idle? }
 
 <h1 class='wi'>Robots Running Jobs</h1>
 <p class='intro'>The list below contains all robots which are currently running a job.</p>
-<table class='workers'>
+<table id='running-table' class='display'>
+  <thead>
 <tr>
   <th>Where</th>
   <th>Lane</th>
   <th>Processing</th>
   <th>Druid</th>
 </tr>
+</thead>
+<tbody>
 <% if worker_jobs.empty? %>
 <tr>
   <td colspan="4" class='no-data'>Nothing is happening right now...</td>
 </tr>
+<% else %>
+  <script>
+  $(document).ready(function() {
+      $('#running-table').DataTable( { paging: false } );
+  } );
+  </script>
 <% end %>
 
 <% worker_jobs.sort_by {|w, j| j['run_at'] ? j['run_at'] : '' }.each do |worker, job| %>
@@ -75,6 +102,7 @@ worker_jobs = worker_jobs.reject { |w, j| w.idle? }
 </td>
   </tr>
 <% end %>
+</tbody>
 </table>
 <% if worker_jobs.size > 0 %>
 <p><%= worker_jobs.size %> robots running jobs</p>
@@ -84,7 +112,8 @@ worker_jobs = worker_jobs.reject { |w, j| w.idle? }
 
 <h1 class='wi'><%= workers.size %> Registered Robots</h1>
 <p class='intro'>The robots listed below are all registered as active on your cluster.</p>
-<table>
+<table id='workers-table' class='display'>
+  <thead>
 <tr>
   <th>Where</th>
   <th>Repo</th>
@@ -92,6 +121,8 @@ worker_jobs = worker_jobs.reject { |w, j| w.idle? }
   <th>Robot</th>
   <th>Lanes</th>
 </tr>
+</thead>
+<tbody>
 <% for worker in (workers = workers.sort_by { |w| w.to_s.split(':')[2].to_s }) %>
 <tr>
 
@@ -115,5 +146,12 @@ worker_jobs = worker_jobs.reject { |w, j| w.idle? }
 <tr>
   <td colspan='5' class='no-data'>There are no registered workers</td>
 </tr>
+<% else %>
+  <script>
+  $(document).ready(function() {
+    $('#workers-table').DataTable( { paging: false } );
+  } );
+  </script>
 <% end %>
+</tbody>
 </table>
