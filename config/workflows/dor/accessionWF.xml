@@ -46,13 +46,13 @@
   <process batch-limit="1" error-limit="5" lifecycle="deposited" name="sdr-ingest-received" sequence="11" skip-queue="true">
     <label>Signal from SDR that object has been received</label>
   </process>
-  <process batch-limit="1" error-limit="5" name="archive-workspace" sequence="12">
-    <label>Archive workspace is renaming the druid-tree to a versioned directory</label>
+  <process batch-limit="1" error-limit="5" name="reset-workspace" sequence="12">
+    <label>Reset workspace by renaming the druid-tree to a versioned directory</label>
+    <prereq>sdr-ingest-received</prereq>
     <prereq>publish</prereq>
   </process>
   <process batch-limit="1" error-limit="5" lifecycle="accessioned" name="end-accession" sequence="13">
     <label>Clean up any diff caches and set disseminationWF:cleanup to waiting</label>
-    <prereq>sdr-ingest-received</prereq>
-    <prereq>archive-workspace</prereq>
+    <prereq>reset-workspace</prereq>
   </process>
 </workflow-def>
