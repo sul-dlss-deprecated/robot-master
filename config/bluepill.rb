@@ -5,6 +5,9 @@ WORKFLOW_STEPS = %w{
   dor:disseminationWF
   dor:wasCrawlPreassemblyWF
   dor:wasCrawlDisseminationWF
+  dor:gisAssemblyWF
+  dor:gisDeliveryWF
+  dor:gisDiscoveryWF
 }
 REPEAT_EVERY = 15 # seconds
 
