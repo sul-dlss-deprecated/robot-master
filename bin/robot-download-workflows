@@ -10,22 +10,10 @@ require 'solrizer'
   
 # XXX: get from config/environment/environment.rb
 FEDORA_URL = 'https://sul-dor-dev.stanford.edu/fedora'
-# XXX: get druids from DOR's Solr index
-WORKFLOWS = Hash[*%w{
-  bb163sd6279 dor/sdrIngestWF
-  dd778qy4284 dor/dpgImageWF
-  dz388gs4054 dor/eemsAccessionWF
-  fy957df3135 dor/digitizationWF
-  gb941hc6393 dor/googleScannedBookWF
-  nb274zx7788 dor/disseminationWF
-  oo000oo0099 dor/hydrusAssemblyWF
-  rs056hz6024 dor/assemblyWF
-  sh219xb1690 dor/registrationWF
-  tm388wy6148 dor/accessionWF
-  vn914kc9255 dor/etdSubmitWF
-  yp220bx1022 dor/versioningWF
-}]
 
+Dor::Config.configure do
+ solrizer.url 'http://sul-solr.stanford.edu/solr/argo_dev'
+end
 
 class RobotDownloadWorkflowsCLI
   def run(args)
