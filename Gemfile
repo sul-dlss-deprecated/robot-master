@@ -5,6 +5,8 @@ gem 'nokogiri', '~> 1.6.1'
 gem 'resque', '~> 1.25.2'
 gem 'robot-controller', '~> 0.3.0'
 gem 'awesome_print', '~> 1.2.0'
+gem 'dor-services', '~> 4.4.13'
+gem 'addressable', '2.3.5' # lock due to RDF bug in 2.3.6
 
 group :development do
   source 'http://sul-gems-prod.stanford.edu'
