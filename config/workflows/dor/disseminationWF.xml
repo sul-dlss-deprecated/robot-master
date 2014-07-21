@@ -1,4 +1,0 @@
-
-<workflow-def id="disseminationWF" repository="dor">
-  <process name="cleanup"></process>
-</workflow-def>
