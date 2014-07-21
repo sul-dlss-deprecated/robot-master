@@ -5,8 +5,11 @@
 require 'optparse'
 require 'awesome_print'
 require 'rest-client'
-
-FEDORA_URL = 'https://sul-dor-prod.stanford.edu/fedora'
+require 'dor-services'
+require 'solrizer'
+  
+# XXX: get from config/environment/environment.rb
+FEDORA_URL = 'https://sul-dor-dev.stanford.edu/fedora'
 # XXX: get druids from DOR's Solr index
 WORKFLOWS = Hash[*%w{
   bb163sd6279 dor/sdrIngestWF
@@ -43,14 +46,25 @@ class RobotDownloadWorkflowsCLI
     
     # Initialize the workflow, and set the repository if prepended with :
     dor_url = args.shift || FEDORA_URL
-    cert_file = args.shift || 'config/certs/dlss-dev-drh-dor-prod.crt'
-    key_file = args.shift || 'config/certs/dlss-dev-drh-dor-prod.key'
+    cert_file = args.shift || 'config/certs/dlss-dev-drh-dor-dev.crt'
+    key_file = args.shift || 'config/certs/dlss-dev-drh-dor-dev.key'
     ap({:dor_url => dor_url, :cert_file => cert_file, :key_file => key_file, :flags => flags}) if flags[:debug]
     
-    WORKFLOWS.each do |druid, wf|
+    puts "Loading druids for all workflow objects..."
+    solr = Dor::SearchService.solr
+    # ap({:solr => solr})
+    res = Dor::SearchService.query("objectType_t:workflow", rows: 1000, fl: "id,workflow_name_s")
+    # ap({:response => res})
+    res[:response][:docs].each do |doc|
+      if doc[:workflow_name_s].nil?
+        puts "ERROR: Skipping malformed workflow #{doc[:id]}"
+        next
+      end
+      druid = doc[:id]
+      wf = doc[:workflow_name_s].first
       ap({:druid => druid, :wf => wf, :flags => flags}) if flags[:debug]
-      uri = URI.parse("#{FEDORA_URL}/objects/druid:#{druid}/datastreams/workflowDefinition/content")
-      fn = "config/workflows/#{wf}.xml"
+      uri = URI.parse("#{FEDORA_URL}/objects/#{druid}/datastreams/workflowDefinition/content")
+      fn = "config/workflows/dor/#{wf}.xml"
       begin
         puts "Downloading #{uri} to #{fn}"
         res = RestClient::Resource.new(
@@ -70,4 +84,5 @@ class RobotDownloadWorkflowsCLI
 end
 
 # __MAIN__
+require File.expand_path(File.dirname(__FILE__) + '/../config/boot')
 RobotDownloadWorkflowsCLI.new.run(ARGV)
