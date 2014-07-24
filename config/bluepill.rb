@@ -16,7 +16,7 @@ Bluepill.application 'robot-master',
   
   [ENV['ROBOT_ENVIRONMENT']].each do |e|
       WORKFLOW_STEPS.each do |wf|
-        app.process(wf) do |process|
+        app.process("#{wf.sub(':', '_')}") do |process|
           process.start_command "bin/robot-master --repeat-every=#{REPEAT_EVERY} #{wf}"
 
           # process configuration
