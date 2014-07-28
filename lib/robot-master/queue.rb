@@ -41,6 +41,7 @@ module RobotMaster
     # Job names for the given step are converted like so:
     #
     # - `dor:assemblyWF:jp2-create` into `Robots::DorRepo::Assembly::Jp2Create`
+    # - `dor:gisAssemblyWF:start-assembly-workflow` into `Robots::DorRepo::GisAssembly::StartAssemblyWorkflow`
     # - `dor:etdSubmitWF:binder-transfer` into `Robots:DorRepo::EtdSubmit::BinderTransfer`
     #
     # @param [String] step fully qualified name
