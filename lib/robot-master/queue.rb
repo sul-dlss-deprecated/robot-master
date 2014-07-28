@@ -62,7 +62,7 @@ module RobotMaster
         'Robots',
         r.camelcase + opts[:repo_suffix], # 'Dor' conflicts with dor-services
         w.sub('WF', '').camelcase,
-        s.sub('-', '_').camelcase
+        s.gsub('-', '_').camelcase
       ].join('::')
   
       # perform the enqueue to Resque
