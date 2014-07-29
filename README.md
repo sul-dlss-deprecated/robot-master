@@ -93,20 +93,20 @@ you want to enable this!)
 
 in pseudo-code:
 
-    foreach repository do
-      foreach workflow do
-        foreach process-step do
-          if queues need jobs then within transaction do
-            jobs = fetch N jobs with 'ready' status by priority from workflow service 
-            jobs.each do |job|
-              mark job as 'queued' in workflow service
+    foreach repository r do
+      foreach workflow w do
+        foreach process-step s do
+          foreach lane l do
+            if queue for step s lane l need jobs then within transaction do
+              jobs = fetch N jobs with 'ready' status from lane l step s from workflow service 
+              jobs.each do |job|
+                mark job as 'queued' in workflow service
+              end
             end
-          end
-          jobs.each do |job|
-            enqueue job into Resque queue
-          end
-          foreach job in /failed queue do
-            mark job status as 'error' in workflow service if not already marked
+            jobs.each do |job|
+              enqueue job into Resque queue
+              -- later job runs
+            end
           end
         end
       end
