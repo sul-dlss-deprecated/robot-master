@@ -152,6 +152,7 @@ module RobotMaster
       # fetch pending jobs in all lanes for this step from the Workflow Service. 
       n = 0
       lanes = Dor::WorkflowService.get_lane_ids(*(step.split(/:/)))
+      ROBOT_LOG.debug { "-- found #{lanes.size} lanes" }
       lanes.each do |lane|
         # only fetch the minimum results we'll need
         # Note that we assume no robots working on the queue and robot-master runs periodically
