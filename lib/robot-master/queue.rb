@@ -56,15 +56,7 @@ module RobotMaster
       # generate the specific lane queue name
       queue = queue_name(step, lane)
   
-      # generate the robot job class name
-      opts[:repo_suffix] ||= 'Repo'
-      r, w, s = Workflow.parse_qualified(step)
-      klass = [
-        'Robots',
-        r.camelcase + opts[:repo_suffix], # 'Dor' conflicts with dor-services
-        w.sub('WF', '').camelcase,
-        s.gsub('-', '_').camelcase
-      ].join('::')
+      klass = LyberCore::Robot.step_to_classname step
   
       # perform the enqueue to Resque
       ROBOT_LOG.debug { "enqueue_to: #{queue} #{klass} #{druid}" }
