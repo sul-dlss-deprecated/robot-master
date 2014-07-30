@@ -16,13 +16,13 @@ Bluepill.application 'robot-master',
   
   [ENV['ROBOT_ENVIRONMENT']].each do |e|
       WORKFLOW_STEPS.each do |wf|
-        app.process("#{wf.sub(':', '_')}") do |process|
+        app.process("#{wf.gsub(':', '_')}") do |process|
           process.start_command "bin/robot-master --repeat-every=#{REPEAT_EVERY} #{wf}"
 
           # process configuration
           process.working_dir = WORKDIR
           process.group = "#{e}"
-          process.stdout = process.stderr = "#{WORKDIR}/log/#{e}_#{wf.sub(':', '_')}.log"
+          process.stdout = process.stderr = "#{WORKDIR}/log/#{e}_#{wf.gsub(':', '_')}.log"
           
           # let bluepill manage pid files
           # process.pid_file "#{WORKDIR}/run/#{e}_#{wf.sub(':', '_')}.pid"
