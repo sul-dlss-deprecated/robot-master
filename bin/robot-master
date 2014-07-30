@@ -101,8 +101,9 @@ class RobotMasterCLI
       
       # sleep for a while if we're looping, otherwise quit
       if flags[:loop] > 0
-        ROBOT_LOG.debug { "Waiting #{flags[:loop]} seconds before next run" }
-        sleep flags[:loop]
+        nsec = flags[:loop] + rand(0..5) # add random backoff
+        ROBOT_LOG.debug { "Waiting #{nsec} seconds before next run" }
+        sleep nsec
       else
         break # iterate once
       end
