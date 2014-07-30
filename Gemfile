@@ -8,7 +8,6 @@ gem 'awesome_print', '~> 1.2.0'
 gem 'dor-services', '~> 4.4.13'
 gem 'lyber-core', '~> 3.2.3'
 gem 'addressable', '2.3.5' # lock due to RDF bug in 2.3.6
-gem 'lyber-core'
 
 group :development do
   source 'http://sul-gems-prod.stanford.edu'
