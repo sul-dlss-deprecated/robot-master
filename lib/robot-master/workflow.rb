@@ -106,7 +106,7 @@ module RobotMaster
           Dor::WorkflowService.update_workflow_status(r, druid, w, s, mark_status.to_s, :current_status 'waiting')
         end
       rescue => e
-        ROBOT_LOG.warn("Update workflow status failed for waiting->queued transition: #{e}")
+        ROBOT_LOG.error("Update workflow status failed for waiting->queued transition on #{druid}: #{e}")
         raise e
       end
       mark_status
@@ -175,7 +175,7 @@ module RobotMaster
               Queue.enqueue(step, druid, lane)
               n += 1
             rescue => e
-              ROBOT_LOG.warn("Cannot enqueue job: #{step} #{druid} #{lane}: #{e}")
+              ROBOT_LOG.error("Cannot enqueue job: #{step} #{druid} #{lane}: #{e}")
               # continue to the next job
             end
           end
