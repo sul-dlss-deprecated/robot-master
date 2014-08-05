@@ -109,8 +109,8 @@ class RobotMasterCLI
         break # iterate once
       end
     end
-    
-    ROBOT_LOG.info("Finished RobotMaster: #{flags[:workflow]} (#{(Time.now - start).to_i} seconds, #{n} jobs)")
+    elapsed = Time.now - start
+    ROBOT_LOG.info("Finished RobotMaster: #{flags[:workflow]} (#{elapsed.to_i} seconds #{n} jobs)")
   end
 end
 

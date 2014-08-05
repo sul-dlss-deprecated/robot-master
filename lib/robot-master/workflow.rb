@@ -15,7 +15,8 @@ module RobotMaster
       ROBOT_LOG.debug { "Start Workflow.perform(#{repository}, #{workflow})" }
       master = new(repository, workflow)
       n = master.perform
-      ROBOT_LOG.info { "Finished Workflow.perform(#{repository}, #{workflow}): #{Time.now - start} seconds" }
+      elapsed = Time.now - start
+      ROBOT_LOG.info { "Finished Workflow.perform(#{repository}, #{workflow}): #{elapsed.to_i} seconds #{n} jobs" }
       n
     end
 
