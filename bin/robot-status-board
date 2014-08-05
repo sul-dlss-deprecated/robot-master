@@ -22,7 +22,6 @@ class RobotStatusBoardCLI
     doc.root['count'].to_i    
   end
 
-  # ?waiting=dor:accessionWF:technical-metadata&lane-id=default&count-only=true
   def count_ready step, prereq, lane
     uri = "#{WQ}?waiting=#{step}&completed=#{prereq}&lane-id=#{lane}&count-only=true"
     xml = RestClient.get uri
