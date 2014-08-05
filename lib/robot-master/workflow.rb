@@ -14,8 +14,9 @@ module RobotMaster
       start = Time.now
       ROBOT_LOG.debug { "Start Workflow.perform(#{repository}, #{workflow})" }
       master = new(repository, workflow)
-      master.perform
+      n = master.perform
       ROBOT_LOG.info { "Finished Workflow.perform(#{repository}, #{workflow}): #{Time.now - start} seconds" }
+      n
     end
 
     # @return [Boolean] true if step is a qualified name, 
