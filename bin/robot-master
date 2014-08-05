@@ -90,10 +90,11 @@ class RobotMasterCLI
     
     # Perform actual work finally
     ROBOT_LOG.info("Starting RobotMaster #{RobotMaster::VERSION}: #{flags[:workflow]}")
+    n = 0
     start = Time.now
     while true do
       begin
-        perform(flags[:workflow], flags)
+        n += perform(flags[:workflow], flags)
       rescue => e
         ROBOT_LOG.error("#{flags[:workflow]}: #{e}")
         raise e unless flags[:loop] > 0 # don't error out if looping
@@ -109,7 +110,7 @@ class RobotMasterCLI
       end
     end
     
-    ROBOT_LOG.info("Finished RobotMaster: #{flags[:workflow]} (#{(Time.now - start).to_i} seconds)")
+    ROBOT_LOG.info("Finished RobotMaster: #{flags[:workflow]} (#{(Time.now - start).to_i} seconds, #{n} jobs)")
   end
 end
 
