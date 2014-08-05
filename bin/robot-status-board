@@ -35,7 +35,7 @@ class RobotStatusBoardCLI
     fn = "config/workflows/#{repo}/#{wf}.xml"
     doc = Nokogiri::XML(File.read(fn))
     doc.root.xpath('.//process').each do |p|
-      puts "Processing step #{p['name']}"
+      STDERR.puts "Processing step #{p['name']}"
       status[p['name']] = {}
       n = count_process([repo, wf, p['name']].join(':'), 'default')
       status[p['name']][:waiting] = n
@@ -46,6 +46,7 @@ class RobotStatusBoardCLI
       end
     end
     # ap({:status => status})
+    puts "step\twaiting\tready"
     status.each do |k, v|
       puts "#{k}\t#{v[:waiting]}\t#{v[:ready]}"
     end
