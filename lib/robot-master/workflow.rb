@@ -70,7 +70,8 @@ module RobotMaster
     # Queries the workflow service for all druids awaiting processing, and 
     # queues them into a priority queue.
     # @return [RobotMaster::Workflow] self
-    def perform      
+    def perform   
+      total = 0   
       # perform on each process step
       @config.xpath('//process').each do |node|        
         process = parse_process_node(node)
@@ -83,9 +84,10 @@ module RobotMaster
         
         # doit
         (n, lanes) = perform_on_process(process)
+        total += n
         ROBOT_LOG.info("Queued #{n} jobs across #{lanes.size} lanes for #{process[:name]}") if n > 0
       end
-      self
+      total
     end    
     
     protected
@@ -103,7 +105,7 @@ module RobotMaster
       r, w, s = Workflow.parse_qualified(step)
       begin
         if ENV['ROBOT_MASTER_ENABLE_UPDATE_WORKFLOW_STATUS'] == 'yes'
-          Dor::WorkflowService.update_workflow_status(r, druid, w, s, mark_status.to_s, :current_status 'waiting')
+          Dor::WorkflowService.update_workflow_status(r, druid, w, s, mark_status.to_s, current_status: 'waiting')
         end
       rescue => e
         ROBOT_LOG.error("Update workflow status failed for waiting->queued transition on #{druid}: #{e}")
