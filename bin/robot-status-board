@@ -1,0 +1,85 @@
+#!/usr/bin/env ruby
+#
+# Usage: robot-status-board [-v] [repository:]workflow
+#        where repository = 'dor' by default
+#
+# @example
+#   robot-status-board accessionWF
+#
+require 'optparse'
+require 'awesome_print'
+require 'nokogiri'
+require 'restclient'
+
+WQ = 'https://lyberservices-dev.stanford.edu/workflow/workflow_queue'
+
+class RobotStatusBoardCLI
+  # ?waiting=dor:accessionWF:technical-metadata&lane-id=default&count-only=true
+  def count_process step, lane
+    uri = "#{WQ}?waiting=#{step}&lane-id=#{lane}&count-only=true"
+    xml = RestClient.get uri
+    doc = Nokogiri::XML(xml)
+    doc.root['count'].to_i    
+  end
+
+  # ?waiting=dor:accessionWF:technical-metadata&lane-id=default&count-only=true
+  def count_ready step, prereq, lane
+    uri = "#{WQ}?waiting=#{step}&completed=#{prereq}&lane-id=#{lane}&count-only=true"
+    xml = RestClient.get uri
+    doc = Nokogiri::XML(xml)
+    doc.root['count'].to_i    
+  end
+  
+  def doit(repo, wf, flags = {})    
+    status = {}
+    fn = "config/workflows/#{repo}/#{wf}.xml"
+    doc = Nokogiri::XML(File.read(fn))
+    doc.root.xpath('.//process').each do |p|
+      puts "Processing step #{p['name']}"
+      status[p['name']] = {}
+      n = count_process([repo, wf, p['name']].join(':'), 'default')
+      status[p['name']][:waiting] = n
+      status[p['name']][:ready] = n
+      p.xpath('prereq/text()').each do |pr|
+        n = count_ready([repo, wf, p['name']].join(':'), [repo, wf, pr.to_s].join(':'), 'default')
+        status[p['name']][:ready] = n
+      end
+    end
+    # ap({:status => status})
+    status.each do |k, v|
+      puts "#{k}\t#{v[:waiting]}\t#{v[:ready]}"
+    end
+  end
+  
+  def run(args)
+    flags = {
+      :verbose => false,
+      :debug => false,
+      :repository => 'dor'
+    }
+    
+    args = %w{--help} if args.nil? or args.empty?
+  
+    OptionParser.new do |opts|
+      opts.banner = "Usage:\t#{File.basename(__FILE__)} [flags] [repo:]workflow"
+      opts.on('-v', '--verbose', 'Run verbosely, use multiple times for debug level output') do
+        flags[:debug] = true if flags[:verbose]  # -vv
+        flags[:verbose] = true
+      end
+    end.parse!(args)
+    ap({:args => args}) if flags[:debug]
+    
+    # Initialize the workflow, and set the repository if prepended with :
+    flags[:workflow] = args.shift
+    raise ArgumentError, "Missing required workflow" if flags[:workflow].nil?
+    if flags[:workflow] =~ /:/
+      flags[:repository], flags[:workflow] = flags[:workflow].split(/:/, 2)
+    end    
+    ap({:flags => flags}) if flags[:debug]
+
+    doit(flags[:repository], flags[:workflow], flags)
+  end
+end
+
+# __MAIN__
+RobotStatusBoardCLI.new.run(ARGV)
