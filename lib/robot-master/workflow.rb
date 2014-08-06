@@ -1,3 +1,5 @@
+require 'threach'
+
 module RobotMaster
 
   # Manages a workflow to enqueue jobs into a priority queue
@@ -71,11 +73,13 @@ module RobotMaster
 
     # Queries the workflow service for all druids awaiting processing, and 
     # queues them into a priority queue.
+    #
+    # @param [Integer] nthread concurrency for steps where 0 is linear
     # @return [RobotMaster::Workflow] self
-    def perform   
+    def perform nthread = 5
       total = 0   
       # perform on each process step
-      @config.xpath('//process').each do |node|        
+      @config.xpath('//process').threach(nthread) do |node|        
         process = parse_process_node(node)
         
         # skip any processes that do not require queueing
