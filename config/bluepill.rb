@@ -8,6 +8,7 @@ WORKFLOW_STEPS = %w{
   dor:gisAssemblyWF
   dor:gisDeliveryWF
   dor:gisDiscoveryWF
+  sdr:sdrIngestWF
 }
 REPEAT_EVERY = 15 # seconds
 

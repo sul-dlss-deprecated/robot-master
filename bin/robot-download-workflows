@@ -3,6 +3,7 @@
 # Usage: robot-download-workflow [-v] [dor-url]
 #
 require 'optparse'
+require 'fileutils'
 require 'awesome_print'
 require 'rest-client'
 require 'dor-services'
@@ -40,9 +41,9 @@ class RobotDownloadWorkflowsCLI
     
     puts "Loading druids for all workflow objects..."
     solr = Dor::SearchService.solr
-    # ap({:solr => solr})
+    ap({:solr => solr}) if flags[:debug]
     res = Dor::SearchService.query("objectType_t:workflow", rows: 1000, fl: "id,workflow_name_s")
-    # ap({:response => res})
+    ap({:response => res}) if flags[:debug]
     res[:response][:docs].each do |doc|
       if doc[:workflow_name_s].nil?
         puts "ERROR: Skipping malformed workflow #{doc[:id]}"
@@ -52,9 +53,8 @@ class RobotDownloadWorkflowsCLI
       wf = doc[:workflow_name_s].first
       ap({:druid => druid, :wf => wf, :flags => flags}) if flags[:debug]
       uri = URI.parse("#{FEDORA_URL}/objects/#{druid}/datastreams/workflowDefinition/content")
-      fn = "config/workflows/dor/#{wf}.xml"
       begin
-        puts "Downloading #{uri} to #{fn}"
+        puts "Downloading #{uri}" if flags[:debug]
         res = RestClient::Resource.new(
           uri.to_s,
           :ssl_client_cert  =>  OpenSSL::X509::Certificate.new(File.read(cert_file)),
@@ -62,11 +62,18 @@ class RobotDownloadWorkflowsCLI
           :verify_ssl       =>  OpenSSL::SSL::VERIFY_PEER
         )
         ap({:res => res}) if flags[:debug]
-        File.open(fn, 'wb').write(res.get)
+        
+        ng = Nokogiri::XML(res.get)
+        repo = ng.root['repository']
+        fn = "config/workflows/#{repo}/#{wf}.xml"
+        FileUtils.mkdir_p(File.dirname(fn)) unless File.directory?(File.dirname(fn))
+        puts "Saving #{fn}"
+        File.open(fn, 'wb') do |f|
+          f.write(res.get)
+        end
       rescue OpenSSL::SSL::SSLError => e
         puts "#{e.class}: #{e}"
-      end
-      
+      end      
     end
   end
 end
