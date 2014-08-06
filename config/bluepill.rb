@@ -1,15 +1,7 @@
 WORKDIR=File.expand_path(File.join(File.dirname(__FILE__), '..'))
-WORKFLOW_STEPS = %w{
-  dor:accessionWF
-  dor:assemblyWF
-  dor:disseminationWF
-  dor:wasCrawlPreassemblyWF
-  dor:wasCrawlDisseminationWF
-  dor:gisAssemblyWF
-  dor:gisDeliveryWF
-  dor:gisDiscoveryWF
-  sdr:sdrIngestWF
-}
+WORKFLOW_STEPS = Dir.glob('config/workflows/**/*.xml').map do |i| 
+  i.gsub('config/workflows/', '').sub('/',':').sub('.xml','')
+end
 REPEAT_EVERY = 15 # seconds
 
 Bluepill.application 'robot-master', 
