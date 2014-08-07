@@ -62,7 +62,11 @@ worker_jobs = workers.zip(jobs)
 worker_jobs = worker_jobs.reject { |w, j| w.idle? }
 %>
 
-<h1 class='wi'>Robots Running Jobs</h1>
+<h1 class='wi'>
+    <% if worker_jobs.size > 0 %>
+      <%= worker_jobs.size %>
+    <% end %>
+    Robots Running Jobs</h1>
 <p class='intro'>The list below contains all robots which are currently running a job.</p>
 <table id='running-table' class='display'>
   <thead>
