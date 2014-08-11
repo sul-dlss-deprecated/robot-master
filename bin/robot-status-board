@@ -11,7 +11,7 @@ require 'awesome_print'
 require 'nokogiri'
 require 'restclient'
 
-WQ = 'https://lyberservices-dev.stanford.edu/workflow/workflow_queue'
+WQ = 'https://localhost/workflow/workflow_queue'
 
 class RobotStatusBoardCLI
   # ?waiting=dor:accessionWF:technical-metadata&lane-id=default&count-only=true
@@ -34,7 +34,7 @@ class RobotStatusBoardCLI
     fn = "config/workflows/#{repo}/#{wf}.xml"
     doc = Nokogiri::XML(File.read(fn))
     doc.root.xpath('.//process').each do |p|
-      STDERR.puts "Processing step #{p['name']}"
+      STDERR.puts "Processing step #{p['name']}" if flags[:debug]
       status[p['name']] = {}
       n = count_process([repo, wf, p['name']].join(':'), 'default')
       status[p['name']][:waiting] = n
