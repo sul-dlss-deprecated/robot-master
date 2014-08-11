@@ -45,9 +45,10 @@ class RobotStatusBoardCLI
       end
     end
     # ap({:status => status})
-    puts "step\twaiting\tready"
+    puts ['step', 'waiting', 'ready'].join(' | ')
+    puts ['----', '-------', '-----'].join(' | ')
     status.each do |k, v|
-      puts "#{k}\t#{v[:waiting]}\t#{v[:ready]}"
+      puts ["#{k}", "#{v[:waiting]}", "#{v[:ready]}"].join(' | ')
     end
   end
   
