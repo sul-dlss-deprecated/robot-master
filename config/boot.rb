@@ -4,10 +4,6 @@ require 'rubygems'
 require 'bundler/setup'
 require 'logger'
 
-# Load the environment file based on Environment.  Default to development
-ENV['ROBOT_ENVIRONMENT'] ||= 'development'
-require File.expand_path(File.join(File.dirname(__FILE__), 'environments', ENV['ROBOT_ENVIRONMENT']))
-
 ENV['ROBOT_LOG'] ||= 'stdout'
 ENV['ROBOT_LOG_LEVEL'] ||= 'info'
 ROBOT_LOG = Logger.new(ENV['ROBOT_LOG'].downcase == 'stdout' ? STDOUT : ENV['ROBOT_LOG'])
@@ -15,6 +11,11 @@ ROBOT_LOG.level = Logger::SEV_LABEL.index(ENV['ROBOT_LOG_LEVEL'].upcase) || Logg
 
 # if running using stdout, then run unbuffered
 STDOUT.sync = true if ENV['ROBOT_LOG'].downcase == 'stdout'
+
+# Load the environment file based on Environment.  Default to development
+require 'dor-services'
+ENV['ROBOT_ENVIRONMENT'] ||= 'development'
+require File.expand_path(File.join(File.dirname(__FILE__), 'environments', ENV['ROBOT_ENVIRONMENT']))
 
 # @see https://github.com/sul-dlss/dor-workflow-service
 require 'dor-workflow-service'

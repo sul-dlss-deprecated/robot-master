@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby
 #
-# Usage: robot-download-workflow [-v] [dor-url]
+# Usage: robot-download-workflow [-v] [dor-url cert_file key_file]
 #
 require 'optparse'
 require 'fileutils'
@@ -9,12 +9,13 @@ require 'rest-client'
 require 'dor-services'
 require 'solrizer'
   
-# XXX: get from config/environment/environment.rb
-FEDORA_URL = 'https://sul-dor-dev.stanford.edu/fedora'
+# Load the environment file based on Environment.  Default to development
+ENV['ROBOT_ENVIRONMENT'] ||= 'development'
+require File.expand_path(File.join(File.dirname(__FILE__), '..', 'config', 'environments', ENV['ROBOT_ENVIRONMENT']))
 
-Dor::Config.configure do
- solrizer.url 'http://sul-solr.stanford.edu/solr/argo_dev'
-end
+FEDORA_URL = Dor::Config.fedora.url
+CERT_FILE = Dor::Config.ssl.cert_file
+KEY_FILE = Dor::Config.ssl.key_file
 
 class RobotDownloadWorkflowsCLI
   def run(args)
@@ -35,8 +36,8 @@ class RobotDownloadWorkflowsCLI
     
     # Initialize the workflow, and set the repository if prepended with :
     dor_url = args.shift || FEDORA_URL
-    cert_file = args.shift || 'config/certs/dlss-dev-drh-dor-dev.crt'
-    key_file = args.shift || 'config/certs/dlss-dev-drh-dor-dev.key'
+    cert_file = args.shift || CERT_FILE
+    key_file = args.shift || KEY_FILE
     ap({:dor_url => dor_url, :cert_file => cert_file, :key_file => key_file, :flags => flags}) if flags[:debug]
     
     puts "Loading druids for all workflow objects..."
