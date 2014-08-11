@@ -154,8 +154,7 @@ module RobotMaster
       self.class.assert_qualified(step)
       process[:limit] ||= QUEUE_LIMIT_DEFAULT
 
-      ROBOT_LOG.info("Processing #{step}")
-      ROBOT_LOG.debug { "-- depends on #{process[:prereq].join(',')}" }
+      ROBOT_LOG.debug { "Processing #{step} -- depends on #{process[:prereq].join(',')}" }
       
       # fetch pending jobs in all lanes for this step from the Workflow Service. 
       n = 0
