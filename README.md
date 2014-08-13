@@ -112,3 +112,8 @@ in pseudo-code:
       end
     end
 
+## Changes
+
+* `v1.0.0`: Initial version
+* `v1.0.1`: Update `bin/robot-status-board` to include all statuses
+
