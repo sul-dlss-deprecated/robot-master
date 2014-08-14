@@ -38,6 +38,8 @@ set :stages, %W(development staging production)
 
 set :linked_dirs, %w(log run config/certs config/environments config/workflows tmp public)
 
+set :linked_files, %w{config.ru}
+
 namespace :deploy do
 
   desc 'Restart application'
