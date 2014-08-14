@@ -1,3 +1,5 @@
+set :default_env, { robot_environment: "production" }
+
 # Simple Role Syntax
 # ==================
 # Supports bulk-adding hosts to roles, the primary
