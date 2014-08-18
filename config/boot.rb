@@ -37,7 +37,7 @@ Resque.redis = REDIS_URL
 
 require 'active_support/core_ext' # camelcase
 require 'lyber_core'
-LyberCore::Log.set_logfile('/dev/null') # Fixes #35
+LyberCore::Log.set_logfile(ENV['ROBOT_LOG'].downcase == 'stdout' ? STDOUT : ENV['ROBOT_LOG']) # Fixes #35
 require 'robot-master'
 
 
