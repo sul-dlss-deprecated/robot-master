@@ -163,7 +163,7 @@ worker_jobs = worker_jobs.reject { |w, j| w.idle? }
 <hr/>
 
 <% k = 'robot-master:running' %>
-<% robotmasters = Resque.redis.smembers(k).sort_by { |i| i.to_s.split(':')[1].to_s } %>
+<% robotmasters = Resque.redis.smembers(k).sort_by { |i| i.to_s.split(':')[2].to_s } %>
 
 <h1 class='wi'><%= robotmasters.size %> Registered Robot Masters</h1>
 <p class='intro'>The robot-masters listed below are all registered as active on your cluster.</p>
