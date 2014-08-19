@@ -159,3 +159,39 @@ worker_jobs = worker_jobs.reject { |w, j| w.idle? }
 <% end %>
 </tbody>
 </table>
+
+<hr/>
+
+<% k = 'robot-master:running' %>
+<% robotmasters = Resque.redis.smembers(k).sort_by { |i| i.to_s.split(':')[2].to_s } %>
+
+<h1 class='wi'><%= robotmasters.size %> Registered Robot Masters</h1>
+<p class='intro'>The robot-masters listed below are all registered as active on your cluster.</p>
+<table id='robotmaster-table' class='display'>
+  <thead>
+<tr>
+  <th>Where</th>
+  <th>Workflow</th>
+</tr>
+</thead>
+<tbody>
+<% for robotmaster in robotmasters %>
+<tr>
+  <% host, pid, wf = robotmaster.to_s.split(':') %>
+  <td><%= [host.to_s.gsub(/\.stanford\.edu/, ''), pid].join(':') %></td>  
+  <td><%= wf %></td>
+</tr>
+<% end %>
+<% if robotmasters.empty? %>
+<tr>
+  <td colspan='2' class='no-data'>There are no registered robot masters</td>
+</tr>
+<% else %>
+  <script>
+  $(document).ready(function() {
+    $('#robotmaster-table').DataTable( { paging: false } );
+  } );
+  </script>
+<% end %>
+</tbody>
+</table>
