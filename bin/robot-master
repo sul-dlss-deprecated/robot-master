@@ -85,32 +85,38 @@ class RobotMasterCLI
       puts "Loading boot file..." if flags[:debug]
       require File.expand_path(File.dirname(__FILE__) + '/../config/boot')
     rescue => e
+      puts e.backtrace
       raise ArgumentError, "Missing boot file: #{e.message}"
     end
     
     # Perform actual work finally
-    ROBOT_LOG.info("Starting RobotMaster #{RobotMaster::VERSION}: #{flags[:workflow]}")
     n = 0
+    working = true
+    Signal.trap("QUIT") { working = false }
     start = Time.now
-    while true do
-      begin
-        n += perform(flags[:workflow], flags)
-      rescue => e
-        ROBOT_LOG.error("#{flags[:workflow]}: #{e}")
-        raise e unless flags[:loop] > 0 # don't error out if looping
-      end
+    begin
+      ROBOT_LOG.info("Starting RobotMaster #{RobotMaster::VERSION}: #{flags[:workflow]}")
+      while working do
+        begin
+          n += perform(flags[:workflow], flags)
+        rescue => e
+          ROBOT_LOG.error("#{flags[:workflow]}: #{e}")
+          raise e unless flags[:loop] > 0 # don't error out if looping
+        end
       
-      # sleep for a while if we're looping, otherwise quit
-      if flags[:loop] > 0
-        nsec = flags[:loop] + rand(0..5) # add random backoff
-        ROBOT_LOG.debug { "Waiting #{nsec} seconds before next run" }
-        sleep nsec
-      else
-        break # iterate once
+        # sleep for a while if we're looping, otherwise quit
+        if flags[:loop] > 0
+          nsec = flags[:loop] + rand(0..5) # add random backoff
+          ROBOT_LOG.debug { "Waiting #{nsec} seconds before next run" }
+          sleep nsec
+        else
+          working = false # iterate once
+        end
       end
+    ensure
+      elapsed = Time.now - start
+      ROBOT_LOG.info("Finished RobotMaster: #{flags[:workflow]} (#{elapsed.to_i} seconds #{n} jobs)")
     end
-    elapsed = Time.now - start
-    ROBOT_LOG.info("Finished RobotMaster: #{flags[:workflow]} (#{elapsed.to_i} seconds #{n} jobs)")
   end
 end
 
