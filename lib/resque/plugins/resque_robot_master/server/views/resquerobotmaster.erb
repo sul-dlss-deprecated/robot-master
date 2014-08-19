@@ -189,7 +189,7 @@ worker_jobs = worker_jobs.reject { |w, j| w.idle? }
 <% else %>
   <script>
   $(document).ready(function() {
-    $('#robotmaster-table').DataTable( { paging: false } );
+    $('#robotmaster-table').DataTable( { paging: false, order: 2 } );
   } );
   </script>
 <% end %>
