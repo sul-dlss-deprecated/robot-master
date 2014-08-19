@@ -94,7 +94,7 @@ class RobotMasterCLI
     working = true
     Signal.trap("QUIT") { working = false }
     start = Time.now
-    sid = "#{`hostname -s`.rstrip}:#{flags[:workflow]}:#{Process.pid}"
+    sid = "#{`hostname -s`.rstrip}:#{Process.pid}:#{flags[:workflow]}"
     begin
       ROBOT_LOG.info("Starting RobotMaster #{RobotMaster::VERSION}: #{flags[:workflow]}")
       Resque.redis.sadd('robot-master:running', sid)
