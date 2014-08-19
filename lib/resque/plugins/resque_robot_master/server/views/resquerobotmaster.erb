@@ -177,8 +177,8 @@ worker_jobs = worker_jobs.reject { |w, j| w.idle? }
 <tbody>
 <% for robotmaster in robotmasters %>
 <tr>
-  <% host, wf = robotmaster.to_s.split(':') %>
-  <td><%= host.to_s.gsub(/\.stanford\.edu/, '') %></td>  
+  <% host, pid, wf = robotmaster.to_s.split(':') %>
+  <td><%= [host.to_s.gsub(/\.stanford\.edu/, ''), pid].join(':') %></td>  
   <td><%= wf %></td>
 </tr>
 <% end %>
