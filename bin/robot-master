@@ -94,8 +94,10 @@ class RobotMasterCLI
     working = true
     Signal.trap("QUIT") { working = false }
     start = Time.now
+    sid = "#{`hostname -s`.rstrip}:#{Process.pid}:#{flags[:workflow]}"
     begin
       ROBOT_LOG.info("Starting RobotMaster #{RobotMaster::VERSION}: #{flags[:workflow]}")
+      Resque.redis.sadd('robot-master:running', sid)
       while working do
         begin
           n += perform(flags[:workflow], flags)
@@ -116,6 +118,7 @@ class RobotMasterCLI
     ensure
       elapsed = Time.now - start
       ROBOT_LOG.info("Finished RobotMaster: #{flags[:workflow]} (#{elapsed.to_i} seconds #{n} jobs)")
+      Resque.redis.srem('robot-master:running', sid)
     end
   end
 end
