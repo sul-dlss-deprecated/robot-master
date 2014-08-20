@@ -45,7 +45,7 @@
 <% else %>
   <script>
   $(document).ready(function() {
-      $('#lane-table').DataTable( { paging: false } );
+      $('#lane-table').DataTable( { paging: false, order: [[ 0, 'asc' ], [ 1, 'asc' ], [ 2, 'asc' ]] } );
   } );
   </script>
 <% end %>
@@ -85,7 +85,7 @@ worker_jobs = worker_jobs.reject { |w, j| w.idle? }
 <% else %>
   <script>
   $(document).ready(function() {
-      $('#running-table').DataTable( { paging: false } );
+      $('#running-table').DataTable( { paging: false, order: [[ 1, 'asc' ], [ 2, 'asc' ]] } );
   } );
   </script>
 <% end %>
@@ -153,7 +153,7 @@ worker_jobs = worker_jobs.reject { |w, j| w.idle? }
 <% else %>
   <script>
   $(document).ready(function() {
-    $('#workers-table').DataTable( { paging: false } );
+    $('#workers-table').DataTable( { paging: false, order: [[ 1, 'asc' ], [ 2, 'asc' ], [ 3, 'asc' ]] } );
   } );
   </script>
 <% end %>
@@ -189,7 +189,7 @@ worker_jobs = worker_jobs.reject { |w, j| w.idle? }
 <% else %>
   <script>
   $(document).ready(function() {
-    $('#robotmaster-table').DataTable( { paging: false, order: 2 } );
+    $('#robotmaster-table').DataTable( { paging: false, order: [ 1, 'asc' ] } );
   } );
   </script>
 <% end %>
