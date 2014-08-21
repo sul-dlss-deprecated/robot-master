@@ -1,4 +1,4 @@
-require 'threach'
+require 'parallel'
 
 module RobotMaster
 
@@ -79,7 +79,7 @@ module RobotMaster
     def perform nthread = 5
       total = 0   
       # perform on each process step
-      @config.xpath('//process').threach(nthread) do |node|        
+      Parallel.map(@config.xpath('//process'), :in_threads => [nthread, 1].max) do |node|        
         process = parse_process_node(node)
         
         # skip any processes that do not require queueing
