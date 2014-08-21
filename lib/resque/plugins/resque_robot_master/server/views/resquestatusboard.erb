@@ -1,0 +1,61 @@
+<!-- DataTables CSS -->
+<link rel="stylesheet" type="text/css" href="//cdn.datatables.net/1.10.0/css/jquery.dataTables.css">
+  
+<!-- jQuery -->
+<script type="text/javascript" charset="utf8" src="//code.jquery.com/jquery-1.10.2.min.js"></script>
+  
+<!-- DataTables -->
+<script type="text/javascript" charset="utf8" src="//cdn.datatables.net/1.10.0/js/jquery.dataTables.min.js"></script>
+
+<table id='status-board-table' class='display'>
+<thead>
+<tr>
+  <th>Repo</th>
+  <th>Workflow</th>
+  <th>Lane</th>
+  <th>Robot</th>
+  <th>Waiting</th>
+  <th>Ready</th>
+  <th>Error</th>
+  <th>Queued</th>
+  <th>Completed</th>
+</tr>
+</thead>
+<tbody>
+<%
+require File.expand_path(File.dirname(__FILE__) + '/../../../../lib/robot-master/status_board')
+
+flags = {
+  :verbose => false,
+  :debug => false,
+  :lane => 'default',
+  :wf_uri => 'http://localhost:8080/workflow'
+}
+
+%w{
+    dor:accessionWF
+    dor:assemblyWF
+    dor:disseminationWF
+    sdr:sdrIngestWF
+}.each do |k|
+  repo, wf = k.split(/:/, 2)
+  # iterate over all the steps in the given repo:wf
+  RobotStatusBoard.new.map_workflow(flags[:wf_uri] + '/workflow_queue', repo, wf, flags) do |row|
+%>
+<tr>
+    <% row.each do |v| %>
+      <td><%= v %></td>
+    <% end %>
+</tr>
+<%
+  end
+end
+%>
+</tbody>
+</table>
+
+<script>
+$(document).ready(function() {
+  $('#status-board-table').DataTable( { paging: false, order: [[ 0, 'asc' ], [ 1, 'asc' ], [ 2, 'asc' ], [ 3, 'asc' ]] } );
+} );
+</script>
