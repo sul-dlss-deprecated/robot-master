@@ -24,7 +24,8 @@
 <tbody>
 <%
 require File.expand_path(File.dirname(__FILE__) + '/../../../../lib/robot-master/status_board')
-
+STDOUT.puts "HELLO"
+STDOUT.flush
 flags = {
   :verbose => false,
   :debug => false,
@@ -36,6 +37,11 @@ flags = {
     dor:accessionWF
     dor:assemblyWF
     dor:disseminationWF
+    dor:dpgImageWF
+    dor:eemsAccessionWF
+    dor:etdSubmitWF
+    dor:googleScannedBookWF
+    dor:hydrusAssemblyWF
     sdr:sdrIngestWF
 }.each do |k|
   repo, wf = k.split(/:/, 2)
