@@ -1,6 +1,7 @@
 require 'awesome_print'
 require 'nokogiri'
 require 'restclient'
+require 'parallel'
 
 class RobotStatusBoard
 
@@ -24,7 +25,7 @@ class RobotStatusBoard
     status = {}
     fn = "config/workflows/#{repo}/#{wf}.xml"
     doc = Nokogiri::XML(File.read(fn))
-    doc.root.xpath('.//process').each do |p|
+    Parallel.map(doc.root.xpath('.//process'), :in_threads => 10) do |p|
       step = p['name']
       fstep = [repo, wf, step].join(':')
       STDERR.puts "Processing step #{step}" if flags[:debug]
