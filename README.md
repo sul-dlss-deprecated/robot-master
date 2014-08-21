@@ -116,4 +116,6 @@ in pseudo-code:
 
 * `v1.0.0`: Initial version
 * `v1.0.1`: Update `bin/robot-status-board` to include all statuses
+* `v1.0.2`: Added Running Robot Masters to UI, and ignore SIGQUIT signals
+* `v1.0.3`: Uses multi-column sorting for the UI
 
