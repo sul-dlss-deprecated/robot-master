@@ -120,4 +120,5 @@ in pseudo-code:
 * `v1.0.3`: Uses multi-column sorting for the UI
 * `v1.0.4`: Added Status Board to UI
 * `v1.0.5`: Use `parallel` for Workflow Service requests
+* `v1.0.6`: Use SIGQUIT for graceful shutdown
 
