@@ -24,8 +24,9 @@ Bluepill.application 'robot-master',
           process.daemonize = true
 
           # graceful stops
-          process.stop_grace_time = 60.seconds
+          process.stop_grace_time = 120.seconds
           process.stop_signals = [
+            :quit, 60.seconds,
             :term, 30.seconds,
             :kill              # no mercy
           ]
