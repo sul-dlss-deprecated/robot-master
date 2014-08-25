@@ -7,89 +7,49 @@
 #   robot-status-board accessionWF
 #
 require 'optparse'
+require 'uri'
 require 'awesome_print'
-require 'nokogiri'
-require 'restclient'
-
-WQ = 'https://localhost/workflow/workflow_queue'
+require File.expand_path(File.dirname(__FILE__) + '/../lib/robot-master/status_board')
 
 class RobotStatusBoardCLI
 
-  def count_ready step, prereq, lane
-    uri = "#{WQ}?waiting=#{step}&completed=#{prereq}&lane-id=#{lane}&count-only=true"
-    xml = RestClient.get uri
-    doc = Nokogiri::XML(xml)
-    doc.root['count'].to_i    
-  end
-
-  def count_status step, lane, type
-    r, w, s = step.split(/:/)
-    uri = "#{WQ}?repository=#{r}&workflow=#{w}&#{type}=#{s}&lane-id=#{lane}&count-only=true"
-    xml = RestClient.get uri
-    doc = Nokogiri::XML(xml)
-    doc.root['count'].to_i
-  end
-
-  def doit(repo, wf, flags = {})
-    lane = flags[:lane]
-    status = {}
-    fn = "config/workflows/#{repo}/#{wf}.xml"
-    doc = Nokogiri::XML(File.read(fn))
-    doc.root.xpath('.//process').each do |p|
-      step = p['name']
-      fstep = [repo, wf, step].join(':')
-      STDERR.puts "Processing step #{step}" if flags[:debug]
-      status[step] = {}
-      n = count_status(fstep, lane, 'waiting')
-      status[step][:waiting] = n
-      status[step][:ready] = n # assuming no prereqs
-      p.xpath('prereq/text()').each do |pr| # XXX: assuming single prereq
-        n = count_ready(fstep, [repo, wf, pr.to_s].join(':'), lane)
-        status[step][:ready] = n
-      end
-      %w{error queued completed}.each do |s|
-        status[step][s.to_sym] = count_status(fstep, lane, s)
-      end
-    end
-    # ap({:status => status})
-    puts ['lane', 'step', 'waiting', 'ready', 'error', 'queued', 'completed'].join(' | ')
-    puts ['----', '----', '-------', '-----', '-----', '------', '---------'].join(' | ')
-    status.each do |k, v|
-      puts ["#{lane}", "#{k}", "#{v[:waiting]}", "#{v[:ready]}", "#{v[:error]}", "#{v[:queued]}", "#{v[:completed]}"].join(' | ')
-    end
-  end
-  
   def run(args)
     flags = {
       :verbose => false,
       :debug => false,
-      :repository => 'dor',
-      :lane => 'default'
+      :lane => 'default',
+      :wf_uri => 'http://localhost:8080/workflow'
     }
     
-    args = %w{--help} if args.nil? or args.empty?
+    # args = %w{--help} if args.nil? or args.empty?
   
     OptionParser.new do |opts|
-      opts.banner = "Usage:\t#{File.basename(__FILE__)} [flags] [repo:]workflow"
+      opts.banner = "Usage:\t#{File.basename(__FILE__)} [flags]"
       opts.on('-v', '--verbose', 'Run verbosely, use multiple times for debug level output') do
         flags[:debug] = true if flags[:verbose]  # -vv
         flags[:verbose] = true
       end
-      opts.on('--lane LANE', 'Use given lane') do |l|
+      opts.on('--uri URI', 'Use given Workflow Service endpoint (default: ' + flags[:wf_uri] + ')') do |uri|
+        flags[:wf_uri] = URI(uri).to_s # canonicalize
+      end
+      opts.on('--lane LANE', 'Use given lane (default: ' + flags[:lane] + ')') do |l|
         flags[:lane] = l
       end
     end.parse!(args)
     ap({:args => args}) if flags[:debug]
-    
-    # Initialize the workflow, and set the repository if prepended with :
-    flags[:workflow] = args.shift
-    raise ArgumentError, "Missing required workflow" if flags[:workflow].nil?
-    if flags[:workflow] =~ /:/
-      flags[:repository], flags[:workflow] = flags[:workflow].split(/:/, 2)
-    end    
-    ap({:flags => flags}) if flags[:debug]
 
-    doit(flags[:repository], flags[:workflow], flags)
+    puts ['repo', 'wf', 'lane', 'step', 'waiting', 'ready', 'error', 'queued', 'completed'].join(' | ')
+    puts ['----', '--', '----', '----', '-------', '-----', '-----', '------', '---------'].join(' | ')
+    Dir.glob(File.dirname(__FILE__) + '/../config/workflows/**/*.xml').each do |fn|
+
+      # Initialize the workflow, and set the repository if prepended with :
+      repo, wf = fn.gsub(/^.*config\/workflows\//, '').gsub('.xml', '').gsub('/', ':').split(/:/, 2)
+
+      # iterate over all the steps in the given repo:wf
+      RobotStatusBoard.new.map_workflow(flags[:wf_uri] + '/workflow_queue', repo, wf, flags) {|row|
+        puts row.join(' | ')
+      }
+    end
   end
 end
 

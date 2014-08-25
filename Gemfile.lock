@@ -60,7 +60,7 @@ GEM
     diff-lcs (1.2.5)
     docile (1.1.5)
     docopt (0.5.0)
-    dor-services (4.13.0)
+    dor-services (4.13.1)
       active-fedora (~> 5.7.1)
       activesupport (~> 3.2, >= 3.2.18)
       confstruct (~> 0.2.2)
@@ -191,8 +191,9 @@ GEM
     rest-client (1.6.8)
       mime-types (~> 1.16)
       rdoc (>= 2.4.2)
-    robot-controller (0.3.7)
+    robot-controller (1.0.2)
       bluepill (~> 0.0.67)
+      rake (~> 10.3.2)
       resque (~> 1.25.2)
     rsolr (1.0.10)
       builder (>= 2.1.2)
@@ -284,7 +285,7 @@ DEPENDENCIES
   rdoc
   redcarpet
   resque (~> 1.25.2)
-  robot-controller (~> 0.3.0, >= 0.3.7)
+  robot-controller (~> 1.0.0)
   rspec
   simplecov
   version_bumper
