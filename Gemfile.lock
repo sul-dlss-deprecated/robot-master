@@ -49,6 +49,9 @@ GEM
       capistrano (~> 3.0)
     capistrano-releaseboard (0.0.1)
       faraday
+    capistrano-rvm (0.1.1)
+      capistrano (~> 3.0)
+      sshkit (~> 1.2)
     coderay (1.1.0)
     confstruct (0.2.7)
     daemons (1.1.9)
@@ -268,6 +271,7 @@ DEPENDENCIES
   awesome_print (~> 1.2.0)
   capistrano (~> 3.0)
   capistrano-bundler (~> 1.1)
+  capistrano-rvm
   dor-services (~> 4.7)
   dor-workflow-service (~> 1.7.0)
   equivalent-xml (~> 0.2, <= 0.4.0)
@@ -275,7 +279,7 @@ DEPENDENCIES
   lyberteam-capistrano-devel (~> 3.0.0)
   mock_redis (~> 0.12.0)
   nokogiri (~> 1.6.1)
-  parallel
+  parallel (~> 1.2.4)
   pry
   rake
   rdoc

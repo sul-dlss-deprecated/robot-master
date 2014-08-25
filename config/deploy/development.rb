@@ -1,4 +1,5 @@
 set :default_env, { robot_environment: "development" }
+set :rvm_ruby_version, '2.1.0'
 
 # Simple Role Syntax
 # ==================
