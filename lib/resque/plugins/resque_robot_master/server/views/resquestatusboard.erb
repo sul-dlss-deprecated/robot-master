@@ -7,6 +7,7 @@
 <!-- DataTables -->
 <script type="text/javascript" charset="utf8" src="//cdn.datatables.net/1.10.0/js/jquery.dataTables.min.js"></script>
 
+<p>These are the status values for all <i>active</i> data in the Workflow Service.</p>
 <table id='status-board-table' class='display'>
 <thead>
 <tr>
@@ -24,8 +25,6 @@
 <tbody>
 <%
 require File.expand_path(File.dirname(__FILE__) + '/../../../../lib/robot-master/status_board')
-STDOUT.puts "HELLO"
-STDOUT.flush
 flags = {
   :verbose => false,
   :debug => false,
