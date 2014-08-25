@@ -119,4 +119,5 @@ in pseudo-code:
 * `v1.0.2`: Added Running Robot Masters to UI, and ignore SIGQUIT signals
 * `v1.0.3`: Uses multi-column sorting for the UI
 * `v1.0.4`: Added Status Board to UI
+* `v1.0.5`: Use `parallel` for Workflow Service requests
 
