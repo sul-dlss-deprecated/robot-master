@@ -77,9 +77,8 @@ module RobotMaster
     # @param [Integer] nthread concurrency for steps where 0 is linear
     # @return [RobotMaster::Workflow] self
     def perform nthread = 5
-      total = 0   
       # perform on each process step
-      Parallel.map(@config.xpath('//process'), :in_threads => [nthread, 1].max) do |node|        
+      total = Parallel.map(@config.xpath('//process'), :in_threads => [nthread, 1].max) do |node|        
         process = parse_process_node(node)
         
         # skip any processes that do not require queueing
@@ -90,8 +89,10 @@ module RobotMaster
         
         # doit
         (n, lanes) = perform_on_process(process)
-        total += n
         ROBOT_LOG.info("Queued #{n} jobs across #{lanes.size} lanes for #{process[:name]}") if n > 0
+        n
+      end.inject(0) do |x, i|
+        x += i
       end
       total
     end    
