@@ -84,13 +84,12 @@ module RobotMaster
         # skip any processes that do not require queueing
         if process[:skip]
           ROBOT_LOG.debug { "Skipping #{process[:name]}" }
-          next
+          0
+        else # doit
+          (n, lanes) = perform_on_process(process)
+          ROBOT_LOG.info("Queued #{n} jobs across #{lanes.size} lanes for #{process[:name]}") if n > 0
+          n
         end
-        
-        # doit
-        (n, lanes) = perform_on_process(process)
-        ROBOT_LOG.info("Queued #{n} jobs across #{lanes.size} lanes for #{process[:name]}") if n > 0
-        n
       end.inject(0) do |x, i|
         x += i
       end
