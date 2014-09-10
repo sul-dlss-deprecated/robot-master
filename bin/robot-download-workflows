@@ -82,3 +82,12 @@ end
 # __MAIN__
 require File.expand_path(File.dirname(__FILE__) + '/../config/boot')
 RobotDownloadWorkflowsCLI.new.run(ARGV)
+
+# XXX: skip these workflows no matter what
+skipfiles = %w{
+	config/workflows/dor/eemsAccessionWF.xml
+	config/workflows/dor/etdSubmitWF.xml
+	config/workflows/dor/googleScannedBookWF.xml
+}.each do |fn|
+	File.delete(fn) if File.exists?(fn)
+end
