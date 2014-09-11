@@ -35,9 +35,12 @@ flags = {
 %w{
     dor:accessionWF
     dor:assemblyWF
+    dor:digitizationWF
     dor:disseminationWF
-    dor:dpgImageWF
     dor:hydrusAssemblyWF
+    dor:versioningWF
+    dor:wasCrawlDisseminationWF
+    dor:wasCrawlPreassemblyWF
     sdr:sdrIngestWF
 }.each do |k|
   repo, wf = k.split(/:/, 2)

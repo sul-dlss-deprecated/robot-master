@@ -85,6 +85,7 @@ RobotDownloadWorkflowsCLI.new.run(ARGV)
 
 # XXX: skip these workflows no matter what
 skipfiles = %w{
+	config/workflows/dor/dpgImageWF.xml
 	config/workflows/dor/eemsAccessionWF.xml
 	config/workflows/dor/etdSubmitWF.xml
 	config/workflows/dor/googleScannedBookWF.xml
