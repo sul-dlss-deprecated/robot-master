@@ -121,4 +121,6 @@ in pseudo-code:
 * `v1.0.4`: Added Status Board to UI
 * `v1.0.5`: Use `parallel` for Workflow Service requests
 * `v1.0.6`: Use SIGQUIT for graceful shutdown
+* `v1.0.7`: Add current time to Status Board
+* `v1.0.8`: Fix Status Board bug when WF files are missing
 
