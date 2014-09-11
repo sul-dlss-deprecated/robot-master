@@ -24,6 +24,7 @@ class RobotStatusBoard
     lane = flags[:lane]
     status = {}
     fn = "config/workflows/#{repo}/#{wf}.xml"
+    return unless File.exist?(fn)
     doc = Nokogiri::XML(File.read(fn))
     Parallel.map(doc.root.xpath('.//process'), :in_threads => 10) do |p|
       step = p['name']
