@@ -22,18 +22,19 @@ require 'dor-workflow-service'
 WORKFLOW_TIMEOUT = 60 unless defined? WORKFLOW_TIMEOUT
 Dor::WorkflowService.configure(WORKFLOW_URL, timeout: WORKFLOW_TIMEOUT)
 
-# @see http://rubydoc.info/gems/redis/3.0.7/file/README.md
-# @see https://github.com/resque/resque
-#
-# Set the redis connection. Takes any of:
-#   String - a redis url string (e.g., 'redis://host:port')
-#   String - 'hostname:port[:db][/namespace]'
-#   Redis - a redis connection that will be namespaced :resque
-#   Redis::Namespace - a namespaced redis connection that will be used as-is
-#   Redis::Distributed - a distributed redis connection that will be used as-is
-#   Hash - a redis connection hash (e.g. {:host => 'localhost', :port => 6379, :db => 0})
+# Load Resque configuration and controller
 require 'resque'
-Resque.redis = REDIS_URL
+begin
+  if defined? REDIS_TIMEOUT
+    _server, _namespace = REDIS_URL.split('/', 2)
+    _host, _port, _db = _server.split(':')
+    _redis = Redis.new(:host => _host, :port => _port, :thread_safe => true, :db => _db, :timeout => REDIS_TIMEOUT.to_f)
+    Resque.redis = Redis::Namespace.new(_namespace, :redis => _redis)
+  else
+    Resque.redis = REDIS_URL
+  end
+end
+require 'robot-controller'
 
 require 'active_support/core_ext' # camelcase
 require 'lyber_core'
