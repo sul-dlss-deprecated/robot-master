@@ -34,7 +34,6 @@ begin
     Resque.redis = REDIS_URL
   end
 end
-require 'robot-controller'
 
 require 'active_support/core_ext' # camelcase
 require 'lyber_core'
