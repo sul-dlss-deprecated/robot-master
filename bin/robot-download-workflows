@@ -89,6 +89,10 @@ skipfiles = %w{
 	config/workflows/dor/eemsAccessionWF.xml
 	config/workflows/dor/etdSubmitWF.xml
 	config/workflows/dor/googleScannedBookWF.xml
+	config/workflows/dor/hydrusAssemblyWF.xml
 }.each do |fn|
-	File.delete(fn) if File.exists?(fn)
+  if File.exists?(fn)
+    puts "Deleting #{fn}"
+  	File.delete(fn) 
+  end
 end
