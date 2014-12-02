@@ -3,8 +3,8 @@
 # Usage: robot-sweeper [-v] [--repeat-every=SECONDS]
 #
 # @example
-#   robot-sweeper
-#   robot-sweeper --repeat-every=60
+#   bundle exec robot-sweeper --environment=ENV
+#   bundle exec robot-sweeper --environment=ENV --repeat-every=60
 #
 require 'optparse'
 require 'awesome_print'
