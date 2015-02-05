@@ -12,12 +12,14 @@ require 'awesome_print'
 class RobotSweeperCLI
   
   def monitor_stale(flags = {})
-    stale = Dor::WorkflowService.get_stale_queued_workflows('dor', hours_ago: 24, limit: 1000)
-    ap({:stale => stale}) if flags[:debug]
-    stale.each do |h|
-      h[:repo] = 'dor'
-      ap({:h => h}) if flags[:debug]
-      Dor::WorkflowService.update_workflow_status(h[:repo], h[:druid], h[:workflow], h[:step], 'waiting', expected: 'queued')      
+    %w{dor sdr}.each do |repo|
+      stale = Dor::WorkflowService.get_stale_queued_workflows(repo, hours_ago: 24, limit: 1000)
+      ap({:stale => stale}) if flags[:debug]
+      stale.each do |h|
+        h[:repo] = repo
+        ap({:h => h}) if flags[:debug]
+        Dor::WorkflowService.update_workflow_status(h[:repo], h[:druid], h[:workflow], h[:step], 'waiting', expected: 'queued')      
+      end
     end
   end
   
