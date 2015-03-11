@@ -1,4 +1,6 @@
-set :default_env, { robot_environment: "production" }
+set :deploy_environment, 'production'
+set :whenever_environment, fetch(:deploy_environment)
+set :default_env, { robot_environment: fetch(:deploy_environment) }
 
 # Simple Role Syntax
 # ==================

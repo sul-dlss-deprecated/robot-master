@@ -1,4 +1,6 @@
-set :default_env, { robot_environment: "development" }
+set :deploy_environment, 'development'
+set :whenever_environment, fetch(:deploy_environment)
+set :default_env, { robot_environment: fetch(:deploy_environment) }
 # set :rvm_ruby_version, '2.1.0'
 
 # Simple Role Syntax
