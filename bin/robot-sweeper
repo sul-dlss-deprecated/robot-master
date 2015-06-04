@@ -10,15 +10,14 @@ require 'optparse'
 require 'awesome_print'
 
 class RobotSweeperCLI
-
   def monitor_stale(flags = {})
-    %w{dor sdr}.each do |repo|
+    %w(dor sdr).each do |repo|
       ROBOT_LOG.info("##### Querying stale jobs for #{repo}")
       stale = Dor::WorkflowService.get_stale_queued_workflows(repo, hours_ago: 24, limit: 1000)
-      ap({:stale => stale}) if flags[:debug]
+      ap(stale: stale) if flags[:debug]
       stale.each do |h|
         h[:repo] = repo
-        ap({:h => h}) if flags[:debug]
+        ap(h: h) if flags[:debug]
         ROBOT_LOG.info("Changing status from queued to waiting for: #{h[:repo]}, #{h[:druid]}, #{h[:workflow]}, #{h[:step]}")
         Dor::WorkflowService.update_workflow_status(h[:repo], h[:druid], h[:workflow], h[:step], 'waiting', expected: 'queued')
       end
@@ -27,17 +26,16 @@ class RobotSweeperCLI
 
   # XXX: sweep up failed job if the Workflow service thinks the object is :queued
   def sweep_job(job, flags = {})
-    ap({:job => job}) if flags[:debug]
+    ap(job: job) if flags[:debug]
     status = Dor::WorkflowService.get_workflow_status(job[:repo], job[:druid], job[:workflow], job[:step])
-    ap({:status => status}) if flags[:debug]
+    ap(status: status) if flags[:debug]
     ROBOT_LOG.info { "Job for #{job[:druid]} has status '#{status}' from #{job[:error_q]}" }
 
     if flags[:change_to_errored] and status == 'queued'
-      opts =  { :error_txt => "queue=#{job[:error_q]} backtrace=#{job[:error_backtrace]}" }
+      opts =  { error_txt: "queue=#{job[:error_q]} backtrace=#{job[:error_backtrace]}" }
       ROBOT_LOG.info("Updating error status for #{job[:druid]} #{job[:error_msg]} #{opts}")
       Dor::WorkflowService.update_workflow_error_status(job[:repo], job[:druid], job[:workflow], job[:step], job[:error_msg], opts)
     end
-
   end
 
   #
@@ -58,23 +56,23 @@ class RobotSweeperCLI
   # }
   def monitor_failed(flags = {})
     failed_key = flags[:failed_key] || 'failed'
-    ap({:failed_key => failed_key, :flags => flags}) if flags[:debug]
+    ap(failed_key: failed_key, flags: flags) if flags[:debug]
     n = Resque.redis.llen(failed_key).to_i
     ROBOT_LOG.info { "Found #{n} items in '#{failed_key}'" }
     return if n < 1
     n.times.each do |i| # assume no deletions from failed queue
       failed = Resque.list_range(failed_key, i, 1)
-      ap({:i => i, :failed => failed}) if flags[:debug]
+      ap(i: i, failed: failed) if flags[:debug]
       job = {
-        :klass => failed['payload']['class'],
-        :druid => failed['payload']['args'].first,
-        :repo => failed['queue'].split(/_/)[0],
-        :workflow => failed['queue'].split(/_/)[1],
-        :step => failed['queue'].split(/_/)[2],
-        :lane => failed['queue'].split(/_/)[3],
-        :error_msg => "#{failed['exception']}: #{failed['error']}",
-        :error_q => failed['queue'],
-        :error_backtrace => failed['backtrace'].join("\n")
+        klass: failed['payload']['class'],
+        druid: failed['payload']['args'].first,
+        repo: failed['queue'].split(/_/)[0],
+        workflow: failed['queue'].split(/_/)[1],
+        step: failed['queue'].split(/_/)[2],
+        lane: failed['queue'].split(/_/)[3],
+        error_msg: "#{failed['exception']}: #{failed['error']}",
+        error_q: failed['queue'],
+        error_backtrace: failed['backtrace'].join("\n")
       }
 
       sweep_job(job, flags)
@@ -83,12 +81,12 @@ class RobotSweeperCLI
 
   def run(args)
     flags = {
-      :verbose => false,
-      :debug => false,
-      :loop => 0,
-      :robot_environment => ENV['ROBOT_ENVIRONMENT'] || 'development',
-      :robot_log_level => ENV['ROBOT_LOG_LEVEL'] || 'info',
-      :robot_log => ENV['ROBOT_LOG'] || '-'
+      verbose: false,
+      debug: false,
+      loop: 0,
+      robot_environment: ENV['ROBOT_ENVIRONMENT'] || 'development',
+      robot_log_level: ENV['ROBOT_LOG_LEVEL'] || 'info',
+      robot_log: ENV['ROBOT_LOG'] || '-'
     }
 
     OptionParser.new do |opts|
@@ -102,7 +100,7 @@ class RobotSweeperCLI
       opts.on('--log=FILE', "Use the given log file (default: #{flags[:robot_log]})") do |v|
         flags[:robot_log] = v
       end
-      opts.on('-R SECONDS', '--repeat-every=SECONDS', "Keep running every SECONDS in an infinite loop") do |v|
+      opts.on('-R SECONDS', '--repeat-every=SECONDS', 'Keep running every SECONDS in an infinite loop') do |v|
         flags[:loop] = v.to_i
       end
       opts.on('-v', '--verbose', 'Run verbosely, use multiple times for debug level output') do
@@ -110,8 +108,8 @@ class RobotSweeperCLI
         flags[:verbose] = true
       end
     end.parse!(args)
-    ap({:args => args}) if flags[:debug]
-    ap({:flags => flags}) if flags[:debug]
+    ap(args: args) if flags[:debug]
+    ap(flags: flags) if flags[:debug]
 
     # boot up
     ENV['ROBOT_ENVIRONMENT'] = flags[:robot_environment]
@@ -121,20 +119,20 @@ class RobotSweeperCLI
     if flags[:debug]
       ENV['ROBOT_LOG_LEVEL'] = 'debug'
       ENV['RESTCLIENT_LOG'] ||= 'stdout'
-      ap({:env => ENV})
+      ap(env: ENV)
     end
     begin
-      puts "Loading boot file..." if flags[:debug]
+      puts 'Loading boot file...' if flags[:debug]
       require File.expand_path(File.dirname(__FILE__) + '/../config/boot')
     rescue => e
       raise ArgumentError, "Missing boot file: #{e.message}"
     end
 
     # Perform actual work finally
-    ROBOT_LOG.info("Starting RobotSweeper v#{RobotMaster::VERSION}: " +
+    ROBOT_LOG.info("Starting RobotSweeper v#{RobotMaster::VERSION}: " \
                    "#{Resque.redis_id} v#{Redis.current.info['redis_version']}")
     start = Time.now
-    while true do
+    loop do
       begin
         monitor_failed(flags)
         monitor_stale(flags)

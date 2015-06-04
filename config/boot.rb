@@ -1,4 +1,4 @@
-$:.unshift File.expand_path(File.join(File.dirname(__FILE__), "..", "lib"))
+$LOAD_PATH.unshift File.expand_path(File.join(File.dirname(__FILE__), '..', 'lib'))
 
 require 'rubygems'
 require 'bundler/setup'
@@ -30,8 +30,8 @@ begin
   if defined? REDIS_TIMEOUT
     _server, _namespace = REDIS_URL.split('/', 2)
     _host, _port, _db = _server.split(':')
-    _redis = Redis.new(:host => _host, :port => _port, :thread_safe => true, :db => _db, :timeout => REDIS_TIMEOUT.to_f)
-    Resque.redis = Redis::Namespace.new(_namespace, :redis => _redis)
+    _redis = Redis.new(host: _host, port: _port, thread_safe: true, db: _db, timeout: REDIS_TIMEOUT.to_f)
+    Resque.redis = Redis::Namespace.new(_namespace, redis: _redis)
   else
     Resque.redis = REDIS_URL
   end
@@ -41,10 +41,3 @@ require 'active_support/core_ext' # camelcase
 require 'lyber_core'
 LyberCore::Log.set_logfile(ENV['ROBOT_LOG'].downcase == 'stdout' ? STDOUT : ENV['ROBOT_LOG']) # Fixes #35
 require 'robot-master'
-
-
-
-
-
-
-

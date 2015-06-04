@@ -1,6 +1,6 @@
 set :deploy_environment, 'test'
 set :whenever_environment, fetch(:deploy_environment)
-set :default_env, { robot_environment: fetch(:deploy_environment) }
+set :default_env, robot_environment: fetch(:deploy_environment)
 
 # Simple Role Syntax
 # ==================
@@ -18,7 +18,7 @@ set :default_env, { robot_environment: fetch(:deploy_environment) }
 # definition into the server list. The second argument
 # something that quacks like a hash can be used to set
 # extended properties on the server.
-server 'sul-lyberservices-test.stanford.edu', user: 'lyberadmin', roles: %w{web app db}
+server 'sul-lyberservices-test.stanford.edu', user: 'lyberadmin', roles: %w(web app db)
 
 Capistrano::OneTimeKey.generate_one_time_key!
 
