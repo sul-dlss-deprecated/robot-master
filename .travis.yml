@@ -3,12 +3,15 @@ notifications:
 
 language: ruby
 cache: bundler
+sudo: false
 
 rvm:
   - 1.9.3
   - 2.0.0
-  - 2.1.0
+  - 2.2.2
 
-before_install:
-  - test -d config/environments || mkdir -p config/environments
-  - cp config/environments/example.rb config/environments/development.rb
+env:
+  - ROBOT_ENVIRONMENT=local
+
+# services:
+#   - redis-server

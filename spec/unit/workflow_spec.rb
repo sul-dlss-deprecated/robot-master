@@ -9,19 +9,19 @@ end
 
 describe RobotMaster::Workflow do
   subject {
-    WorkflowTest.new('dor', 'accessionWF')
+    WorkflowTest.new('dor', 'accessionWF', File.read('spec/fixtures/accessionWF.xml'))
   }
   
   it 'expected public methods' do
     %w{perform qualify}.map(&:to_sym).each do |proc|
-      expect(subject.respond_to?(proc)).to be_true
+      expect(subject.respond_to?(proc)).to be_truthy
     end
   end
   
   it 'initialization errors' do
     expect {
       WorkflowTest.new('dor', 'willNotFindWF')
-    }.to raise_error(Exception)
+    }.to raise_error
   end
 
   context '#qualify' do
@@ -32,14 +32,14 @@ describe RobotMaster::Workflow do
 
   context '#qualified?' do
     it "yes" do
-      expect(described_class.qualified?('dor:accessionWF:foo-bar')).to be true
+      expect(described_class.qualified?('dor:accessionWF:foo-bar')).to be_truthy
     end
   
     it "no" do
-      expect(described_class.qualified?('a')).to be false
-      expect(described_class.qualified?('a:b')).to be false
-      expect(described_class.qualified?('a:b-c')).to be false
-      expect(described_class.qualified?('a:b:c:d')).to be false
+      expect(described_class.qualified?('a')).to be_falsey
+      expect(described_class.qualified?('a:b')).to be_falsey
+      expect(described_class.qualified?('a:b-c')).to be_falsey
+      expect(described_class.qualified?('a:b:c:d')).to be_falsey
     end
   end
   
@@ -61,27 +61,27 @@ describe RobotMaster::Workflow do
       doc = Nokogiri::XML('<process name="initiate"/>')
       step = subject.parse_process_node(doc.root)
       expect(step[:name]).to eq 'dor:accessionWF:initiate'
-      expect(step[:skip]).to be false
+      expect(step[:skip]).to be_falsey
     end
 
     it 'waiting' do
       doc = Nokogiri::XML('<process name="initiate" status="waiting"/>')
-      expect(subject.parse_process_node(doc.root)[:skip]).to be false
+      expect(subject.parse_process_node(doc.root)[:skip]).to be_falsey
     end
 
     it 'completed' do
       doc = Nokogiri::XML('<process name="initiate" status="completed"/>')
-      expect(subject.parse_process_node(doc.root)[:skip]).to be true
+      expect(subject.parse_process_node(doc.root)[:skip]).to be_truthy
     end
 
     it 'skip-queue' do
       doc = Nokogiri::XML('<process name="initiate" skip-queue="true"/>')
-      expect(subject.parse_process_node(doc.root)[:skip]).to be true
+      expect(subject.parse_process_node(doc.root)[:skip]).to be_truthy
     end
 
     it 'skip-queue false' do
       doc = Nokogiri::XML('<process name="initiate" skip-queue="false"/>')
-      expect(subject.parse_process_node(doc.root)[:skip]).to be false
+      expect(subject.parse_process_node(doc.root)[:skip]).to be_falsey
     end
 
     context "single prereq" do
@@ -151,16 +151,17 @@ describe RobotMaster::Workflow do
   
   context '#self.perform without lanes' do
     before(:each) do
-      Dor::WorkflowService.stub(:get_lane_ids).and_return([
+      allow(Dor::WorkflowService).to receive(:get_lane_ids).and_return([
         'AAA'
       ])
-      Dor::WorkflowService.stub(:get_objects_for_workstep).and_return([
+      allow(Dor::WorkflowService).to receive(:get_objects_for_workstep).and_return([
         'druid:aa111bb2222',
         'druid:py156ps0477',
         'druid:tt628cb6479',
         'druid:ct021wp7863'
       ])
       Resque.redis = MockRedis.new
+      Resque.mock!
     end
   
     context 'dor:assemblyWF' do
@@ -173,7 +174,8 @@ describe RobotMaster::Workflow do
       }
     
       it 'should perform' do
-        described_class.perform('dor', 'assemblyWF')
+        wf = WorkflowTest.new('dor', 'assemblyWF', File.read('spec/fixtures/assemblyWF.xml'))
+        wf.perform
         # ap({:queues => Resque.queues})
         expect(Resque.queues).to eq(queues)
         { 
@@ -203,21 +205,22 @@ describe RobotMaster::Workflow do
   
   context '#self.perform with exception' do
     before(:each) do
-      Dor::WorkflowService.stub(:get_lane_ids).and_return([
+      allow(Dor::WorkflowService).to receive(:get_lane_ids).and_return([
         'default'
       ])
-      Dor::WorkflowService.stub(:get_objects_for_workstep).and_return([
+      allow(Dor::WorkflowService).to receive(:get_objects_for_workstep).and_return([
         'druid:aa111bb2222' 
       ])
       Resque.redis = MockRedis.new
-      Resque.stub(:enqueue_to).and_raise(Exception)
+      Resque.mock!
+      allow(Resque).to receive(:enqueue_to).and_raise(Exception)
     end
     
     context 'dor:assemblyWF' do
       it 'should perform' do
         expect {
           described_class.perform('dor', 'assemblyWF')          
-        }.to raise_error(Exception)
+        }.to raise_error
         expect(Resque.queues).to eq([])
       end
     end    
@@ -226,15 +229,16 @@ describe RobotMaster::Workflow do
   context '#self.perform with no prereq' do
     before(:each) do
       Resque.redis = MockRedis.new
+      Resque.mock!
     end
     
     it 'should run empty prereq' do
       xml = File.read('spec/fixtures/singleStepWF.xml')
       wf = RobotMaster::Workflow.new('dor', 'singleStepWF', xml)
-      Dor::WorkflowService.stub(:get_lane_ids).and_return([
+      allow(Dor::WorkflowService).to receive(:get_lane_ids).and_return([
         'default'
       ])
-      Dor::WorkflowService.stub(:get_objects_for_workstep).and_return([
+      allow(Dor::WorkflowService).to receive(:get_objects_for_workstep).and_return([
         'druid:aa111bb2222'
       ])
       wf.perform
@@ -250,16 +254,16 @@ describe RobotMaster::Workflow do
       expect(wf.class).to eq RobotMaster::Workflow
       expect(wf.repository).to eq 'dor'
       expect(wf.workflow).to eq 'singleStepWF'
-      wf.config.root.should be_equivalent_to(Nokogiri::XML(xml).root)
     end
   end
 
   context '#limit' do
     it 'should pass limit flag from workflow xml' do
       Resque.redis = MockRedis.new
+      Resque.mock!
       xml = File.read('spec/fixtures/singleStepWF.xml')
       wf = RobotMaster::Workflow.new('dor', 'singleStepWF', xml)
-      wf.stub(:perform_on_process).with({
+      allow(wf).to receive(:perform_on_process).with({
           :name => "dor:singleStepWF:doit",
         :prereq => [ ],
           :skip => false,
@@ -269,11 +273,12 @@ describe RobotMaster::Workflow do
     end
     it 'should use default limit from workflow xml' do
       Resque.redis = MockRedis.new
+      Resque.mock!
       xml = '<workflow-def id="singleStepWF" repository="dor">
 	<process name="doit" sequence="1"/>
 </workflow-def>'
       wf = RobotMaster::Workflow.new('dor', 'singleStepWF', xml)
-      wf.stub(:perform_on_process).with({
+      allow(wf).to receive(:perform_on_process).with({
           :name => 'dor:singleStepWF:doit',
         :prereq => [ ],
           :skip => false,

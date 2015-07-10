@@ -12,8 +12,9 @@ gem 'parallel', '~> 1.2.4'
 gem 'whenever'
 
 group :development do
-  gem 'equivalent-xml'#, '~> 0.2', '<= 0.4.0' # 0.4.x breaks RSpec
-  gem 'mock_redis', '~> 0.12.0'
+  gem 'equivalent-xml'
+  gem 'mock_redis'
+  gem 'resque-mock'
   gem 'pry'
   gem 'rake'
   gem 'rdoc'
