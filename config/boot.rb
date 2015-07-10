@@ -19,12 +19,14 @@ require File.expand_path(File.join(File.dirname(__FILE__), 'environments', ENV['
 
 # @see https://github.com/sul-dlss/dor-workflow-service
 require 'dor-workflow-service'
+WORKFLOW_URL = 'http://127.0.0.1:8080/workflow' unless defined? WORKFLOW_URL
 WORKFLOW_TIMEOUT = 60 unless defined? WORKFLOW_TIMEOUT
 Dor::WorkflowService.configure(WORKFLOW_URL, timeout: WORKFLOW_TIMEOUT)
 
 # Load Resque configuration and controller
 require 'resque'
 begin
+  REDIS_URL = '127.0.0.1:6379/resque:development' unless defined? REDIS_URL
   if defined? REDIS_TIMEOUT
     _server, _namespace = REDIS_URL.split('/', 2)
     _host, _port, _db = _server.split(':')

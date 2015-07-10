@@ -48,26 +48,26 @@ describe RobotMaster::Queue do
     end
     
     it 'no queue' do
-      described_class.empty_slots(step).should eq 100
+      expect(described_class.empty_slots(step)).to eq 100
     end
     
     it 'queue single job' do
       Resque.enqueue_to(described_class.queue_name(step), 'Foo')
-      described_class.empty_slots(step, :default, 1).should eq 0
+      expect(described_class.empty_slots(step, :default, 1)).to eq 0
     end
 
     it 'queue threshold jobs' do
       threshold.times do |i|
         Resque.enqueue_to(described_class.queue_name(step), 'Foo')
       end
-      described_class.empty_slots(step).should eq 0
+      expect(described_class.empty_slots(step)).to eq 0
     end
 
     it 'queue not-quite threshold jobs' do
       (threshold-1).times do |i|
         Resque.enqueue_to(described_class.queue_name(step), 'Foo')
       end
-      described_class.empty_slots(step).should eq 1
+      expect(described_class.empty_slots(step)).to eq 1
     end
   end
   
