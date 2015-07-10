@@ -18,7 +18,7 @@ describe RobotMaster::Workflow do
   }
 
   it 'expected public methods' do
-    %w{perform qualify}.map(&:to_sym).each do |proc|
+    %w(perform qualify).map(&:to_sym).each do |proc|
       expect(subject.respond_to?(proc)).to be_truthy
     end
   end
@@ -36,11 +36,11 @@ describe RobotMaster::Workflow do
   end
 
   context '#qualified?' do
-    it "yes" do
+    it 'yes' do
       expect(described_class.qualified?('dor:accessionWF:foo-bar')).to be_truthy
     end
-  
-    it "no" do
+
+    it 'no' do
       expect(described_class.qualified?('a')).to be_falsey
       expect(described_class.qualified?('a:b')).to be_falsey
       expect(described_class.qualified?('a:b-c')).to be_falsey
@@ -169,12 +169,13 @@ describe RobotMaster::Workflow do
     end
 
     context 'dor:assemblyWF' do
-      let(:queues) { %w{
-        dor_assemblyWF_accessioning-initiate_AAA
-        dor_assemblyWF_checksum-compute_AAA
-        dor_assemblyWF_exif-collect_AAA
-        dor_assemblyWF_jp2-create_AAA
-        }
+      let(:queues) {
+        %w(
+          dor_assemblyWF_accessioning-initiate_AAA
+          dor_assemblyWF_checksum-compute_AAA
+          dor_assemblyWF_exif-collect_AAA
+          dor_assemblyWF_jp2-create_AAA
+        )
       }
 
       it 'should perform' do
@@ -182,7 +183,7 @@ describe RobotMaster::Workflow do
         wf.perform
         # ap({:queues => Resque.queues})
         expect(Resque.queues.sort).to eq(queues)
-        { 
+        {
           'accessioning-initiate' => 'AccessioningInitiate',
           'exif-collect' => 'ExifCollect',
           'checksum-compute' => 'ChecksumCompute',
@@ -211,7 +212,7 @@ describe RobotMaster::Workflow do
         'default'
       ])
       allow(Dor::WorkflowService).to receive(:get_objects_for_workstep).and_return([
-        'druid:aa111bb2222' 
+        'druid:aa111bb2222'
       ])
       Resque.redis = MockRedis.new
       Resque.mock!
@@ -221,7 +222,7 @@ describe RobotMaster::Workflow do
     context 'dor:assemblyWF' do
       it 'should perform' do
         expect {
-          described_class.perform('dor', 'assemblyWF')          
+          described_class.perform('dor', 'assemblyWF')
         }.to raise_error(StandardError)
         expect(Resque.queues).to eq([])
       end
@@ -265,11 +266,11 @@ describe RobotMaster::Workflow do
       xml = File.read('spec/fixtures/singleStepWF.xml')
       wf = RobotMaster::Workflow.new('dor', 'singleStepWF', xml)
       allow(wf).to receive(:perform_on_process).with({
-          :name => "dor:singleStepWF:doit",
-        :prereq => [ ],
-          :skip => false,
-         :limit => 1
-      }) { 0 } # don't actually run perform on process
+                                                       name: 'dor:singleStepWF:doit',
+                                                       prereq: [],
+                                                       skip: false,
+                                                       limit: 1
+                                                     }) { 0 } # don't actually run perform on process
       wf.perform
     end
     it 'should use default limit from workflow xml' do
@@ -280,11 +281,11 @@ describe RobotMaster::Workflow do
 </workflow-def>'
       wf = RobotMaster::Workflow.new('dor', 'singleStepWF', xml)
       allow(wf).to receive(:perform_on_process).with({
-          :name => 'dor:singleStepWF:doit',
-        :prereq => [ ],
-          :skip => false,
-         :limit => nil
-      }) { 0 } # don't actually run perform on process
+                                                       name: 'dor:singleStepWF:doit',
+                                                       prereq: [],
+                                                       skip: false,
+                                                       limit: nil
+                                                     }) { 0 } # don't actually run perform on process
       wf.perform
     end
   end

@@ -66,7 +66,7 @@ module RobotMaster
         Nokogiri::XML(xml)
       rescue
         ROBOT_LOG.error("Cannot load workflow object: #{fn}")
-        fail "Cannot load workflow object: #{fn}"
+        raise "Cannot load workflow object: #{fn}"
       end
     end
 
