@@ -26,7 +26,7 @@ describe RobotMaster::Workflow do
   it 'initialization errors' do
     expect {
       WorkflowTest.new('dor', 'willNotFindWF')
-    }.to raise_error
+    }.to raise_error(Errno::ENOENT)
   end
 
   context '#qualify' do
@@ -215,14 +215,14 @@ describe RobotMaster::Workflow do
       ])
       Resque.redis = MockRedis.new
       Resque.mock!
-      allow(Resque).to receive(:enqueue_to).and_raise(Exception)
+      allow(Resque).to receive(:enqueue_to).and_raise(StandardError)
     end
 
     context 'dor:assemblyWF' do
       it 'should perform' do
         expect {
           described_class.perform('dor', 'assemblyWF')          
-        }.to raise_error
+        }.to raise_error(StandardError)
         expect(Resque.queues).to eq([])
       end
     end

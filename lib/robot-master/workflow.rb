@@ -64,9 +64,9 @@ module RobotMaster
       end
       @config = begin
         Nokogiri::XML(xml)
-      rescue Exception => e
+      rescue
         ROBOT_LOG.error("Cannot load workflow object: #{fn}")
-        raise e
+        fail "Cannot load workflow object: #{fn}"
       end
     end
 
