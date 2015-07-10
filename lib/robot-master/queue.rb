@@ -2,7 +2,7 @@ module RobotMaster
   # Manages a workflow to enqueue jobs into a lane queue
   module Queue
     # Generate the queue name from step and lane
-    # 
+    #
     # @param [String] step fully qualified name
     # @param [Symbol | String] lane
     # @return [String] the queue name
@@ -13,10 +13,10 @@ module RobotMaster
     #     => 'dor_assemblyWF_jp2-create_mylane'
     def self.queue_name(step, lane = :default)
       Workflow.assert_qualified(step)
-      unless lane.to_s =~ /^[a-zA-Z0-9-]+$/ or lane.to_s == '*'
-        raise ArgumentError, "Invalid lane specification: #{lane}"
+      unless lane.to_s =~ /^[a-zA-Z0-9-]+$/ || lane.to_s == '*'
+        fail ArgumentError, "Invalid lane specification: #{lane}"
       end
-      [ 
+      [
         Workflow.parse_qualified(step),
         lane.to_s
       ].flatten.join('_')
@@ -32,7 +32,7 @@ module RobotMaster
       Workflow.assert_qualified(step)
       queue = queue_name(step, lane)
       n = Resque.size(queue)
-      ROBOT_LOG.debug { "queue size=#{n} #{queue}"}
+      ROBOT_LOG.debug { "queue size=#{n} #{queue}" }
       n < threshold ? (threshold - n) : 0
     end
 
@@ -50,19 +50,19 @@ module RobotMaster
     # @param [Hash] opts
     # @option opts [String] :repo_suffix suffix to append to the Repo component of the step name
     # @return [Hash] returns the `:queue` name and `klass` name enqueued
-    def self.enqueue(step, druid, lane = :default, opts = {})
+    def self.enqueue(step, druid, lane = :default, _opts = {})
       Workflow.assert_qualified(step)
-  
+
       # generate the specific lane queue name
       queue = queue_name(step, lane)
-  
+
       klass = LyberCore::Robot.step_to_classname step
-  
+
       # perform the enqueue to Resque
       ROBOT_LOG.debug { "enqueue_to: #{queue} #{klass} #{druid}" }
       Resque.enqueue_to(queue.to_sym, klass, druid)
-  
-      { :queue => queue, :klass => klass }
+
+      { queue: queue, klass: klass }
     end
   end
 end

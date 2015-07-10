@@ -31,14 +31,13 @@ set :log_level, :info
 # Default value for keep_releases is 5
 # set :keep_releases, 5
 
-set :stages, %W(development staging production)
+set :stages, %w(development staging production)
 
 set :linked_dirs, %w(log run config/certs config/environments config/workflows tmp public)
 
-set :linked_files, %w{config.ru}
+set :linked_files, %w(config.ru)
 
 namespace :deploy do
-
   desc 'Restart application'
   task :restart do
     on roles(:app), in: :sequence, wait: 10 do
@@ -52,5 +51,4 @@ namespace :deploy do
   end
 
   after :publishing, :restart
-
 end

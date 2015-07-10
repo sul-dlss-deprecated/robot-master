@@ -12,17 +12,16 @@ require 'awesome_print'
 require File.expand_path(File.dirname(__FILE__) + '/../lib/robot-master/status_board')
 
 class RobotStatusBoardCLI
-
   def run(args)
     flags = {
-      :verbose => false,
-      :debug => false,
-      :lane => 'default',
-      :wf_uri => 'http://localhost:8080/workflow'
+      verbose: false,
+      debug: false,
+      lane: 'default',
+      wf_uri: 'http://localhost:8080/workflow'
     }
-    
+
     # args = %w{--help} if args.nil? or args.empty?
-  
+
     OptionParser.new do |opts|
       opts.banner = "Usage:\t#{File.basename(__FILE__)} [flags]"
       opts.on('-v', '--verbose', 'Run verbosely, use multiple times for debug level output') do
@@ -36,12 +35,11 @@ class RobotStatusBoardCLI
         flags[:lane] = l
       end
     end.parse!(args)
-    ap({:args => args}) if flags[:debug]
+    ap(args: args) if flags[:debug]
 
-    puts ['repo', 'wf', 'lane', 'step', 'waiting', 'ready', 'error', 'queued', 'completed'].join(' | ')
+    puts %w(repo wf lane step waiting ready error queued completed).join(' | ')
     puts ['----', '--', '----', '----', '-------', '-----', '-----', '------', '---------'].join(' | ')
     Dir.glob(File.dirname(__FILE__) + '/../config/workflows/**/*.xml').each do |fn|
-
       # Initialize the workflow, and set the repository if prepended with :
       repo, wf = fn.gsub(/^.*config\/workflows\//, '').gsub('.xml', '').gsub('/', ':').split(/:/, 2)
 

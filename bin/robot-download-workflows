@@ -8,7 +8,7 @@ require 'awesome_print'
 require 'rest-client'
 require 'dor-services'
 require 'solrizer'
-  
+
 # Load the environment file based on Environment.  Default to development
 ENV['ROBOT_ENVIRONMENT'] ||= 'development'
 require File.expand_path(File.join(File.dirname(__FILE__), '..', 'config', 'environments', ENV['ROBOT_ENVIRONMENT']))
@@ -19,12 +19,11 @@ KEY_FILE = Dor::Config.ssl.key_file
 
 class RobotDownloadWorkflowsCLI
   def run(args)
-
     flags = {
-      :verbose => false,
-      :debug => false
+      verbose: false,
+      debug: false
     }
-  
+
     OptionParser.new do |opts|
       opts.banner = "Usage:\t#{File.basename(__FILE__)} [-v] [dor-url cert_file key_file]"
       opts.on('-v', '--verbose', 'Run verbosely, use multiple times for debug level output') do
@@ -32,19 +31,19 @@ class RobotDownloadWorkflowsCLI
         flags[:verbose] = true
       end
     end.parse!(args)
-    ap({:args => args}) if flags[:debug]
-    
+    ap(args: args) if flags[:debug]
+
     # Initialize the workflow, and set the repository if prepended with :
     dor_url = args.shift || FEDORA_URL
     cert_file = args.shift || CERT_FILE
     key_file = args.shift || KEY_FILE
-    ap({:dor_url => dor_url, :cert_file => cert_file, :key_file => key_file, :flags => flags}) if flags[:debug]
-    
-    puts "Loading druids for all workflow objects..."
+    ap(dor_url: dor_url, cert_file: cert_file, key_file: key_file, flags: flags) if flags[:debug]
+
+    puts 'Loading druids for all workflow objects...'
     solr = Dor::SearchService.solr
-    ap({:solr => solr}) if flags[:debug]
-    res = Dor::SearchService.query("objectType_t:workflow", rows: 1000, fl: "id,workflow_name_s")
-    ap({:response => res}) if flags[:debug]
+    ap(solr: solr) if flags[:debug]
+    res = Dor::SearchService.query('objectType_t:workflow', rows: 1000, fl: 'id,workflow_name_s')
+    ap(response: res) if flags[:debug]
     res[:response][:docs].each do |doc|
       if doc[:workflow_name_s].nil?
         puts "ERROR: Skipping malformed workflow #{doc[:id]}"
@@ -52,18 +51,18 @@ class RobotDownloadWorkflowsCLI
       end
       druid = doc[:id]
       wf = doc[:workflow_name_s].first
-      ap({:druid => druid, :wf => wf, :flags => flags}) if flags[:debug]
+      ap(druid: druid, wf: wf, flags: flags) if flags[:debug]
       uri = URI.parse("#{FEDORA_URL}/objects/#{druid}/datastreams/workflowDefinition/content")
       begin
         puts "Downloading #{uri}" if flags[:debug]
         res = RestClient::Resource.new(
           uri.to_s,
-          :ssl_client_cert  =>  OpenSSL::X509::Certificate.new(File.read(cert_file)),
-          :ssl_client_key   =>  OpenSSL::PKey::RSA.new(File.read(key_file), ''),
-          :verify_ssl       =>  OpenSSL::SSL::VERIFY_PEER
+          ssl_client_cert: OpenSSL::X509::Certificate.new(File.read(cert_file)),
+          ssl_client_key: OpenSSL::PKey::RSA.new(File.read(key_file), ''),
+          verify_ssl: OpenSSL::SSL::VERIFY_PEER
         )
-        ap({:res => res}) if flags[:debug]
-        
+        ap(res: res) if flags[:debug]
+
         ng = Nokogiri::XML(res.get)
         repo = ng.root['repository']
         fn = "config/workflows/#{repo}/#{wf}.xml"
@@ -74,7 +73,7 @@ class RobotDownloadWorkflowsCLI
         end
       rescue OpenSSL::SSL::SSLError => e
         puts "#{e.class}: #{e}"
-      end      
+      end
     end
   end
 end
@@ -84,15 +83,15 @@ require File.expand_path(File.dirname(__FILE__) + '/../config/boot')
 RobotDownloadWorkflowsCLI.new.run(ARGV)
 
 # XXX: skip these workflows no matter what
-skipfiles = %w{
-	config/workflows/dor/dpgImageWF.xml
-	config/workflows/dor/eemsAccessionWF.xml
-	config/workflows/dor/etdSubmitWF.xml
-	config/workflows/dor/googleScannedBookWF.xml
-	config/workflows/dor/hydrusAssemblyWF.xml
-}.each do |fn|
-  if File.exists?(fn)
+skipfiles = %w(
+  config/workflows/dor/dpgImageWF.xml
+  config/workflows/dor/eemsAccessionWF.xml
+  config/workflows/dor/etdSubmitWF.xml
+  config/workflows/dor/googleScannedBookWF.xml
+  config/workflows/dor/hydrusAssemblyWF.xml
+).each do |fn|
+  if File.exist?(fn)
     puts "Deleting #{fn}"
-  	File.delete(fn) 
+    File.delete(fn)
   end
 end

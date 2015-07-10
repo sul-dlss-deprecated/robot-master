@@ -1,12 +1,12 @@
-cert_dir = File.join(File.dirname(__FILE__), "..", "certs")
+cert_dir = File.join(File.dirname(__FILE__), '..', 'certs')
 
 Dor::Config.configure do
   solrizer.url 'http://example.com/solr/collection'
   fedora.url 'https://example.com/fedora'
 
   ssl do
-    cert_file File.join(cert_dir,"example.crt")
-    key_file File.join(cert_dir,"example.key")
+    cert_file File.join(cert_dir, 'example.crt')
+    key_file File.join(cert_dir, 'example.key')
     key_pass ''
   end
 end
