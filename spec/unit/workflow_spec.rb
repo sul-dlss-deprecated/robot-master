@@ -167,8 +167,8 @@ describe RobotMaster::Workflow do
     context 'dor:assemblyWF' do
       let(:queues) { %w{
         dor_assemblyWF_accessioning-initiate_AAA
-        dor_assemblyWF_exif-collect_AAA
         dor_assemblyWF_checksum-compute_AAA
+        dor_assemblyWF_exif-collect_AAA
         dor_assemblyWF_jp2-create_AAA
         }
       }
@@ -177,7 +177,7 @@ describe RobotMaster::Workflow do
         wf = WorkflowTest.new('dor', 'assemblyWF', File.read('spec/fixtures/assemblyWF.xml'))
         wf.perform
         # ap({:queues => Resque.queues})
-        expect(Resque.queues).to eq(queues)
+        expect(Resque.queues.sort).to eq(queues)
         { 
           'accessioning-initiate' => 'AccessioningInitiate',
           'exif-collect' => 'ExifCollect',
