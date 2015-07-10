@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/sul-dlss/robot-master.svg?branch=master)](https://travis-ci.org/sul-dlss/robot-master)
+
 # robot-master
 
 Mediates jobs from the Workflow service to the Resque priority queues.
