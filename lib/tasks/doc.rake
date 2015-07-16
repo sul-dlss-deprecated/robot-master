@@ -12,5 +12,5 @@ begin
     end
   end
 rescue LoadError
-  abort 'Please install the YARD gem to generate doc.'
+  puts 'Please install the YARD gem to generate doc.'
 end
