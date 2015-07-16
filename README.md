@@ -126,4 +126,5 @@ in pseudo-code:
 * `v1.0.7`: Add current time to Status Board
 * `v1.0.8`: Fix Status Board bug when WF files are missing
 * `v1.2.0`: Updated gem dependencies and fixed tests
+* `v1.2.1`: Updated rake tasks
 
