@@ -91,6 +91,7 @@ class RobotMasterCLI
     n = 0
     working = true
     Signal.trap('QUIT') { working = false }
+    Signal.trap('TERM') { working = false }
     start = Time.now
     sid = "#{`hostname -s`.rstrip}:#{Process.pid}:#{flags[:workflow]}"
     begin
