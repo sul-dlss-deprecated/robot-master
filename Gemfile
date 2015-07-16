@@ -23,6 +23,7 @@ group :development do
   gem 'simplecov'
   gem 'version_bumper'
   gem 'yard'
+  gem 'rubocop'
 end
 
 group :deployment do
