@@ -1,5 +1,16 @@
-desc "Run console; defaults to IRB='pry'"
-task :console, :IRB do |_t, args|
-  irb = args[:IRB].nil? ? 'pry' : args[:IRB]
-  sh irb, '-r', "#{File.dirname(__FILE__)}/../../config/boot.rb"
+desc 'Run a console'
+task :console, :ROBOT_ENVIRONMENT do |_t, args|
+  args.with_defaults(ROBOT_ENVIRONMENT: 'development')
+
+  ENV['ROBOT_ENVIRONMENT'] ||= args[:ROBOT_ENVIRONMENT]
+  require_relative '../../config/boot'
+
+  begin
+    require 'pry'
+    IRB = Pry
+  rescue LoadError
+    require 'irb'
+  end
+
+  IRB.start
 end

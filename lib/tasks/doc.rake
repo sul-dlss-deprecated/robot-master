@@ -1,37 +1,16 @@
-desc 'Generate RDoc'
-task doc: ['doc:generate']
-
-namespace :doc do
-  project_root = File.expand_path(File.join(File.dirname(__FILE__), '..', '..'))
-  doc_destination = File.join(project_root, 'rdoc')
-
-  begin
-    require 'yard'
-    require 'yard/rake/yardoc_task'
-
-    YARD::Rake::YardocTask.new(:generate) do |yt|
-      yt.files   =  Dir.glob(File.join(project_root, 'lib', '*.rb')) +
-        Dir.glob(File.join(project_root, 'lib', '**', '*.rb')) +
-        [File.join(project_root, 'README.rdoc')]
-
-      yt.options = ['--output-dir', doc_destination, '--readme', 'README.md']
-    end
-  rescue LoadError
-    desc 'Generate YARD Documentation'
-    task :generate do
-      abort 'Please install the YARD gem to generate rdoc.'
-    end
-  end
-
-  desc 'Remove generated documenation'
-  task :clean do
-    rm_r doc_destination if File.exist?(doc_destination)
-  end
-end
-
-desc 'Build Yard documentation'
-task :yard do
+begin
+  require 'yard'
   YARD::Rake::YardocTask.new do |t|
-    t.files = ['lib/**/*.rb', 'bin/**/*.rb']
+    t.files = ['lib/**/*.rb', 'bin/controller']
+    t.options = ['--readme', 'README.md', '-m', 'markdown']
   end
+
+  namespace :yard do
+    desc 'Clean up documentation'
+    task :clean do
+      FileUtils.rm_rf('doc')
+    end
+  end
+rescue LoadError
+  abort 'Please install the YARD gem to generate doc.'
 end
