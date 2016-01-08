@@ -299,7 +299,6 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
-  addressable (= 2.3.5)
   awesome_print (~> 1.2.0)
   capistrano (~> 3.0)
   capistrano-bundler (~> 1.1)
@@ -326,4 +325,4 @@ DEPENDENCIES
   yard
 
 BUNDLED WITH
-   1.10.5
+   1.11.2
