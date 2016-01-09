@@ -29,7 +29,7 @@ class RobotMasterCLI
       robot_log: ENV['ROBOT_LOG'] || '-'
     }
 
-    args = %w(--help) if args.nil? or args.empty?
+    args = %w(--help) if args.nil? || args.empty?
 
     OptionParser.new do |opts|
       opts.banner = "Usage:\t#{File.basename(__FILE__)} [flags] [repo:]workflow"

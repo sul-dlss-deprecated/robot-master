@@ -31,7 +31,7 @@ class RobotSweeperCLI
     ap(status: status) if flags[:debug]
     ROBOT_LOG.info { "Job for #{job[:druid]} has status '#{status}' from #{job[:error_q]}" }
 
-    if flags[:change_to_errored] and status == 'queued'
+    if flags[:change_to_errored] && status == 'queued'
       opts =  { error_txt: "queue=#{job[:error_q]} backtrace=#{job[:error_backtrace]}" }
       ROBOT_LOG.info("Updating error status for #{job[:druid]} #{job[:error_msg]} #{opts}")
       Dor::WorkflowService.update_workflow_error_status(job[:repo], job[:druid], job[:workflow], job[:step], job[:error_msg], opts)

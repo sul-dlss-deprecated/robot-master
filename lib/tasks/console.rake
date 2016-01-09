@@ -11,7 +11,7 @@ task :console, :ROBOT_ENVIRONMENT do |_t, args|
   rescue LoadError
     require 'irb'
   end
-  
+
   ARGV.clear
   IRB.start
 end
