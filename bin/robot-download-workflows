@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby
 #
-# Usage: robot-download-workflow [-v] [dor-url cert_file key_file]
+# Usage: robot-download-workflows [-v] [dor-url cert_file key_file]
 #
 require 'optparse'
 require 'fileutils'
@@ -42,15 +42,18 @@ class RobotDownloadWorkflowsCLI
     puts 'Loading druids for all workflow objects...'
     solr = Dor::SearchService.solr
     ap(solr: solr) if flags[:debug]
-    res = Dor::SearchService.query('objectType_t:workflow', rows: 1000, fl: 'id,workflow_name_s')
+    workflow_name_field = Solrizer.solr_name 'workflow_name', :symbol
+    res = Dor::SearchService.query("#{Solrizer.solr_name 'objectType', :symbol}:\"workflow\"",
+                                   rows: 1000,
+                                   fl: "id,#{workflow_name_field}")
     ap(response: res) if flags[:debug]
     res[:response][:docs].each do |doc|
-      if doc[:workflow_name_s].nil?
+      if doc[workflow_name_field].nil?
         puts "ERROR: Skipping malformed workflow #{doc[:id]}"
         next
       end
       druid = doc[:id]
-      wf = doc[:workflow_name_s].first
+      wf = doc[workflow_name_field].first
       ap(druid: druid, wf: wf, flags: flags) if flags[:debug]
       uri = URI.parse("#{FEDORA_URL}/objects/#{druid}/datastreams/workflowDefinition/content")
       begin
