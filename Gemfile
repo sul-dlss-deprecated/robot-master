@@ -28,5 +28,6 @@ end
 group :deployment do
   gem 'capistrano', '~> 3.0'
   gem 'capistrano-bundler', '~> 1.1'
+  gem 'capistrano-rvm'
   gem 'lyberteam-capistrano-devel', '~> 3.1'
 end

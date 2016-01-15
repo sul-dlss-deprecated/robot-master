@@ -17,12 +17,6 @@ require 'dor-services'
 ENV['ROBOT_ENVIRONMENT'] ||= 'development'
 require File.expand_path(File.join(File.dirname(__FILE__), 'environments', ENV['ROBOT_ENVIRONMENT']))
 
-# @see https://github.com/sul-dlss/dor-workflow-service
-require 'dor-workflow-service'
-WORKFLOW_URL = 'http://127.0.0.1:8080/workflow' unless defined? WORKFLOW_URL
-WORKFLOW_TIMEOUT = 60 unless defined? WORKFLOW_TIMEOUT
-Dor::WorkflowService.configure(WORKFLOW_URL, timeout: WORKFLOW_TIMEOUT)
-
 # Load Resque configuration and controller
 require 'resque'
 begin
