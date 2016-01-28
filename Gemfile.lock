@@ -58,6 +58,11 @@ GEM
     deprecation (0.2.2)
       activesupport
     diff-lcs (1.2.5)
+    dlss-capistrano (3.2.0)
+      capistrano (~> 3.0)
+      capistrano-bundle_audit (>= 0.0.3)
+      capistrano-one_time_key
+      capistrano-releaseboard
     docile (1.1.5)
     docopt (0.5.0)
     domain_name (0.5.25)
@@ -123,11 +128,6 @@ GEM
       nokogiri (>= 1.4.3.1)
       systemu (>= 1.2.0)
       validatable
-    lyberteam-capistrano-devel (3.2.0)
-      capistrano (~> 3.0)
-      capistrano-bundle_audit (>= 0.0.3)
-      capistrano-one_time_key
-      capistrano-releaseboard
     mediashelf-loggable (0.4.10)
     method_source (0.8.2)
     mime-types (2.99)
@@ -321,11 +321,11 @@ DEPENDENCIES
   capistrano (~> 3.0)
   capistrano-bundler (~> 1.1)
   capistrano-rvm
+  dlss-capistrano (~> 3.1)
   dor-services (~> 5.3)
   dor-workflow-service (~> 1.7)
   equivalent-xml
   lyber-core (~> 3.2.3)
-  lyberteam-capistrano-devel (~> 3.1)
   mock_redis
   nokogiri (~> 1.6.1)
   parallel (~> 1.2)
