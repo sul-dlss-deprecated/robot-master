@@ -1,5 +1,4 @@
-require File.expand_path(File.dirname(__FILE__) + '/../spec_helper')
-require File.expand_path(File.dirname(__FILE__) + '/../../config/boot')
+require 'spec_helper'
 
 class WorkflowTest < RobotMaster::Workflow
   # expose protected methods
@@ -13,6 +12,11 @@ class WorkflowTest < RobotMaster::Workflow
 end
 
 describe RobotMaster::Workflow do
+  before(:each) do
+    Resque.redis = MockRedis.new
+    Resque.mock!
+  end
+
   subject {
     WorkflowTest.new('dor', 'accessionWF', File.read('spec/fixtures/accessionWF.xml'))
   }
@@ -164,8 +168,6 @@ describe RobotMaster::Workflow do
         'druid:tt628cb6479',
         'druid:ct021wp7863'
       ])
-      Resque.redis = MockRedis.new
-      Resque.mock!
     end
 
     context 'dor:assemblyWF' do
@@ -214,8 +216,6 @@ describe RobotMaster::Workflow do
       allow(Dor::WorkflowService).to receive(:get_objects_for_workstep).and_return([
         'druid:aa111bb2222'
       ])
-      Resque.redis = MockRedis.new
-      Resque.mock!
       allow(Resque).to receive(:enqueue_to).and_raise(StandardError)
     end
 
@@ -230,11 +230,6 @@ describe RobotMaster::Workflow do
   end
 
   context '#self.perform with no prereq' do
-    before(:each) do
-      Resque.redis = MockRedis.new
-      Resque.mock!
-    end
-
     it 'should run empty prereq' do
       xml = File.read('spec/fixtures/singleStepWF.xml')
       wf = RobotMaster::Workflow.new('dor', 'singleStepWF', xml)
@@ -261,8 +256,6 @@ describe RobotMaster::Workflow do
 
   context '#limit' do
     it 'should pass limit flag from workflow xml' do
-      Resque.redis = MockRedis.new
-      Resque.mock!
       xml = File.read('spec/fixtures/singleStepWF.xml')
       wf = RobotMaster::Workflow.new('dor', 'singleStepWF', xml)
       allow(wf).to receive(:perform_on_process).with({
@@ -274,8 +267,6 @@ describe RobotMaster::Workflow do
       wf.perform
     end
     it 'should use default limit from workflow xml' do
-      Resque.redis = MockRedis.new
-      Resque.mock!
       xml = '<workflow-def id="singleStepWF" repository="dor">
   <process name="doit" sequence="1"/>
 </workflow-def>'

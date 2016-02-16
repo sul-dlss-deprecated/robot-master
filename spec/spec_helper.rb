@@ -10,7 +10,4 @@ SimpleCov.start
 require 'bundler/setup'
 Bundler.require(:default, :development)
 
-RSpec.configure do |_config|
-end
-
-Rails = Object.new unless defined? Rails
+require File.expand_path(File.dirname(__FILE__) + '/../config/boot')
