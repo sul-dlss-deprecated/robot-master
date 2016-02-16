@@ -20,6 +20,7 @@ GEM
       minitest (~> 5.1)
       thread_safe (~> 0.3, >= 0.3.4)
       tzinfo (~> 1.1)
+    addressable (2.4.0)
     ast (2.2.0)
     awesome_print (1.6.1)
     bagit (0.3.2)
@@ -65,7 +66,7 @@ GEM
       capistrano-releaseboard
     docile (1.1.5)
     docopt (0.5.0)
-    domain_name (0.5.25)
+    domain_name (0.5.20160128)
       unf (>= 0.0.5, < 1.0.0)
     dor-rights-auth (1.0.2)
       nokogiri
@@ -121,7 +122,9 @@ GEM
     iso-639 (0.2.5)
     json (1.8.3)
     link_header (0.0.8)
-    lyber-core (3.2.5)
+    lyber-core (4.0.0)
+      activesupport
+      addressable (!= 2.3.6)
       dor-workflow-service (~> 1.7)
     lyber-utils (0.1.2)
       bagit (>= 0.1.0)
@@ -302,7 +305,7 @@ GEM
     uber (0.0.15)
     unf (0.1.4)
       unf_ext
-    unf_ext (0.0.7.1)
+    unf_ext (0.0.7.2)
     uuidtools (2.1.5)
     validatable (1.6.7)
     vegas (0.1.11)
@@ -325,7 +328,7 @@ DEPENDENCIES
   dor-services (~> 5.3)
   dor-workflow-service (~> 1.7)
   equivalent-xml
-  lyber-core (~> 3.2.3)
+  lyber-core (~> 4.0)
   mock_redis
   nokogiri (~> 1.6.1)
   parallel (~> 1.2)
