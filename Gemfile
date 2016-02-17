@@ -4,10 +4,10 @@ gem 'dor-workflow-service', '~> 1.7'
 gem 'nokogiri', '~> 1.6.1'
 gem 'resque', '~> 1.25.2'
 gem 'robot-controller', '~> 2.0.0'
-gem 'awesome_print', '~> 1.2.0'
+gem 'awesome_print', '~> 1.2'
 gem 'dor-services', '~> 5.3'
-gem 'lyber-core', '~> 3.2.3'
-gem 'parallel', '~> 1.2.4'
+gem 'lyber-core', '~> 4.0'
+gem 'parallel', '~> 1.2'
 gem 'whenever'
 
 group :development do
@@ -29,5 +29,5 @@ group :deployment do
   gem 'capistrano', '~> 3.0'
   gem 'capistrano-bundler', '~> 1.1'
   gem 'capistrano-rvm'
-  gem 'lyberteam-capistrano-devel', '~> 3.1'
+  gem 'dlss-capistrano', '~> 3.1'
 end
