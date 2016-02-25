@@ -20,7 +20,6 @@ GEM
       minitest (~> 5.1)
       thread_safe (~> 0.3, >= 0.3.4)
       tzinfo (~> 1.1)
-    addressable (2.4.0)
     ast (2.2.0)
     awesome_print (1.6.1)
     bagit (0.3.2)
@@ -66,29 +65,26 @@ GEM
       capistrano-releaseboard
     docile (1.1.5)
     docopt (0.5.0)
-    domain_name (0.5.20160128)
+    domain_name (0.5.20160216)
       unf (>= 0.0.5, < 1.0.0)
     dor-rights-auth (1.0.2)
       nokogiri
-    dor-services (5.3.0)
+    dor-services (5.4.2)
       active-fedora (~> 6.0)
       activesupport (>= 3.2.18)
       confstruct (~> 0.2.7)
       dor-rights-auth (~> 1.0, >= 1.0.2)
-      dor-workflow-service (~> 1.8, >= 1.8.0)
+      dor-workflow-service (~> 2.0)
       druid-tools (~> 0.4, >= 0.4.1)
       equivalent-xml (~> 0.5, >= 0.5.1)
       json (~> 1.8.1)
       lyber-utils (~> 0.1.2)
-      moab-versioning (~> 1.4.4)
+      moab-versioning (~> 2.0)
       modsulator (~> 0.0.7)
-      net-sftp (~> 2.1.2)
-      net-ssh (~> 2.6.5)
-      nokogiri (~> 1.6.0)
-      nokogiri-pretty (~> 0.1.0)
+      net-sftp (~> 2.1)
+      nokogiri (~> 1.6)
+      nokogiri-pretty (~> 0.1)
       om (~> 3.0)
-      osullivan (~> 0.0.3)
-      progressbar (~> 0.21.0)
       rdf (~> 1.1.7)
       rest-client (~> 1.7)
       retries
@@ -97,16 +93,15 @@ GEM
       ruby-graphviz
       rubydora (~> 1.6.5)
       solrizer (~> 3.0)
-      stanford-mods (~> 1.1)
-      systemu (~> 2.6.0)
+      stanford-mods (= 1.5.3)
+      systemu (~> 2.6)
       uuidtools (~> 2.1.4)
-    dor-workflow-service (1.8.0)
+    dor-workflow-service (2.0.0)
       activesupport (>= 3.2.1, < 5)
       confstruct (>= 0.2.7, < 2)
       faraday (~> 0.9.2)
       net-http-persistent (~> 2.9.4)
       nokogiri (~> 1.6.0)
-      rest-client (~> 1.7)
       retries
     druid-tools (0.4.1)
     equivalent-xml (0.6.0)
@@ -122,10 +117,9 @@ GEM
     iso-639 (0.2.5)
     json (1.8.3)
     link_header (0.0.8)
-    lyber-core (4.0.0)
+    lyber-core (4.0.2)
       activesupport
-      addressable (!= 2.3.6)
-      dor-workflow-service (~> 1.7)
+      dor-workflow-service (>= 1.7, < 3)
     lyber-utils (0.1.2)
       bagit (>= 0.1.0)
       nokogiri (>= 1.4.3.1)
@@ -133,10 +127,10 @@ GEM
       validatable
     mediashelf-loggable (0.4.10)
     method_source (0.8.2)
-    mime-types (2.99)
+    mime-types (2.99.1)
     mini_portile2 (2.0.0)
     minitest (5.8.4)
-    moab-versioning (1.4.4)
+    moab-versioning (2.0.0)
       confstruct
       json
       nokogiri
@@ -160,7 +154,7 @@ GEM
       net-ssh (>= 2.6.5)
     net-sftp (2.1.2)
       net-ssh (>= 2.6.5)
-    net-ssh (2.6.8)
+    net-ssh (3.0.2)
     netrc (0.11.0)
     nokogiri (1.6.7.2)
       mini_portile2 (~> 2.0.0.rc2)
@@ -179,15 +173,10 @@ GEM
       mediashelf-loggable
       nokogiri (>= 1.4.2)
       solrizer (~> 3.1.0)
-    osullivan (0.0.3)
-      activesupport (>= 3.2.18)
-      faraday (~> 0.9.0)
-      json
     parallel (1.6.1)
     parser (2.3.0.2)
       ast (~> 2.2)
     powerpack (0.1.1)
-    progressbar (0.21.0)
     pry (0.10.3)
       coderay (~> 1.1.0)
       method_source (~> 0.8.1)
@@ -228,10 +217,10 @@ GEM
       rake (~> 10.3)
       resque (~> 1.25.2)
       whenever (~> 0.9.2)
-    roo (2.3.1)
+    roo (2.3.2)
       nokogiri (~> 1)
       rubyzip (~> 1.1, < 2.0.0)
-    rsolr (1.0.13)
+    rsolr (1.1.1)
       builder (>= 2.1.2)
     rsolr-ext (1.0.3)
       rsolr (>= 1.0.2)
@@ -266,7 +255,7 @@ GEM
       mime-types
       nokogiri
       rest-client
-    rubyzip (1.1.7)
+    rubyzip (1.2.0)
     simplecov (0.11.1)
       docile (~> 1.1.0)
       json (~> 1.8)
@@ -288,7 +277,7 @@ GEM
       net-scp (>= 1.1.2)
       net-ssh
       term-ansicolor
-    stanford-mods (1.5.0)
+    stanford-mods (1.5.3)
       activesupport
       mods (~> 2.0.2)
     state_machine (1.2.0)
@@ -325,8 +314,8 @@ DEPENDENCIES
   capistrano-bundler (~> 1.1)
   capistrano-rvm
   dlss-capistrano (~> 3.1)
-  dor-services (~> 5.3)
-  dor-workflow-service (~> 1.7)
+  dor-services (~> 5.4, >= 5.4.2)
+  dor-workflow-service (~> 2.0)
   equivalent-xml
   lyber-core (~> 4.0)
   mock_redis
