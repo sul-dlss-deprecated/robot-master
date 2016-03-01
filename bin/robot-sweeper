@@ -13,13 +13,13 @@ class RobotSweeperCLI
   def monitor_stale(flags = {})
     %w(dor sdr).each do |repo|
       ROBOT_LOG.info("##### Querying stale jobs for #{repo}")
-      stale = Dor::WorkflowService.get_stale_queued_workflows(repo, hours_ago: 24, limit: 1000)
+      stale = Dor::Config.workflow.client.get_stale_queued_workflows(repo, hours_ago: 24, limit: 1000)
       ap(stale: stale) if flags[:debug]
       stale.each do |h|
         h[:repo] = repo
         ap(h: h) if flags[:debug]
         ROBOT_LOG.info("Changing status from queued to waiting for: #{h[:repo]}, #{h[:druid]}, #{h[:workflow]}, #{h[:step]}")
-        Dor::WorkflowService.update_workflow_status(h[:repo], h[:druid], h[:workflow], h[:step], 'waiting', expected: 'queued')
+        Dor::Config.workflow.client.update_workflow_status(h[:repo], h[:druid], h[:workflow], h[:step], 'waiting', expected: 'queued')
       end
     end
   end
@@ -27,14 +27,14 @@ class RobotSweeperCLI
   # XXX: sweep up failed job if the Workflow service thinks the object is :queued
   def sweep_job(job, flags = {})
     ap(job: job) if flags[:debug]
-    status = Dor::WorkflowService.get_workflow_status(job[:repo], job[:druid], job[:workflow], job[:step])
+    status = Dor::Config.workflow.client.get_workflow_status(job[:repo], job[:druid], job[:workflow], job[:step])
     ap(status: status) if flags[:debug]
     ROBOT_LOG.info { "Job for #{job[:druid]} has status '#{status}' from #{job[:error_q]}" }
 
     if flags[:change_to_errored] && status == 'queued'
       opts =  { error_txt: "queue=#{job[:error_q]} backtrace=#{job[:error_backtrace]}" }
       ROBOT_LOG.info("Updating error status for #{job[:druid]} #{job[:error_msg]} #{opts}")
-      Dor::WorkflowService.update_workflow_error_status(job[:repo], job[:druid], job[:workflow], job[:step], job[:error_msg], opts)
+      Dor::Config.workflow.client.update_workflow_error_status(job[:repo], job[:druid], job[:workflow], job[:step], job[:error_msg], opts)
     end
   end
 

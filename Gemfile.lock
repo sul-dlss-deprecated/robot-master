@@ -69,7 +69,7 @@ GEM
       unf (>= 0.0.5, < 1.0.0)
     dor-rights-auth (1.0.2)
       nokogiri
-    dor-services (5.4.2)
+    dor-services (5.5.0)
       active-fedora (~> 6.0)
       activesupport (>= 3.2.18)
       confstruct (~> 0.2.7)
@@ -314,8 +314,7 @@ DEPENDENCIES
   capistrano-bundler (~> 1.1)
   capistrano-rvm
   dlss-capistrano (~> 3.1)
-  dor-services (~> 5.4, >= 5.4.2)
-  dor-workflow-service (~> 2.0)
+  dor-services (~> 5.5)
   equivalent-xml
   lyber-core (~> 4.0)
   mock_redis
