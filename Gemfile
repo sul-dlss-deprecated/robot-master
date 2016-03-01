@@ -1,11 +1,10 @@
 source 'https://rubygems.org'
 
-gem 'dor-workflow-service', '~> 2.0'
 gem 'nokogiri', '~> 1.6.1'
 gem 'resque', '~> 1.25.2'
 gem 'robot-controller', '~> 2.0.0'
 gem 'awesome_print', '~> 1.2'
-gem 'dor-services', '~> 5.4', '>= 5.4.2'
+gem 'dor-services', '~> 5.5'
 gem 'lyber-core', '~> 4.0'
 gem 'parallel', '~> 1.2'
 gem 'whenever'

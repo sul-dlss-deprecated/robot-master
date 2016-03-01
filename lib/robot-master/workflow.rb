@@ -111,7 +111,7 @@ module RobotMaster
       r, w, s = Workflow.parse_qualified(step)
       begin
         if ENV['ROBOT_MASTER_ENABLE_UPDATE_WORKFLOW_STATUS'] == 'yes'
-          Dor::WorkflowService.update_workflow_status(r, druid, w, s, mark_status.to_s, current_status: 'waiting')
+          Dor::Config.workflow.client.update_workflow_status(r, druid, w, s, mark_status.to_s, current_status: 'waiting')
         end
       rescue => e
         ROBOT_LOG.error("Update workflow status failed for waiting->queued transition on #{druid}: #{e}")
@@ -158,7 +158,7 @@ module RobotMaster
 
       # fetch pending jobs in all lanes for this step from the Workflow Service.
       n = 0
-      lanes = Dor::WorkflowService.get_lane_ids(*(step.split(/:/)))
+      lanes = Dor::Config.workflow.client.get_lane_ids(*(step.split(/:/)))
       ROBOT_LOG.debug { "-- found #{lanes.size} lanes" }
       lanes.each do |lane|
         # only fetch the minimum results we'll need
@@ -166,7 +166,7 @@ module RobotMaster
         nlimit = [process[:limit], Queue.empty_slots(step, lane, process[:limit])].min
         next unless nlimit > 0
 
-        results = Dor::WorkflowService.get_objects_for_workstep(
+        results = Dor::Config.workflow.client.get_objects_for_workstep(
           process[:prereq],
           step,
           lane,

@@ -159,10 +159,10 @@ describe RobotMaster::Workflow do
 
   context '#self.perform without lanes' do
     before(:each) do
-      allow(Dor::WorkflowService).to receive(:get_lane_ids).and_return([
+      allow(Dor::Config.workflow.client).to receive(:get_lane_ids).and_return([
         'AAA'
       ])
-      allow(Dor::WorkflowService).to receive(:get_objects_for_workstep).and_return([
+      allow(Dor::Config.workflow.client).to receive(:get_objects_for_workstep).and_return([
         'druid:aa111bb2222',
         'druid:py156ps0477',
         'druid:tt628cb6479',
@@ -210,10 +210,10 @@ describe RobotMaster::Workflow do
 
   context '#self.perform with exception' do
     before(:each) do
-      allow(Dor::WorkflowService).to receive(:get_lane_ids).and_return([
+      allow(Dor::Config.workflow.client).to receive(:get_lane_ids).and_return([
         'default'
       ])
-      allow(Dor::WorkflowService).to receive(:get_objects_for_workstep).and_return([
+      allow(Dor::Config.workflow.client).to receive(:get_objects_for_workstep).and_return([
         'druid:aa111bb2222'
       ])
       allow(Resque).to receive(:enqueue_to).and_raise(StandardError)
@@ -233,10 +233,10 @@ describe RobotMaster::Workflow do
     it 'should run empty prereq' do
       xml = File.read('spec/fixtures/singleStepWF.xml')
       wf = RobotMaster::Workflow.new('dor', 'singleStepWF', xml)
-      allow(Dor::WorkflowService).to receive(:get_lane_ids).and_return([
+      allow(Dor::Config.workflow.client).to receive(:get_lane_ids).and_return([
         'default'
       ])
-      allow(Dor::WorkflowService).to receive(:get_objects_for_workstep).and_return([
+      allow(Dor::Config.workflow.client).to receive(:get_objects_for_workstep).and_return([
         'druid:aa111bb2222'
       ])
       wf.perform
