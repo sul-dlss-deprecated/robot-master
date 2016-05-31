@@ -4,6 +4,10 @@
 
 Mediates jobs from the Workflow service to the Resque priority queues.
 
+## Documentation
+
+We have a [*Wiki*](https://github.com/sul-dlss/robot-master/wiki).
+
 ## Configuration
 
 Your `config/environments/ENVIRONMENT.rb` should have (see `config/example_environment.rb`):
