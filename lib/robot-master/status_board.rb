@@ -6,7 +6,8 @@ require 'parallel'
 class RobotStatusBoard
   def count_ready(wq_uri, step, prereq, lane)
     uri = "#{wq_uri}?waiting=#{step}&completed=#{prereq}&lane-id=#{lane}&count-only=true"
-    xml = RestClient.get uri
+    resource = RestClient::Resource.new(uri, timeout: 60)
+    xml = resource.get
     doc = Nokogiri::XML(xml)
     doc.root['count'].to_i
   end
@@ -14,7 +15,8 @@ class RobotStatusBoard
   def count_status(wq_uri, step, lane, type)
     r, w, s = step.split(/:/)
     uri = "#{wq_uri}?repository=#{r}&workflow=#{w}&#{type}=#{s}&lane-id=#{lane}&count-only=true"
-    xml = RestClient.get uri
+    resource = RestClient::Resource.new(uri, timeout: 60)
+    xml = resource.get
     doc = Nokogiri::XML(xml)
     doc.root['count'].to_i
   end
