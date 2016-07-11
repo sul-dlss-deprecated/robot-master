@@ -46,6 +46,8 @@ GEM
       sshkit (~> 1.2)
     capistrano-one_time_key (0.0.1)
       capistrano (~> 3.0)
+    capistrano-passenger (0.2.0)
+      capistrano (~> 3.0)
     capistrano-releaseboard (0.0.1)
       faraday
     capistrano-rvm (0.1.2)
@@ -310,6 +312,7 @@ DEPENDENCIES
   awesome_print (~> 1.2)
   capistrano (~> 3.0)
   capistrano-bundler (~> 1.1)
+  capistrano-passenger
   capistrano-rvm
   dlss-capistrano (~> 3.1)
   dor-services (~> 5.5)
@@ -333,4 +336,4 @@ DEPENDENCIES
   yard
 
 BUNDLED WITH
-   1.11.2
+   1.12.5
