@@ -1,6 +1,6 @@
 source 'https://rubygems.org'
 
-gem 'nokogiri', '~> 1.6.1'
+gem 'nokogiri', '~> 1.6.8'
 gem 'resque', '~> 1.25.2'
 gem 'robot-controller', '~> 2.0.0'
 gem 'awesome_print', '~> 1.2'

@@ -130,7 +130,7 @@ GEM
     mediashelf-loggable (0.4.10)
     method_source (0.8.2)
     mime-types (2.99.1)
-    mini_portile2 (2.0.0)
+    mini_portile2 (2.1.0)
     minitest (5.8.4)
     moab-versioning (2.0.0)
       confstruct
@@ -158,8 +158,9 @@ GEM
       net-ssh (>= 2.6.5)
     net-ssh (3.0.2)
     netrc (0.11.0)
-    nokogiri (1.6.7.2)
-      mini_portile2 (~> 2.0.0.rc2)
+    nokogiri (1.6.8)
+      mini_portile2 (~> 2.1.0)
+      pkg-config (~> 1.1.7)
     nokogiri-happymapper (0.5.9)
       nokogiri (~> 1.5)
     nokogiri-pretty (0.1.0)
@@ -178,6 +179,7 @@ GEM
     parallel (1.6.2)
     parser (2.3.0.6)
       ast (~> 2.2)
+    pkg-config (1.1.7)
     powerpack (0.1.1)
     pry (0.10.3)
       coderay (~> 1.1.0)
@@ -319,7 +321,7 @@ DEPENDENCIES
   equivalent-xml
   lyber-core (~> 4.0)
   mock_redis
-  nokogiri (~> 1.6.1)
+  nokogiri (~> 1.6.8)
   parallel (~> 1.2)
   pry
   rake
