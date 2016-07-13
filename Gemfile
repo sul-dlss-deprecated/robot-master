@@ -1,34 +1,35 @@
 source 'https://rubygems.org'
 
-gem 'nokogiri', '~> 1.6.8'
-gem 'resque', '~> 1.25.2'
-gem 'robot-controller', '~> 2.0.0'
-gem 'awesome_print', '~> 1.2'
-gem 'dor-services', '~> 5.5'
-gem 'lyber-core', '~> 4.0'
-gem 'parallel', '~> 1.2'
+gem 'awesome_print'
+gem 'nokogiri'
+gem 'parallel'
+gem 'resque'
 gem 'whenever'
 gem 'faraday'
 
-group :development do
+gem 'dor-services', '>= 5.8.2'
+gem 'lyber-core', '>= 4.0.3'
+gem 'robot-controller', '>= 2.0.1'
+
+group :development, :test do
   gem 'equivalent-xml'
   gem 'mock_redis'
-  gem 'resque-mock'
   gem 'pry'
   gem 'rake'
   gem 'rdoc'
   gem 'redcarpet' # provides Markdown
+  gem 'resque-mock'
   gem 'rspec'
+  gem 'rubocop'
   gem 'simplecov'
   gem 'version_bumper'
   gem 'yard'
-  gem 'rubocop'
 end
 
 group :deployment do
-  gem 'capistrano', '~> 3.0'
-  gem 'capistrano-bundler', '~> 1.1'
-  gem 'capistrano-rvm'
+  gem 'capistrano-bundler'
   gem 'capistrano-passenger'
-  gem 'dlss-capistrano', '~> 3.1'
+  gem 'capistrano-rvm'
+  gem 'capistrano'
+  gem 'dlss-capistrano'
 end
