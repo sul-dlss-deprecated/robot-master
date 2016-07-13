@@ -8,6 +8,7 @@ gem 'dor-services', '~> 5.5'
 gem 'lyber-core', '~> 4.0'
 gem 'parallel', '~> 1.2'
 gem 'whenever'
+gem 'faraday'
 
 group :development do
   gem 'equivalent-xml'
