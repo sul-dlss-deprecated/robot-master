@@ -319,6 +319,7 @@ DEPENDENCIES
   dlss-capistrano (~> 3.1)
   dor-services (~> 5.5)
   equivalent-xml
+  faraday
   lyber-core (~> 4.0)
   mock_redis
   nokogiri (~> 1.6.8)
