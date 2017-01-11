@@ -89,7 +89,6 @@ RobotDownloadWorkflowsCLI.new.run(ARGV)
 skipfiles = %w(
   config/workflows/dor/dpgImageWF.xml
   config/workflows/dor/eemsAccessionWF.xml
-  config/workflows/dor/etdSubmitWF.xml
   config/workflows/dor/googleScannedBookWF.xml
   config/workflows/dor/hydrusAssemblyWF.xml
 ).each do |fn|
