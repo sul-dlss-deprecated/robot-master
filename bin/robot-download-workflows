@@ -4,96 +4,51 @@
 #
 require 'optparse'
 require 'fileutils'
-require 'awesome_print'
-require 'rest-client'
 require 'dor-services'
-require 'solrizer'
 
 # Load the environment file based on Environment.  Default to development
 ENV['ROBOT_ENVIRONMENT'] ||= 'development'
 require File.expand_path(File.join(File.dirname(__FILE__), '..', 'config', 'environments', ENV['ROBOT_ENVIRONMENT']))
 
-FEDORA_URL = Dor::Config.fedora.url
-CERT_FILE = Dor::Config.ssl.cert_file
-KEY_FILE = Dor::Config.ssl.key_file
-
 class RobotDownloadWorkflowsCLI
-  def run(args)
-    flags = {
-      verbose: false,
-      debug: false
-    }
+  def initialize(output_folder)
+    @output_folder = Pathname(output_folder)
+    @output_folder.mkpath unless @output_folder.directory?
+  end
 
-    OptionParser.new do |opts|
-      opts.banner = "Usage:\t#{File.basename(__FILE__)} [-v] [dor-url cert_file key_file]"
-      opts.on('-v', '--verbose', 'Run verbosely, use multiple times for debug level output') do
-        flags[:debug] = true if flags[:verbose]  # -vv
-        flags[:verbose] = true
-      end
-    end.parse!(args)
-    ap(args: args) if flags[:debug]
-
-    # Initialize the workflow, and set the repository if prepended with :
-    dor_url = args.shift || FEDORA_URL
-    cert_file = args.shift || CERT_FILE
-    key_file = args.shift || KEY_FILE
-    ap(dor_url: dor_url, cert_file: cert_file, key_file: key_file, flags: flags) if flags[:debug]
-
+  def run
     puts 'Loading druids for all workflow objects...'
-    solr = Dor::SearchService.solr
-    ap(solr: solr) if flags[:debug]
-    workflow_name_field = Solrizer.solr_name 'workflow_name', :symbol
-    res = Dor::SearchService.query("#{Solrizer.solr_name 'objectType', :symbol}:\"workflow\"",
-                                   rows: 1000,
-                                   fl: "id,#{workflow_name_field}")
-    ap(response: res) if flags[:debug]
-    res[:response][:docs].each do |doc|
-      if doc[workflow_name_field].nil?
-        puts "ERROR: Skipping malformed workflow #{doc[:id]}"
-        next
-      end
-      druid = doc[:id]
-      wf = doc[workflow_name_field].first
-      ap(druid: druid, wf: wf, flags: flags) if flags[:debug]
-      uri = URI.parse("#{FEDORA_URL}/objects/#{druid}/datastreams/workflowDefinition/content")
-      begin
-        puts "Downloading #{uri}" if flags[:debug]
-        res = RestClient::Resource.new(
-          uri.to_s,
-          ssl_client_cert: OpenSSL::X509::Certificate.new(File.read(cert_file)),
-          ssl_client_key: OpenSSL::PKey::RSA.new(File.read(key_file), ''),
-          verify_ssl: OpenSSL::SSL::VERIFY_PEER
-        )
-        ap(res: res) if flags[:debug]
+    Dor::WorkflowObject.find_each do |workflow_object|
+      puts "Found workflow #{workflow_object.label} (#{workflow_object.pid})"
 
-        ng = Nokogiri::XML(res.get)
-        repo = ng.root['repository']
-        fn = "config/workflows/#{repo}/#{wf}.xml"
-        FileUtils.mkdir_p(File.dirname(fn)) unless File.directory?(File.dirname(fn))
-        puts "Saving #{fn}"
-        File.open(fn, 'wb') do |f|
-          f.write(res.get)
-        end
-      rescue OpenSSL::SSL::SSLError => e
-        puts "#{e.class}: #{e}"
-      end
+      # Find out name and repo name from XML
+      doc = Nokogiri::XML(workflow_object.datastreams['workflowDefinition'].content)
+      name = doc.root['id']
+      repo = doc.root['repository']
+
+      # Save workflow XML to a file
+      fn = @output_folder.join(repo).join("#{name}.xml")
+      fn.dirname.mkdir unless fn.dirname.directory?
+      puts "Saving #{name} into file #{fn}"
+      fn.write(doc.to_xml)
     end
   end
 end
 
 # __MAIN__
 require File.expand_path(File.dirname(__FILE__) + '/../config/boot')
-RobotDownloadWorkflowsCLI.new.run(ARGV)
+RobotDownloadWorkflowsCLI.new('config/workflows').run
 
 # XXX: skip these workflows no matter what
 skipfiles = %w(
-  config/workflows/dor/dpgImageWF.xml
-  config/workflows/dor/eemsAccessionWF.xml
-  config/workflows/dor/googleScannedBookWF.xml
-  config/workflows/dor/hydrusAssemblyWF.xml
+  dor/dpgImageWF.xml
+  dor/eemsAccessionWF.xml
+  dor/googleScannedBookWF.xml
+  dor/hydrusAssemblyWF.xml
 ).each do |fn|
-  if File.exist?(fn)
-    puts "Deleting #{fn}"
-    File.delete(fn)
+  path = Pathname("config/workflows/#{fn}")
+  if path.exist?
+    puts "Deleting blacklisted #{path}"
+    path.delete
   end
 end
