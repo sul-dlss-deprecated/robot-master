@@ -210,20 +210,14 @@ describe RobotMaster::Workflow do
 
   context '#self.perform with exception' do
     before(:each) do
-      allow(Dor::Config.workflow.client).to receive(:get_lane_ids).and_return([
-        'default'
-      ])
-      allow(Dor::Config.workflow.client).to receive(:get_objects_for_workstep).and_return([
-        'druid:aa111bb2222'
-      ])
-      allow(Resque).to receive(:enqueue_to).and_raise(StandardError)
+      expect(Dor::Config.workflow.client).to receive(:get_lane_ids).and_raise(NotImplementedError)
     end
 
     context 'dor:assemblyWF' do
       it 'should perform' do
         expect {
           described_class.perform('dor', 'assemblyWF')
-        }.to raise_error(StandardError)
+        }.to raise_error(NotImplementedError)
         expect(Resque.queues).to eq([])
       end
     end
