@@ -129,6 +129,7 @@ GEM
       multipart-post (>= 1.2, < 3)
     haml (4.0.7)
       tilt
+    honeybadger (3.1.2)
     hooks (0.4.1)
       uber (~> 0.0.14)
     htmlentities (4.3.4)
@@ -414,6 +415,7 @@ DEPENDENCIES
   dor-services (>= 5.8.2)
   equivalent-xml
   faraday
+  honeybadger
   lyber-core (>= 4.0.3)
   mock_redis
   nokogiri
@@ -433,4 +435,4 @@ DEPENDENCIES
   yard
 
 BUNDLED WITH
-   1.14.4
+   1.14.6

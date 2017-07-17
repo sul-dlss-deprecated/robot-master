@@ -11,6 +11,7 @@
 #
 require 'optparse'
 require 'awesome_print'
+require 'honeybadger'
 
 class RobotMasterCLI
   def perform(workflow, flags = {})
@@ -102,6 +103,7 @@ class RobotMasterCLI
           n += perform(flags[:workflow], flags)
         rescue => e
           ROBOT_LOG.error("#{flags[:workflow]}: #{e}")
+          Honeybadger.notify(e)
           raise e unless flags[:loop] > 0 # don't error out if looping
         end
 
