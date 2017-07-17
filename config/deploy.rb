@@ -36,7 +36,7 @@ set :stages, %w(development staging production)
 
 set :linked_dirs, %w(log run config/certs config/environments config/workflows tmp public)
 
-set :linked_files, %w(config.ru)
+set :linked_files, %w(config.ru config/honeybadger.yml)
 
 namespace :deploy do
   desc 'Restart application'
@@ -53,3 +53,5 @@ namespace :deploy do
 
   after :publishing, :restart
 end
+
+set :honeybadger_env, fetch(:stage)

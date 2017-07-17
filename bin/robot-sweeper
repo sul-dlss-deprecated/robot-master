@@ -8,6 +8,7 @@
 #
 require 'optparse'
 require 'awesome_print'
+require 'honeybadger'
 
 class RobotSweeperCLI
   def monitor_stale(flags = {})
@@ -137,6 +138,7 @@ class RobotSweeperCLI
         monitor_failed(flags)
         monitor_stale(flags)
       rescue => e
+        Honeybadger.notify(e)
         ROBOT_LOG.error("#{e}")
         raise e unless flags[:loop] > 0 # don't error out if looping
       end
