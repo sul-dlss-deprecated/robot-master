@@ -1,7 +1,6 @@
 doc
 .rvmrc
 .ruby-version
-.yardoc
 rdoc
 *.log
 coverage
