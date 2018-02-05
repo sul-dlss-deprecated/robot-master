@@ -3,7 +3,7 @@ source 'https://rubygems.org'
 gem 'awesome_print'
 gem 'nokogiri'
 gem 'parallel'
-# pin resque, as v1.27 doesn't work with our mocking strategy for tests 
+# pin resque, as v1.27 doesn't work with our mocking strategy for tests
 gem 'resque', '~> 1.26.0'
 gem 'whenever'
 gem 'faraday'
@@ -28,7 +28,6 @@ group :development, :test do
   gem 'rubocop'
   gem 'simplecov'
   gem 'version_bumper'
-  gem 'yard'
 end
 
 group :deployment do
