@@ -218,7 +218,7 @@ GEM
       rdf (~> 1.1, >= 1.1.10)
     rdf-xsd (1.99.0)
       rdf (~> 1.99)
-    rdoc (6.0.1)
+    rdoc (6.0.2)
     redcarpet (3.4.0)
     redis (4.0.1)
     redis-namespace (1.6.0)
