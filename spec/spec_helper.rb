@@ -8,6 +8,6 @@ require 'simplecov'
 SimpleCov.start
 
 require 'bundler/setup'
-Bundler.require(:default, :development)
+Bundler.require(:default, :test)
 
 require File.expand_path(File.dirname(__FILE__) + '/../config/boot')
