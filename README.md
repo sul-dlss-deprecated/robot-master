@@ -1,4 +1,5 @@
 [![Build Status](https://travis-ci.org/sul-dlss/robot-master.svg?branch=master)](https://travis-ci.org/sul-dlss/robot-master)
+[![Coverage Status](https://coveralls.io/repos/github/sul-dlss/robot-master/badge.svg)](https://coveralls.io/github/sul-dlss/robot-master)
 [![Dependency Status](https://gemnasium.com/badges/github.com/sul-dlss/robot-master.svg)](https://gemnasium.com/github.com/sul-dlss/robot-master)
 
 # robot-master
