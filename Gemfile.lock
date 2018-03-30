@@ -208,8 +208,6 @@ GEM
       rdf (~> 1.1, >= 1.1.10)
     rdf-xsd (1.99.0)
       rdf (~> 1.99)
-    rdoc (6.0.3)
-    redcarpet (3.4.0)
     redis (4.0.1)
     redis-namespace (1.6.0)
       redis (>= 3.0.4)
@@ -306,7 +304,6 @@ GEM
     uuidtools (2.1.5)
     vegas (0.1.11)
       rack (>= 1.0.0)
-    version_bumper (0.3.0)
     whenever (0.9.7)
       chronic (>= 0.6.3)
     xml-simple (1.1.5)
@@ -323,7 +320,6 @@ DEPENDENCIES
   capistrano-rvm
   dlss-capistrano
   dor-services (>= 5.8.2)
-  equivalent-xml
   faraday
   honeybadger
   lyber-core (>= 4.0.3)
@@ -332,15 +328,12 @@ DEPENDENCIES
   parallel
   pry
   rake
-  rdoc
-  redcarpet
   resque (~> 1.26.0)
   resque-mock
   robot-controller (>= 2.0.1)
   rspec
   rubocop
   simplecov
-  version_bumper
   whenever
 
 BUNDLED WITH
