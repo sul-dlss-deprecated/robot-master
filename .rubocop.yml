@@ -1,13 +1,51 @@
 inherit_from: .rubocop_todo.yml
 
-# rspec expect{...} is conventional
-Style/SpaceBeforeBlockBraces:
+AllCops:
+  DisplayCopNames: true
+  Include:
+    - Rakefile
+    - lib/**/*.rake
+  Exclude:
+    - Gemfile.lock
+    - '**/*.md'
+    # - bin/**/*
+    - config/**/*.yml
+    # - config/environments/*.rb
+    - script/**/*
+    - vendor/**/*
+
+Bundler/OrderedGems:
+  Exclude:
+    - Gemfile
+
+# --- Layout ---
+
+# expect{...} is conventional
+Layout/SpaceBeforeBlockBraces:
   Exclude:
     - 'spec/**/*_spec.rb'
 
-Style/EmptyLineBetweenDefs:
+Layout/EmptyLineBetweenDefs:
   AllowAdjacentOneLineDefs: true
 
-# Configuration parameters: AllowURI, URISchemes.
+# --- Lint ---
+
+# --- Metrics ---
+
 Metrics/LineLength:
-  Max: 200
+  Max: 201
+
+# --- Naming ---
+
+Naming/FileName:
+  Exclude:
+    - Capfile
+    - Gemfile
+    - lib/resque/resque-robot-master.rb
+    - lib/robot-master.rb
+
+# --- Performance ---
+
+# --- RSpec ---
+
+# --- Style ---
