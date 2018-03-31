@@ -1,4 +1,8 @@
 [![Build Status](https://travis-ci.org/sul-dlss/robot-master.svg?branch=master)](https://travis-ci.org/sul-dlss/robot-master)
+[![Coverage Status](https://coveralls.io/repos/github/sul-dlss/robot-master/badge.svg)](https://coveralls.io/github/sul-dlss/robot-master)
+[![Dependency Status](https://gemnasium.com/badges/github.com/sul-dlss/robot-master.svg)](https://gemnasium.com/github.com/sul-dlss/robot-master)
+[![GitHub version](https://badge.fury.io/gh/sul-dlss%2Frobot-master.svg)](https://badge.fury.io/gh/sul-dlss%2Frobot-master)
+
 
 # robot-master
 
@@ -42,10 +46,10 @@ There are 2 command-line programs: `robot-master` and `controller`:
             --log=FILE                   Use the given log file (default: robot-master.log)
         -R, --repeat-every=SECONDS       Keep running every SECONDS in an infinite loop
         -v, --verbose                    Run verbosely, use multiple times for debug level output
-      
-   
+
+
 If using `controller` then you also need to edit `config/environments/bluepill_*.rb`
-     
+
     Usage: controller ( boot | quit )
            controller ( start | status | stop | restart | log ) [worker]
            controller [--help]
@@ -61,31 +65,31 @@ If using `controller` then you also need to edit `config/environments/bluepill_*
       BLUEPILL_BASEDIR - where bluepill stores its state (default: run/bluepill)
       BLUEPILL_LOGFILE - output log (default: log/bluepill.log)
       ROBOT_ENVIRONMENT - (default: development)
-      
+
 Environment variables supported:
 
     ROBOT_ENVIRONMENT
     ROBOT_LOG_LEVEL
     ROBOT_LOG
     RESTCLIENT_LOG
-    
-    
+
+
 ## `robot-master` operation
 
 To run all of the workflows, use:
 
     ROBOT_ENVIRONMENT=production controller boot
-    
+
 To run just the `accessionWF` workflow:
 
 in production:
 
     bin/robot-master --repeat-every=60 --environment=production dor:accessionWF
-    
+
 for testing:
 
     bin/robot-master --repeat-every=60 --environment=testing dor:accessionWF
-  
+
 for development (runs once with debugging):
 
     bin/robot-master -vv dor:accessionWF
@@ -104,7 +108,7 @@ in pseudo-code:
         foreach process-step s do
           foreach lane l do
             if queue for step s lane l need jobs then within transaction do
-              jobs = fetch N jobs with 'ready' status from lane l step s from workflow service 
+              jobs = fetch N jobs with 'ready' status from lane l step s from workflow service
               jobs.each do |job|
                 mark job as 'queued' in workflow service
               end
@@ -131,4 +135,3 @@ in pseudo-code:
 * `v1.0.8`: Fix Status Board bug when WF files are missing
 * `v1.2.0`: Updated gem dependencies and fixed tests
 * `v1.2.1`: Updated rake tasks
-

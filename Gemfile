@@ -17,17 +17,17 @@ gem 'robot-controller', '>= 2.0.1'
 gem 'bluepill', git: 'https://github.com/bluepill-rb/bluepill.git'
 
 group :development, :test do
-  gem 'equivalent-xml'
-  gem 'mock_redis'
   gem 'pry'
   gem 'rake'
-  gem 'rdoc'
-  gem 'redcarpet' # provides Markdown
-  gem 'resque-mock'
-  gem 'rspec'
   gem 'rubocop'
+end
+
+group :test do
+  gem 'coveralls', require: false
+  gem 'mock_redis'
+  gem 'resque-mock' # must be in
+  gem 'rspec'
   gem 'simplecov'
-  gem 'version_bumper'
 end
 
 group :deployment do
