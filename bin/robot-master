@@ -7,7 +7,7 @@
 #   robot-master accessionWF
 #   robot-master dor:accessionWF
 #   robot-master --repeat-every=60 dor:accessionWF  # daemon mode
-#   robot-master --repository=sdr sdrIngestWF
+#   robot-master --repository=sdr preservationIngestWF
 #
 require 'optparse'
 require 'awesome_print'
