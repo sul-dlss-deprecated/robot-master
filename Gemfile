@@ -11,10 +11,7 @@ gem 'faraday'
 gem 'dor-services', '>= 5.8.2'
 gem 'lyber-core', '>= 4.0.3'
 gem 'robot-controller', '>= 2.0.1'
-
-# Pin bluepill to master branch of git since the gem release 0.1.2 is
-# incompatible with rails 5, can remove this when a new gem is released
-gem 'bluepill', git: 'https://github.com/bluepill-rb/bluepill.git'
+gem 'bluepill', '>= 0.1.3'
 
 group :development, :test do
   gem 'pry'
