@@ -59,6 +59,7 @@ class RobotMasterCLI
     # Initialize the workflow, and set the repository if prepended with :
     flags[:workflow] = args.shift
     fail ArgumentError, 'Missing required workflow' if flags[:workflow].nil?
+
     if flags[:workflow] =~ /:/
       flags[:repository], flags[:workflow] = flags[:workflow].split(/:/, 2)
     end

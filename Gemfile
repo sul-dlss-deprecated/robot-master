@@ -19,7 +19,7 @@ gem 'bluepill', git: 'https://github.com/bluepill-rb/bluepill.git'
 group :development, :test do
   gem 'pry'
   gem 'rake'
-  gem 'rubocop'
+  gem 'rubocop', '~> 0.59.2'
 end
 
 group :test do
