@@ -16,7 +16,7 @@ gem 'bluepill', '>= 0.1.3'
 group :development, :test do
   gem 'pry'
   gem 'rake'
-  gem 'rubocop'
+  gem 'rubocop', '~> 0.59.2'
 end
 
 group :test do

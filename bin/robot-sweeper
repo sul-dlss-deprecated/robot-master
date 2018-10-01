@@ -61,6 +61,7 @@ class RobotSweeperCLI
     n = Resque.redis.llen(failed_key).to_i
     ROBOT_LOG.info { "Found #{n} items in '#{failed_key}'" }
     return if n < 1
+
     n.times.each do |i| # assume no deletions from failed queue
       failed = Resque.list_range(failed_key, i, 1)
       ap(i: i, failed: failed) if flags[:debug]
