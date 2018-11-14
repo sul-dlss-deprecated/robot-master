@@ -6,8 +6,7 @@ cache: bundler
 sudo: false
 
 rvm:
-  - 2.3.7 # deployed
-  - 2.5.3
+  - 2.5.3 # deployed
 
 env:
   - ROBOT_ENVIRONMENT=local
