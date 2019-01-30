@@ -6,9 +6,21 @@
 
 # robot-master
 
-Mediates jobs from the Workflow service to the Resque priority queues.
+Polls the Workflow service and enqueues Resque messages for processes that are ready.
 
 ## Documentation
+
+### How do workflows work at DLSS?
+
+1. Call dor-services-app via: `Dor::Services::Client.object(object_identifier).workflow.create(wf_name: workflow_name_string)`
+1. This hits dor-services-app, which calls `Dor::CreateWorkflowService.create_workflow`
+1. This uses the dor-workflow-service (client) to call the workflow-service-rails, which creates rows in
+it's datastore.
+1. Robot master is continually polling workflow-service-rails and when it finds rows that are "waiting",
+it enqueues them in Resque and tells workflow-service-rails that that process has been "queued"
+1. The individual robot suites are bound to specific Resque queues. They complete the work.
+1. When the work is done, lyber-admin (the base class of all robots) tells workflow-service-rails the status of the job.
+
 
 We have a [*Wiki*](https://github.com/sul-dlss/robot-master/wiki).
 
