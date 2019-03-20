@@ -16,11 +16,12 @@ Polls the Workflow service and enqueues Resque messages for processes that are r
 1. This hits dor-services-app, which calls `Dor::CreateWorkflowService.create_workflow`
 1. This uses the dor-workflow-service (client) to call the workflow-service-rails, which creates rows in
 it's datastore.
+1. Robot-master has a cache of workflow templates that it pulls as it is deployed https://github.com/sul-dlss/robot-master/blob/aa78e2c65042b2712e9d9a9e5b67fa63afae71a2/config/deploy.rb#L47
 1. Robot master is continually polling workflow-service-rails and when it finds rows that are "waiting",
 it enqueues them in Resque and tells workflow-service-rails that that process has been "queued"
 1. The individual robot suites are bound to specific Resque queues. They complete the work.
 1. When the work is done, lyber-core (the base class of all robots) tells workflow-service-rails the status of the job.
-
+ 
 
 We have a [*Wiki*](https://github.com/sul-dlss/robot-master/wiki).
 
