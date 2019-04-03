@@ -158,7 +158,7 @@ module RobotMaster
 
       # fetch pending jobs in all lanes for this step from the Workflow Service.
       n = 0
-      lanes = Dor::Config.workflow.client.get_lane_ids(*(step.split(/:/)))
+      lanes = Dor::Config.workflow.client.lane_ids(*(step.split(/:/)))
       ROBOT_LOG.debug { "-- found #{lanes.size} lanes" }
       lanes.each do |lane|
         # only fetch the minimum results we'll need
@@ -166,7 +166,7 @@ module RobotMaster
         nlimit = [process[:limit], Queue.empty_slots(step, lane, process[:limit])].min
         next unless nlimit > 0
 
-        results = Dor::Config.workflow.client.get_objects_for_workstep(
+        results = Dor::Config.workflow.client.objects_for_workstep(
           process[:prereq],
           step,
           lane,
