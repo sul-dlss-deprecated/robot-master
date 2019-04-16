@@ -39,12 +39,15 @@ end
 require File.expand_path(File.dirname(__FILE__) + '/../config/boot')
 RobotDownloadWorkflowsCLI.new('config/workflows').run
 
-# XXX: skip these workflows no matter what
+# Skip these workflows, we don't want them to run robots
+# these workflows are defunct.
 skipfiles = %w(
+  dor/digitizationWF.xml
   dor/dpgImageWF.xml
   dor/eemsAccessionWF.xml
   dor/googleScannedBookWF.xml
   dor/hydrusAssemblyWF.xml
+  sdr/sdrIngestWF.xml
 ).each do |fn|
   path = Pathname("config/workflows/#{fn}")
   if path.exist?
