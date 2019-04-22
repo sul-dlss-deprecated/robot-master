@@ -1,7 +1,7 @@
 source 'https://rubygems.org'
 
 gem 'awesome_print'
-gem 'nokogiri'
+gem 'nokogiri', '~> 1.10.3'
 gem 'parallel'
 gem 'resque', '~> 1.27.4'
 gem 'whenever'
