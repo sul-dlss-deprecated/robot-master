@@ -44,8 +44,8 @@ namespace :deploy do
       within release_path do
         test :bundle, :exec, :controller, :stop
         test :bundle, :exec, :controller, :quit
-        execute :bundle, :exec, 'bin/robot-download-workflows'
-        execute :bundle, :exec, :controller, :boot
+        # execute :bundle, :exec, 'bin/robot-download-workflows'
+        # execute :bundle, :exec, :controller, :boot
       end
     end
   end
